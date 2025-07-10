@@ -641,6 +641,70 @@ next x`,
     print(country[x])
 next x`,
                     description: "Array indexing with string"
+                },
+                {
+                    code: `for x = 1 to 4
+    if x < 3 then
+        print("it's Jeff")    
+    else
+        num = int(input("Enter a number"))
+        print(x * num)
+    endif
+next x`,
+                    description: "For loop with conditional input",
+                    inputSets: [
+                        ["5", "8"],
+                        ["3", "10"],
+                        ["7", "4"],
+                        ["2", "6"]
+                    ]
+                },
+                {
+                    code: `for x = 1 to 3
+    name = input("Enter a name")
+    length = name.length
+    print(x * length)
+next x`,
+                    description: "For loop with string length calculation",
+                    inputSets: [
+                        ["Alice", "Bob", "Charlie"],
+                        ["Sam", "Jennifer", "Alex"],
+                        ["Jo", "Michael", "Diana"],
+                        ["Max", "Catherine", "Tom"]
+                    ]
+                },
+                {
+                    code: `for x = 1 to 3
+    country = "United Kingdom"     
+    num = int(input("Enter a number"))
+    letter = country[num]
+    print(country[x] + letter)
+next x`,
+                    description: "For loop with string indexing",
+                    inputSets: [
+                        ["2", "5", "8"],
+                        ["0", "7", "3"],
+                        ["4", "1", "9"],
+                        ["6", "10", "2"]
+                    ]
+                },
+                {
+                    code: `for x = 1 to 4
+    num = int(input("Enter a number"))
+    operator = input("Enter operator")
+    if operator == "%" then
+        print(num MOD x)
+    else
+        print(num*x)
+    endif
+next x`,
+                    description: "For loop with operator selection",
+                    inputSets: [
+                        ["10", "%", "15", "*", "8", "%", "20", "*"],
+                        ["12", "*", "9", "%", "14", "*", "7", "%"],
+                        ["16", "%", "11", "*", "6", "%", "18", "*"],
+                        ["13", "*", "17", "%", "5", "*", "22", "%"]
+                    ]
                 }
             ],
             hard: [
