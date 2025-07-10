@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Clean background -->
+  <rect width="32" height="32" fill="#1f2937" rx="4"/>
+  
+  <!-- Simple table structure -->
+  <g fill="none" stroke="#10b981" stroke-width="2">
+    <!-- Outer border -->
+    <rect x="6" y="8" width="20" height="16" rx="1"/>
+    
+    <!-- Grid lines -->
+    <line x1="16" y1="8" x2="16" y2="24"/>
+    <line x1="6" y1="16" x2="26" y2="16"/>
+  </g>
+  
+  <!-- Header indicators -->
+  <rect x="8" y="10" width="6" height="2" fill="#10b981" rx="1"/>
+  <rect x="18" y="10" width="6" height="2" fill="#10b981" rx="1"/>
+  
+  <!-- Data indicators -->
+  <rect x="8" y="18" width="4" height="2" fill="#6b7280" rx="1"/>
+  <rect x="18" y="18" width="4" height="2" fill="#6b7280" rx="1"/>
+</svg>
