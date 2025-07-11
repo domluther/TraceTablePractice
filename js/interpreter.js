@@ -133,6 +133,26 @@ export class Interpreter {
                     vars[varName] = 0;
                     changeRecord[varName] = vars[varName];
                 }
+            } else if (value.startsWith('float(input(')) {
+                // float(input()) statement - use predefined input value and convert to float
+                if (this.inputIndex < this.inputs.length) {
+                    vars[varName] = parseFloat(this.inputs[this.inputIndex]);
+                    changeRecord[varName] = vars[varName];
+                    this.inputIndex++;
+                } else {
+                    vars[varName] = 0.0;
+                    changeRecord[varName] = vars[varName];
+                }
+            } else if (value.startsWith('real(input(')) {
+                // real(input()) statement - use predefined input value and convert to float (alternative syntax)
+                if (this.inputIndex < this.inputs.length) {
+                    vars[varName] = parseFloat(this.inputs[this.inputIndex]);
+                    changeRecord[varName] = vars[varName];
+                    this.inputIndex++;
+                } else {
+                    vars[varName] = 0.0;
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (value.startsWith('random(')) {
                 // random() statement - use predefined random value
                 if (this.currentProgram.randomValue !== undefined) {
@@ -210,6 +230,25 @@ export class Interpreter {
             const content = line.substring(6, line.length - 1);
             if (content.startsWith('"') && content.endsWith('"')) {
                 output = content.slice(1, -1);
+            } else if (content.includes(',')) {
+                // Handle comma-separated arguments like print("The score is", score)
+                const parts = content.split(',').map(p => p.trim());
+                let result = '';
+                parts.forEach((part, index) => {
+                    if (index > 0) result += ' '; // Add space between parts
+                    
+                    if (part.startsWith('"') && part.endsWith('"')) {
+                        result += part.slice(1, -1);
+                    } else if (vars[part] !== undefined) {
+                        result += vars[part].toString();
+                    } else if (part.startsWith('str(') && part.endsWith(')')) {
+                        const varName = part.substring(4, part.length - 1);
+                        if (vars[varName] !== undefined) {
+                            result += vars[varName].toString();
+                        }
+                    }
+                });
+                output = result;
             } else if (content.includes('+')) {
                 // String concatenation or complex expression
                 const parts = content.split('+').map(p => p.trim());
@@ -761,12 +800,31 @@ export class Interpreter {
         
         // Execute the appropriate block (only trace lines that actually execute)
         if (conditionMet) {
-            for (let bodyLine = executionStart; bodyLine < executionEnd; bodyLine++) {
+            let bodyLine = executionStart;
+            while (bodyLine < executionEnd) {
                 const bodyLineCode = lines[bodyLine];
                 const bodyLineNum = bodyLine + 1;
-                const result = this.executeStatement(bodyLineCode, bodyLineNum, this.variables);
-                if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
-                    this.addTraceEntry(bodyLineNum, this.variables, result.output, result.changedVariables);
+                
+                // Check if this line is a nested control structure
+                if (bodyLineCode.startsWith('if ') && bodyLineCode.includes(' then')) {
+                    // Handle nested if statement
+                    bodyLine = this.handleIfStatement(lines, bodyLine);
+                } else if (bodyLineCode.startsWith('while ')) {
+                    // Handle nested while loop
+                    bodyLine = this.handleWhileLoop(lines, bodyLine);
+                } else if (bodyLineCode === 'do') {
+                    // Handle nested do-until loop
+                    bodyLine = this.handleDoUntilLoop(lines, bodyLine);
+                } else if (bodyLineCode.startsWith('for ') && bodyLineCode.includes(' to ')) {
+                    // Handle nested for loop
+                    bodyLine = this.handleForLoop(lines, bodyLine);
+                } else {
+                    // Regular statement
+                    const result = this.executeStatement(bodyLineCode, bodyLineNum, this.variables);
+                    if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
+                        this.addTraceEntry(bodyLineNum, this.variables, result.output, result.changedVariables);
+                    }
+                    bodyLine++;
                 }
             }
         }

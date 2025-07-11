@@ -332,6 +332,91 @@
             assertEqual(interpreter.evaluateArithmeticExpression('7 MOD 4', {}), 3, 'Duck Grouping MOD (7 MOD 4 = 3)');
         }
 
+        function testTypeConversions() {
+            // Test float() and real() input conversions
+            
+            // Create a mock program and inputs for testing
+            const testProgram = { inputs: ["3.14", "2.5", "10.0"], randomValue: undefined };
+            const testInterpreter = new Interpreter();
+            
+            // Test float(input()) conversion
+            const result1 = testInterpreter.executeProgram(`
+                x = float(input("Enter number"))
+                print(x)
+            `, testProgram);
+            
+            assertEqual(testInterpreter.variables.x, 3.14, 'float(input()) should convert "3.14" to 3.14');
+            
+            // Test real(input()) conversion  
+            const testInterpreter2 = new Interpreter();
+            const result2 = testInterpreter2.executeProgram(`
+                y = real(input("Enter number"))
+                print(y)
+            `, testProgram);
+            
+            assertEqual(testInterpreter2.variables.y, 3.14, 'real(input()) should convert "3.14" to 3.14');
+            
+            // Test that comparisons work with converted floats
+            const testInterpreter3 = new Interpreter();
+            const testProgram3 = { inputs: ["3.1", "11"], randomValue: undefined };
+            const result3 = testInterpreter3.executeProgram(`
+                jumpLength = float(input("Enter jump length"))
+                yearGroup = float(input("Enter year group"))
+                if jumpLength > 2 then
+                    result = "pass"
+                else
+                    result = "fail"
+                endif
+                print(result)
+            `, testProgram3);
+            
+            assertEqual(testInterpreter3.variables.jumpLength, 3.1, 'jumpLength should be 3.1 as float');
+            assertEqual(testInterpreter3.variables.yearGroup, 11, 'yearGroup should be 11 as float');
+            assertEqual(testInterpreter3.variables.result, "pass", 'Comparison 3.1 > 2 should be true');
+        }
+
+        function testNestedConditionalExecution() {
+            // Test the exact failing scenario from the jump qualification program
+            const testInterpreter = new Interpreter();
+            const testProgram = { inputs: ["2.2", "8"], randomValue: undefined };
+            
+            const result = testInterpreter.executeProgram(`
+                jumpLength = float(input("Enter jump length"))
+                yearGroup = float(input("Enter year group"))
+                if jumpLength > 2 then
+                    if yearGroup >= 10 then
+                        print("You qualify for the team")
+                    else
+                        print("You are too young")
+                    endif
+                else
+                    print("Jump not long enough")
+                endif
+            `, testProgram);
+            
+            // Check variable values
+            assertEqual(testInterpreter.variables.jumpLength, 2.2, 'jumpLength should be 2.2');
+            assertEqual(testInterpreter.variables.yearGroup, 8, 'yearGroup should be 8');
+            
+            // Check that the correct message was printed
+            assertEqual(testInterpreter.outputs.length, 1, 'Should have exactly 1 output');
+            assertEqual(testInterpreter.outputs[0], "You are too young", 'Should print "You are too young" for yearGroup=8');
+            
+            // Check that the trace table has the correct lines
+            // Lines that should execute: 1 (jumpLength=2.2), 2 (yearGroup=8), 7 (else print)
+            // Lines that should NOT execute: 3 (if jumpLength>2), 4 (if yearGroup>=10), 5 (print "qualify"), 6 (endif), 8 (endif), 9 (else), 10 (print "not long enough"), 11 (endif)
+            
+            const executedLines = testInterpreter.trace.map(entry => entry.lineNumber);
+            assertEqual(testInterpreter.variables.jumpLength, 2.2, 'jumpLength should be 2.2');
+            assertEqual(testInterpreter.variables.yearGroup, 8, 'yearGroup should be 8');
+            assertEqual(executedLines.includes(1), true, 'Line 1 should execute (jumpLength assignment)');
+            assertEqual(executedLines.includes(2), true, 'Line 2 should execute (yearGroup assignment)');
+            assertEqual(executedLines.includes(3), false, 'Line 3 should NOT execute (if condition not traced)');
+            assertEqual(executedLines.includes(4), false, 'Line 4 should NOT execute (if condition not traced)');
+            assertEqual(executedLines.includes(5), false, 'Line 5 should NOT execute (yearGroup >= 10 is false)');
+            assertEqual(executedLines.includes(7), true, 'Line 7 should execute (else branch print)');
+        }
+        
         function runAllTests() {
             // Reset test results
             testResults = [];
@@ -348,6 +433,8 @@
             testEdgeCases();
             testStringMethods();
             testDuckGrouping();
+            testTypeConversions();
+            testNestedConditionalExecution();
             
             // Display results
             displayTestResults();
@@ -368,7 +455,9 @@
                 'Edge Cases': ['Division by One', 'Multiplication by Zero', 'Power of Zero', 'Empty Array Access', 'Out of Bounds Array Access'],
                 'String Methods': ['First name .left(1) should return "J"', 'Last name .left(1) should return "S"', 'Initials concatenation should return "JS"', 'Should detect as string concatenation', 'String .upper method', 'String .lower method'],
                 'String Integration': ['Numeric Operation with String Variables Present', 'Addition with String Variables Present'],
-                'Duck Grouping': ['Duck Grouping DIV (15 DIV 4 = 3)', 'Duck Grouping MOD (15 MOD 4 = 3)', 'Duck Grouping DIV (22 DIV 4 = 5)', 'Duck Grouping MOD (22 MOD 4 = 2)', 'Duck Grouping DIV (8 DIV 4 = 2)', 'Duck Grouping MOD (8 MOD 4 = 0)', 'Duck Grouping DIV (7 DIV 4 = 1)', 'Duck Grouping MOD (7 MOD 4 = 3)']
+                'Duck Grouping': ['Duck Grouping DIV (15 DIV 4 = 3)', 'Duck Grouping MOD (15 MOD 4 = 3)', 'Duck Grouping DIV (22 DIV 4 = 5)', 'Duck Grouping MOD (22 MOD 4 = 2)', 'Duck Grouping DIV (8 DIV 4 = 2)', 'Duck Grouping MOD (8 MOD 4 = 0)', 'Duck Grouping DIV (7 DIV 4 = 1)', 'Duck Grouping MOD (7 MOD 4 = 3)'],
+                'Type Conversions': ['float(input()) should convert "3.14" to 3.14', 'real(input()) should convert "3.14" to 3.14', 'jumpLength should be 3.1 as float', 'yearGroup should be 11 as float', 'Comparison 3.1 > 2 should be true'],
+                'Nested Conditionals': ['jumpLength should be 2.2', 'yearGroup should be 8', 'Should have exactly 1 output', 'Should print "You are too young" for yearGroup=8', 'Line 1 should execute (jumpLength assignment)', 'Line 2 should execute (yearGroup assignment)', 'Line 3 should NOT execute (if condition not traced)', 'Line 4 should NOT execute (if condition not traced)', 'Line 5 should NOT execute (yearGroup >= 10 is false)', 'Line 7 should execute (else branch print)']
             };
             
             let html = '';

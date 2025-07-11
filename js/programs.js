@@ -201,26 +201,26 @@ print(y)`,
             description: "While loop with variable decrement"
         },
         {
-            code: `a = input("Enter first letter of first name")
-b = input("Enter first letter of second name")
-c = random(1,100)
-while c < 100
-    c = c * 10
+            code: `initial1 = input("Enter first initial")
+initial2 = input("Enter second initial")
+num = random(1,99)
+while num < 75
+    num = num * 10
 endwhile
-pilotCode = a + b + str(c)
-print(pilotCode)`,
-            description: "Pilot code generator with random",
+userCode = initial1 + initial2 + str(num)
+print(userCode)`,
+            description: "User code generator with loops",
             inputSets: [
-                ["S", "T"],
-                ["A", "B"],
-                ["J", "M"],
-                ["K", "R"]
+                ["A", "Z"],
+                ["M", "K"],
+                ["P", "Q"],
+                ["X", "Y"]
             ],
-            randomValues: [4, 7, 12, 25, 50]
+            randomValues: [3, 8, 15, 42, 99]
         },
         {
-            code: `jumpLength = input("Enter jump length")
-yearGroup = input("Enter year group")
+            code: `jumpLength = float(input("Enter jump length"))
+yearGroup = float(input("Enter year group"))
 if jumpLength > 2 then
     if yearGroup >= 10 then
         print("You qualify for the team")
