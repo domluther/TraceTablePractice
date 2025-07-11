@@ -66,7 +66,7 @@ print("You got " + str(total))`,
         },
         {
             code: `price = int(input("Enter price"))
-discount = price / 10
+discount = price * (10 / 100)
 final_price = price - discount
 print("Original: " + str(price))
 print("Final: " + str(final_price))`,

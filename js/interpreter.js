@@ -178,8 +178,8 @@ export class Interpreter {
                 vars[varName] = value.slice(1, -1);
                 changeRecord[varName] = vars[varName];
             } else if (!isNaN(value)) {
-                // Numeric literal
-                vars[varName] = parseInt(value);
+                // Numeric literal - use parseFloat to handle both integers and decimals
+                vars[varName] = parseFloat(value);
                 changeRecord[varName] = vars[varName];
             } else if (this.isStringConcatenation(value, vars)) {
                 // String concatenation
@@ -418,12 +418,12 @@ export class Interpreter {
         
         // Handle regular variables
         if (vars[operand] !== undefined) {
-            return parseInt(vars[operand]);
+            return parseFloat(vars[operand]);
         }
         
         // Handle numeric literals
         if (!isNaN(operand)) {
-            return parseInt(operand);
+            return parseFloat(operand);
         }
         
         return 0;
@@ -479,7 +479,7 @@ export class Interpreter {
                     leftStart--; // Skip spaces
                 }
                 let leftEnd = leftStart + 1;
-                while (leftStart >= 0 && /[A-Za-z0-9_\[\]]/.test(expression[leftStart])) {
+                while (leftStart >= 0 && /[A-Za-z0-9_\[\].]/.test(expression[leftStart])) {
                     leftStart--;
                 }
                 leftStart++;
@@ -490,7 +490,7 @@ export class Interpreter {
                     rightStart++; // Skip spaces
                 }
                 let rightEnd = rightStart;
-                while (rightEnd < expression.length && /[A-Za-z0-9_\[\]]/.test(expression[rightEnd])) {
+                while (rightEnd < expression.length && /[A-Za-z0-9_\[\].]/.test(expression[rightEnd])) {
                     rightEnd++;
                 }
                 
@@ -513,10 +513,10 @@ export class Interpreter {
                             result = leftVal * rightVal;
                             break;
                         case '/':
-                            result = Math.floor(leftVal / rightVal);
+                            result = leftVal / rightVal; // Use floating-point division
                             break;
                         case 'DIV':
-                            result = Math.floor(leftVal / rightVal);
+                            result = Math.floor(leftVal / rightVal); // Integer division
                             break;
                         case 'MOD':
                             result = leftVal % rightVal;
