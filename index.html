@@ -783,6 +783,22 @@ next x`,
                         ["16", "%", "10", "*", "6", "%", "15", "*"],
                         ["14", "*", "16", "%", "5", "*", "20", "%"]
                     ]
+                },
+                {
+                    code: `ducks = int(input("How many ducks are there"))
+groups = ducks DIV 4
+leftOver = ducks MOD 4
+print("Number of groups: " + str(groups))
+print("Ducks left over: " + str(leftOver))`,
+                    description: "Duck grouping with MOD and DIV operators",
+                    inputSets: [
+                        ["15"],
+                        ["22"],
+                        ["8"],
+                        ["13"],
+                        ["20"],
+                        ["7"]
+                    ]
                 }
             ],
             hard: [
@@ -916,8 +932,12 @@ print("Correct!")`,
             }
 
             function evaluateArithmeticExpression(expression, vars) {
-                // Remove all spaces for easier parsing
-                expression = expression.replace(/\s+/g, '');
+                // Normalize whitespace around word operators
+                expression = expression.replace(/\s*\bMOD\b\s*/g, ' MOD ');
+                expression = expression.replace(/\s*\bDIV\b\s*/g, ' DIV ');
+                
+                // Clean up multiple spaces
+                expression = expression.replace(/\s+/g, ' ').trim();
                 
                 // Handle parentheses by recursively evaluating inner expressions
                 while (expression.includes('(')) {
@@ -947,33 +967,36 @@ print("Correct!")`,
                     const leftPart = expression.substring(0, lastPos);
                     const rightPart = expression.substring(lastPos + 1);
                     
-                    // Find left operand
+                    // Find left operand (skip spaces)
                     let leftOperand = '';
-                    for (let i = leftPart.length - 1; i >= 0; i--) {
-                        if (/[A-Za-z0-9_]/.test(leftPart[i])) {
-                            leftOperand = leftPart[i] + leftOperand;
-                        } else {
-                            break;
-                        }
+                    let i = leftPart.length - 1;
+                    // Skip spaces before operand
+                    while (i >= 0 && leftPart[i] === ' ') i--;
+                    // Collect operand characters
+                    while (i >= 0 && /[A-Za-z0-9_]/.test(leftPart[i])) {
+                        leftOperand = leftPart[i] + leftOperand;
+                        i--;
                     }
                     
-                    // Find right operand
+                    // Find right operand (skip spaces)
                     let rightOperand = '';
-                    for (let i = 0; i < rightPart.length; i++) {
-                        if (/[A-Za-z0-9_]/.test(rightPart[i])) {
-                            rightOperand += rightPart[i];
-                        } else {
-                            break;
-                        }
+                    let j = 0;
+                    // Skip spaces after operator
+                    while (j < rightPart.length && rightPart[j] === ' ') j++;
+                    // Collect operand characters
+                    while (j < rightPart.length && /[A-Za-z0-9_]/.test(rightPart[j])) {
+                        rightOperand += rightPart[j];
+                        j++;
                     }
                     
                     const leftVal = getExpressionValue(leftOperand, vars);
                     const rightVal = getExpressionValue(rightOperand, vars);
                     const result = Math.pow(leftVal, rightVal);
                     
-                    expression = leftPart.substring(0, leftPart.length - leftOperand.length) + 
-                                result + 
-                                rightPart.substring(rightOperand.length);
+                    // Replace the entire operation with the result
+                    const beforeLeft = leftPart.substring(0, i + 1);
+                    const afterRight = rightPart.substring(j);
+                    expression = beforeLeft + result + afterRight;
                 }
                 
                 // Then handle *, /, DIV, MOD (left to right)
@@ -1061,21 +1084,29 @@ print("Correct!")`,
                     }
                     
                     if (earliestOp && earliestPos < expression.length) {
-                        // Find left operand
+                        // Find left operand (skip spaces)
                         let leftStart = earliestPos - 1;
+                        while (leftStart >= 0 && expression[leftStart] === ' ') {
+                            leftStart--; // Skip spaces
+                        }
+                        let leftEnd = leftStart + 1;
                         while (leftStart >= 0 && /[A-Za-z0-9_\[\]]/.test(expression[leftStart])) {
                             leftStart--;
                         }
                         leftStart++;
                         
-                        // Find right operand
-                        let rightEnd = earliestPos + earliestLength;
+                        // Find right operand (skip spaces)
+                        let rightStart = earliestPos + earliestLength;
+                        while (rightStart < expression.length && expression[rightStart] === ' ') {
+                            rightStart++; // Skip spaces
+                        }
+                        let rightEnd = rightStart;
                         while (rightEnd < expression.length && /[A-Za-z0-9_\[\]]/.test(expression[rightEnd])) {
                             rightEnd++;
                         }
                         
-                        const leftOperand = expression.substring(leftStart, earliestPos);
-                        const rightOperand = expression.substring(earliestPos + earliestLength, rightEnd);
+                        const leftOperand = expression.substring(leftStart, leftEnd).trim();
+                        const rightOperand = expression.substring(rightStart, rightEnd).trim();
                         
                         if (leftOperand && rightOperand) {
                             const leftVal = getExpressionValue(leftOperand, vars);
@@ -1103,7 +1134,10 @@ print("Correct!")`,
                                     break;
                             }
                             
-                            expression = expression.substring(0, leftStart) + result + expression.substring(rightEnd);
+                            // Replace the entire operation (from leftStart to rightEnd) with the result
+                            const beforeOperation = expression.substring(0, leftStart);
+                            const afterOperation = expression.substring(rightEnd);
+                            expression = beforeOperation + result + afterOperation;
                             changed = true;
                         }
                     }

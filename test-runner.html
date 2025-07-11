@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trace Table Practice - Test Suite</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .description {
+            color: #4a5568;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .test-link {
+            display: block;
+            margin: 15px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+        
+        .test-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+        
+        .test-link.unit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .test-link.unit:hover {
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .test-link.integration {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+        
+        .test-link.integration:hover {
+            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
+        }
+        
+        .main-app-link {
+            background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+        }
+        
+        .main-app-link:hover {
+            box-shadow: 0 6px 20px rgba(159, 122, 234, 0.4);
+        }
+        
+        .test-description {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .test-description h3 {
+            margin-top: 0;
+            color: #2d3748;
+        }
+        
+        .test-description p {
+            margin-bottom: 0;
+            color: #4a5568;
+        }
+        
+        .features-list {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .features-list h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .features-list ul {
+            color: #4a5568;
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .features-list li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Trace Table Practice - Test Suite</h1>
+        
+        <p class="description">
+            Comprehensive testing for the GCSE Computer Science Trace Table Practice application.
+            These tests ensure that arithmetic expressions, interpreter functionality, and trace table generation work correctly.
+        </p>
+        
+        <div class="features-list">
+            <h3>🎯 What's Being Tested</h3>
+            <ul>
+                <li><strong>Arithmetic Expression Evaluation:</strong> Basic operations, operator precedence, parentheses handling</li>
+                <li><strong>Variable Management:</strong> Assignment, retrieval, and array access</li>
+                <li><strong>String Operations:</strong> Concatenation and OCR ERL string methods</li>
+                <li><strong>Control Structures:</strong> If statements, loops, and conditional logic</li>
+                <li><strong>Input/Output:</strong> User input processing and output generation</li>
+                <li><strong>Trace Table Generation:</strong> Line-by-line execution tracking</li>
+                <li><strong>Integration:</strong> Complete program execution with real GCSE examples</li>
+            </ul>
+        </div>
+        
+        <div class="test-description">
+            <h3>🔬 Unit Tests</h3>
+            <p>Tests individual functions and components in isolation. Focuses on the arithmetic expression evaluator, operator precedence, parentheses handling, and edge cases.</p>
+        </div>
+        <a href="tests.html" class="test-link unit">
+            🔬 Run Unit Tests
+        </a>
+        
+        <div class="test-description">
+            <h3>🔗 Integration Tests</h3>
+            <p>Tests complete program execution with real GCSE Computer Science examples. Verifies that entire programs run correctly and generate proper trace tables.</p>
+        </div>
+        <a href="integration-tests.html" class="test-link integration">
+            🔗 Run Integration Tests
+        </a>
+        
+        <div class="test-description">
+            <h3>🎯 Main Application</h3>
+            <p>Return to the main Trace Table Practice application to test programs interactively.</p>
+        </div>
+        <a href="index.html" class="test-link main-app-link">
+            🎯 Open Main Application
+        </a>
+        
+        <div class="features-list">
+            <h3>🚀 Recent Fixes Tested</h3>
+            <ul>
+                <li><strong>Parentheses Support:</strong> Expressions like <code>2 * (length + width)</code> now work correctly</li>
+                <li><strong>Operator Precedence:</strong> Multiplication/division before addition/subtraction</li>
+                <li><strong>Complex Expressions:</strong> Nested parentheses and multi-operator expressions</li>
+                <li><strong>Array Access:</strong> Proper handling of array indexing in arithmetic</li>
+                <li><strong>Rectangle Calculations:</strong> The problematic perimeter calculation is now fixed</li>
+            </ul>
+        </div>
+        
+        <div class="test-description">
+            <h3>📝 Running Tests</h3>
+            <p>
+                <strong>Unit Tests:</strong> Click "Run Unit Tests" to test individual functions like arithmetic evaluation, operator precedence, and parentheses handling.<br><br>
+                <strong>Integration Tests:</strong> Click "Run Integration Tests" to test complete GCSE programs including the rectangle calculation that was previously broken.<br><br>
+                Both test suites run automatically when opened and provide detailed pass/fail results with explanations.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

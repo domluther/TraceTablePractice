@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trace Table Practice - Unit Tests</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .test-section h2 {
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .test-pass {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .test-fail {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+        
+        .test-summary {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .run-tests-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .run-tests-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        .test-details {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Trace Table Practice - Unit Tests</h1>
+        
+        <button class="run-tests-btn" onclick="runAllTests()">🔄 Run All Tests</button>
+        
+        <div id="testResults"></div>
+        
+        <div id="testSummary"></div>
+    </div>
+
+    <script>
+        // Import the functions we need to test from the main application
+        // We'll copy the core interpreter functions here for testing
+        
+        // Test helper functions
+        let testResults = [];
+        let testsPassed = 0;
+        let testsFailed = 0;
+        
+        function assert(condition, testName, details = '') {
+            if (condition) {
+                testResults.push({
+                    name: testName,
+                    passed: true,
+                    details: details
+                });
+                testsPassed++;
+            } else {
+                testResults.push({
+                    name: testName,
+                    passed: false,
+                    details: details
+                });
+                testsFailed++;
+            }
+        }
+        
+        function assertEqual(actual, expected, testName, details = '') {
+            const condition = actual === expected;
+            const testDetails = details + ` (Expected: ${expected}, Got: ${actual})`;
+            assert(condition, testName, testDetails);
+        }
+        
+        function assertArrayEqual(actual, expected, testName, details = '') {
+            const condition = JSON.stringify(actual) === JSON.stringify(expected);
+            const testDetails = details + ` (Expected: ${JSON.stringify(expected)}, Got: ${JSON.stringify(actual)})`;
+            assert(condition, testName, testDetails);
+        }
+        
+        // Copy core interpreter functions for testing
+        function getExpressionValue(operand, vars) {
+            // Handle array access
+            if (operand.includes('[') && operand.includes(']')) {
+                const arrayMatch = operand.match(/(\w+)\[(\w+)\]/);
+                if (arrayMatch) {
+                    const arrayName = arrayMatch[1];
+                    const indexVar = arrayMatch[2];
+                    
+                    if (vars[arrayName] && Array.isArray(vars[arrayName])) {
+                        const index = vars[indexVar] !== undefined ? parseInt(vars[indexVar]) : parseInt(indexVar);
+                        if (index >= 0 && index < vars[arrayName].length) {
+                            return vars[arrayName][index];
+                        }
+                    }
+                }
+                return 0;
+            }
+            
+            // Handle regular variables
+            if (vars[operand] !== undefined) {
+                return parseInt(vars[operand]);
+            }
+            
+            // Handle numeric literals
+            if (!isNaN(operand)) {
+                return parseInt(operand);
+            }
+            
+            return 0;
+        }
+        
+        function handleLeftToRightOperators(expression, operators, vars) {
+            let changed = true;
+            while (changed) {
+                changed = false;
+                
+                // Find the leftmost operator from our list
+                let earliestPos = expression.length;
+                let earliestOp = null;
+                let earliestLength = 0;
+                
+                for (const op of operators) {
+                    let pos = 0;
+                    while (pos < expression.length) {
+                        if (op === 'DIV' || op === 'MOD') {
+                            // Find whole word operators
+                            pos = expression.indexOf(op, pos);
+                            if (pos === -1) break;
+                            
+                            // Check if it's a whole word (not part of another word)
+                            if ((pos === 0 || !/[A-Za-z0-9_]/.test(expression[pos - 1])) &&
+                                (pos + op.length === expression.length || !/[A-Za-z0-9_]/.test(expression[pos + op.length]))) {
+                                if (pos < earliestPos) {
+                                    earliestPos = pos;
+                                    earliestOp = op;
+                                    earliestLength = op.length;
+                                }
+                                break;
+                            }
+                            pos++;
+                        } else {
+                            pos = expression.indexOf(op, pos);
+                            if (pos === -1) break;
+                            
+                            if (pos < earliestPos) {
+                                earliestPos = pos;
+                                earliestOp = op;
+                                earliestLength = 1;
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                if (earliestOp && earliestPos < expression.length) {
+                    // Find left operand (skip spaces)
+                    let leftStart = earliestPos - 1;
+                    while (leftStart >= 0 && expression[leftStart] === ' ') {
+                        leftStart--; // Skip spaces
+                    }
+                    let leftEnd = leftStart + 1;
+                    while (leftStart >= 0 && /[A-Za-z0-9_\[\]]/.test(expression[leftStart])) {
+                        leftStart--;
+                    }
+                    leftStart++;
+                    
+                    // Find right operand (skip spaces)
+                    let rightStart = earliestPos + earliestLength;
+                    while (rightStart < expression.length && expression[rightStart] === ' ') {
+                        rightStart++; // Skip spaces
+                    }
+                    let rightEnd = rightStart;
+                    while (rightEnd < expression.length && /[A-Za-z0-9_\[\]]/.test(expression[rightEnd])) {
+                        rightEnd++;
+                    }
+                    
+                    const leftOperand = expression.substring(leftStart, leftEnd).trim();
+                    const rightOperand = expression.substring(rightStart, rightEnd).trim();
+                    
+                    if (leftOperand && rightOperand) {
+                        const leftVal = getExpressionValue(leftOperand, vars);
+                        const rightVal = getExpressionValue(rightOperand, vars);
+                        let result;
+                        
+                        switch (earliestOp) {
+                            case '+':
+                                result = leftVal + rightVal;
+                                break;
+                            case '-':
+                                result = leftVal - rightVal;
+                                break;
+                            case '*':
+                                result = leftVal * rightVal;
+                                break;
+                            case '/':
+                                result = Math.floor(leftVal / rightVal);
+                                break;
+                            case 'DIV':
+                                result = Math.floor(leftVal / rightVal);
+                                break;
+                            case 'MOD':
+                                result = leftVal % rightVal;
+                                break;
+                        }
+                        
+                        // Replace the entire operation (from leftStart to rightEnd) with the result
+                        const beforeOperation = expression.substring(0, leftStart);
+                        const afterOperation = expression.substring(rightEnd);
+                        expression = beforeOperation + result + afterOperation;
+                        changed = true;
+                    }
+                }
+            }
+            
+            return expression;
+        }
+        
+        function evaluateArithmeticExpression(expression, vars) {
+            // Normalize whitespace around word operators
+            expression = expression.replace(/\s*\bMOD\b\s*/g, ' MOD ');
+            expression = expression.replace(/\s*\bDIV\b\s*/g, ' DIV ');
+            
+            // Clean up multiple spaces
+            expression = expression.replace(/\s+/g, ' ').trim();
+            
+            // Handle parentheses by recursively evaluating inner expressions
+            while (expression.includes('(')) {
+                let depth = 0;
+                let start = -1;
+                
+                for (let i = 0; i < expression.length; i++) {
+                    if (expression[i] === '(') {
+                        if (depth === 0) start = i;
+                        depth++;
+                    } else if (expression[i] === ')') {
+                        depth--;
+                        if (depth === 0) {
+                            const innerExpr = expression.substring(start + 1, i);
+                            const result = evaluateArithmeticExpression(innerExpr, vars);
+                            expression = expression.substring(0, start) + result + expression.substring(i + 1);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Handle operators in order of precedence
+            // First handle ^ (exponentiation) - right to left
+            while (expression.includes('^')) {
+                const lastPos = expression.lastIndexOf('^');
+                const leftPart = expression.substring(0, lastPos);
+                const rightPart = expression.substring(lastPos + 1);
+                
+                // Find left operand (skip spaces)
+                let leftOperand = '';
+                let i = leftPart.length - 1;
+                // Skip spaces before operand
+                while (i >= 0 && leftPart[i] === ' ') i--;
+                // Collect operand characters
+                while (i >= 0 && /[A-Za-z0-9_]/.test(leftPart[i])) {
+                    leftOperand = leftPart[i] + leftOperand;
+                    i--;
+                }
+                
+                // Find right operand (skip spaces)
+                let rightOperand = '';
+                let j = 0;
+                // Skip spaces after operator
+                while (j < rightPart.length && rightPart[j] === ' ') j++;
+                // Collect operand characters
+                while (j < rightPart.length && /[A-Za-z0-9_]/.test(rightPart[j])) {
+                    rightOperand += rightPart[j];
+                    j++;
+                }
+                
+                const leftVal = getExpressionValue(leftOperand, vars);
+                const rightVal = getExpressionValue(rightOperand, vars);
+                const result = Math.pow(leftVal, rightVal);
+                
+                // Replace the entire operation with the result
+                const beforeLeft = leftPart.substring(0, i + 1);
+                const afterRight = rightPart.substring(j);
+                expression = beforeLeft + result + afterRight;
+            }
+            
+            // Then handle *, /, DIV, MOD (left to right)
+            expression = handleLeftToRightOperators(expression, ['*', '/', 'DIV', 'MOD'], vars);
+            
+            // Finally handle +, - (left to right)
+            expression = handleLeftToRightOperators(expression, ['+', '-'], vars);
+            
+            // At this point, expression should be a single value
+            return getExpressionValue(expression, vars);
+        }
+        
+        // Test runner functions
+        function testBasicArithmetic() {
+            const vars = { a: 5, b: 3, c: 2 };
+            
+            // Test basic addition
+            assertEqual(evaluateArithmeticExpression('a + b', vars), 8, 'Basic Addition (a + b)');
+            
+            // Test basic subtraction
+            assertEqual(evaluateArithmeticExpression('a - b', vars), 2, 'Basic Subtraction (a - b)');
+            
+            // Test basic multiplication
+            assertEqual(evaluateArithmeticExpression('a * b', vars), 15, 'Basic Multiplication (a * b)');
+            
+            // Test basic division
+            assertEqual(evaluateArithmeticExpression('a / c', vars), 2, 'Basic Division (a / c)');
+            
+            // Test modulo
+            assertEqual(evaluateArithmeticExpression('a MOD b', vars), 2, 'Basic Modulo (a MOD b)');
+            
+            // Test exponentiation
+            assertEqual(evaluateArithmeticExpression('c ^ b', vars), 8, 'Basic Exponentiation (c ^ b)');
+        }
+        
+        function testOperatorPrecedence() {
+            const vars = { a: 2, b: 3, c: 4 };
+            
+            // Test multiplication before addition
+            assertEqual(evaluateArithmeticExpression('a + b * c', vars), 14, 'Multiplication before Addition (2 + 3 * 4 = 14)');
+            
+            // Test division before subtraction
+            assertEqual(evaluateArithmeticExpression('c / a - b', vars), -1, 'Division before Subtraction (4 / 2 - 3 = -1)');
+            
+            // Test exponentiation before multiplication
+            assertEqual(evaluateArithmeticExpression('a * b ^ a', vars), 18, 'Exponentiation before Multiplication (2 * 3 ^ 2 = 18)');
+            
+            // Test left-to-right for same precedence
+            assertEqual(evaluateArithmeticExpression('a + b - c', vars), 1, 'Left-to-right for Addition/Subtraction (2 + 3 - 4 = 1)');
+            assertEqual(evaluateArithmeticExpression('a * b / a', vars), 3, 'Left-to-right for Multiplication/Division (2 * 3 / 2 = 3)');
+        }
+        
+        function testParentheses() {
+            const vars = { a: 2, b: 3, c: 4 };
+            
+            // Test basic parentheses
+            assertEqual(evaluateArithmeticExpression('(a + b) * c', vars), 20, 'Basic Parentheses ((2 + 3) * 4 = 20)');
+            
+            // Test nested parentheses
+            assertEqual(evaluateArithmeticExpression('((a + b) * c) / (a + c)', vars), 3, 'Nested Parentheses (((2 + 3) * 4) / (2 + 4) = 3)');
+            
+            // Test the rectangle perimeter calculation
+            const rectVars = { length: 5, width: 3 };
+            assertEqual(evaluateArithmeticExpression('2 * (length + width)', rectVars), 16, 'Rectangle Perimeter (2 * (5 + 3) = 16)');
+            
+            // Test complex expression with parentheses
+            assertEqual(evaluateArithmeticExpression('(a + b) * (c - a)', vars), 10, 'Complex Parentheses ((2 + 3) * (4 - 2) = 10)');
+        }
+        
+        function testArrayAccess() {
+            const vars = { 
+                nums: [10, 20, 30], 
+                i: 1,
+                j: 0
+            };
+            
+            // Test array access with variable index
+            assertEqual(getExpressionValue('nums[i]', vars), 20, 'Array Access with Variable Index (nums[1] = 20)');
+            
+            // Test array access with literal index
+            assertEqual(getExpressionValue('nums[0]', vars), 10, 'Array Access with Literal Index (nums[0] = 10)');
+            
+            // Test arithmetic with array access
+            assertEqual(evaluateArithmeticExpression('nums[i] + nums[j]', vars), 30, 'Arithmetic with Array Access (nums[1] + nums[0] = 30)');
+            
+            // Test complex expression with arrays
+            assertEqual(evaluateArithmeticExpression('nums[i] * 2', vars), 40, 'Array Access in Multiplication (nums[1] * 2 = 40)');
+        }
+        
+        function testVariableOperations() {
+            const vars = { 
+                x: 10, 
+                y: 0,
+                temp: 5
+            };
+            
+            // Test variable assignment expressions
+            assertEqual(getExpressionValue('x', vars), 10, 'Variable Access (x = 10)');
+            assertEqual(getExpressionValue('temp', vars), 5, 'Variable Access (temp = 5)');
+            
+            // Test numeric literals
+            assertEqual(getExpressionValue('42', vars), 42, 'Numeric Literal (42)');
+            assertEqual(getExpressionValue('0', vars), 0, 'Numeric Literal (0)');
+        }
+        
+        function testComplexExpressions() {
+            const vars = { 
+                a: 2, 
+                b: 3, 
+                c: 4,
+                nums: [1, 2, 3, 4, 5],
+                index: 2
+            };
+            
+            // Test complex arithmetic expression
+            assertEqual(evaluateArithmeticExpression('a * b + c * (a + b) - nums[index]', vars), 23, 
+                'Complex Expression (2 * 3 + 4 * (2 + 3) - 3 = 23)');
+            
+            // Test expression with multiple operators
+            assertEqual(evaluateArithmeticExpression('a ^ b + c / a * nums[0]', vars), 10, 
+                'Multiple Operators (2 ^ 3 + 4 / 2 * 1 = 10)');
+            
+            // Test deeply nested parentheses
+            assertEqual(evaluateArithmeticExpression('((a + b) * (c - a)) / ((nums[index] + a) - b)', vars), 5, 
+                'Deeply Nested (((2 + 3) * (4 - 2)) / ((3 + 2) - 3) = 5)');
+        }
+        
+        function testEdgeCases() {
+            const vars = { 
+                zero: 0, 
+                one: 1, 
+                ten: 10,
+                emptyArray: [],
+                smallArray: [42]
+            };
+            
+            // Test division by one
+            assertEqual(evaluateArithmeticExpression('ten / one', vars), 10, 'Division by One (10 / 1 = 10)');
+            
+            // Test multiplication by zero
+            assertEqual(evaluateArithmeticExpression('ten * zero', vars), 0, 'Multiplication by Zero (10 * 0 = 0)');
+            
+            // Test power of zero
+            assertEqual(evaluateArithmeticExpression('ten ^ zero', vars), 1, 'Power of Zero (10 ^ 0 = 1)');
+            
+            // Test array bounds (should return 0 for out of bounds)
+            assertEqual(getExpressionValue('emptyArray[0]', vars), 0, 'Empty Array Access (should return 0)');
+            assertEqual(getExpressionValue('smallArray[5]', vars), 0, 'Out of Bounds Array Access (should return 0)');
+        }
+        
+        function testStringMethods() {
+            // Note: String methods are handled separately in the main interpreter
+            // This tests that numeric expressions work correctly alongside string operations
+            const vars = {
+                name: 'John',
+                count: 4
+            };
+            
+            // Test that numeric operations still work when string variables exist
+            assertEqual(evaluateArithmeticExpression('count * 2', vars), 8, 'Numeric Operation with String Variables Present');
+            assertEqual(evaluateArithmeticExpression('count + 1', vars), 5, 'Addition with String Variables Present');        }
+        
+        function testDuckGrouping() {
+            // Test duck grouping scenarios (DIV and MOD operators)
+            
+            // Test with 15 ducks (3 groups of 4, 3 left over)
+            assertEqual(evaluateArithmeticExpression('15 DIV 4', {}), 3, 'Duck Grouping DIV (15 DIV 4 = 3)');
+            assertEqual(evaluateArithmeticExpression('15 MOD 4', {}), 3, 'Duck Grouping MOD (15 MOD 4 = 3)');
+            
+            // Test with 22 ducks (5 groups of 4, 2 left over)
+            assertEqual(evaluateArithmeticExpression('22 DIV 4', {}), 5, 'Duck Grouping DIV (22 DIV 4 = 5)');
+            assertEqual(evaluateArithmeticExpression('22 MOD 4', {}), 2, 'Duck Grouping MOD (22 MOD 4 = 2)');
+            
+            // Test with 8 ducks (2 groups of 4, 0 left over)
+            assertEqual(evaluateArithmeticExpression('8 DIV 4', {}), 2, 'Duck Grouping DIV (8 DIV 4 = 2)');
+            assertEqual(evaluateArithmeticExpression('8 MOD 4', {}), 0, 'Duck Grouping MOD (8 MOD 4 = 0)');
+            
+            // Test with 7 ducks (1 group of 4, 3 left over)
+            assertEqual(evaluateArithmeticExpression('7 DIV 4', {}), 1, 'Duck Grouping DIV (7 DIV 4 = 1)');
+            assertEqual(evaluateArithmeticExpression('7 MOD 4', {}), 3, 'Duck Grouping MOD (7 MOD 4 = 3)');
+        }
+
+        function runAllTests() {
+            // Reset test results
+            testResults = [];
+            testsPassed = 0;
+            testsFailed = 0;
+            
+            // Run test suites
+            testBasicArithmetic();
+            testOperatorPrecedence();
+            testParentheses();
+            testArrayAccess();
+            testVariableOperations();
+            testComplexExpressions();
+            testEdgeCases();
+            testStringMethods();
+            testDuckGrouping();
+            
+            // Display results
+            displayTestResults();
+        }
+        
+        function displayTestResults() {
+            const resultsDiv = document.getElementById('testResults');
+            const summaryDiv = document.getElementById('testSummary');
+            
+            // Group tests by category
+            const testSuites = {
+                'Basic Arithmetic': ['Basic Addition', 'Basic Subtraction', 'Basic Multiplication', 'Basic Division', 'Basic Modulo', 'Basic Exponentiation'],
+                'Operator Precedence': ['Multiplication before Addition', 'Division before Subtraction', 'Exponentiation before Multiplication', 'Left-to-right for Addition/Subtraction', 'Left-to-right for Multiplication/Division'],
+                'Parentheses': ['Basic Parentheses', 'Nested Parentheses', 'Rectangle Perimeter', 'Complex Parentheses'],
+                'Array Access': ['Array Access with Variable Index', 'Array Access with Literal Index', 'Arithmetic with Array Access', 'Array Access in Multiplication'],
+                'Variable Operations': ['Variable Access (x = 10)', 'Variable Access (temp = 5)', 'Numeric Literal (42)', 'Numeric Literal (0)'],
+                'Complex Expressions': ['Complex Expression', 'Multiple Operators', 'Deeply Nested'],
+                'Edge Cases': ['Division by One', 'Multiplication by Zero', 'Power of Zero', 'Empty Array Access', 'Out of Bounds Array Access'],
+                'String Integration': ['Numeric Operation with String Variables Present', 'Addition with String Variables Present'],
+                'Duck Grouping': ['Duck Grouping DIV (15 DIV 4 = 3)', 'Duck Grouping MOD (15 MOD 4 = 3)', 'Duck Grouping DIV (22 DIV 4 = 5)', 'Duck Grouping MOD (22 MOD 4 = 2)', 'Duck Grouping DIV (8 DIV 4 = 2)', 'Duck Grouping MOD (8 MOD 4 = 0)', 'Duck Grouping DIV (7 DIV 4 = 1)', 'Duck Grouping MOD (7 MOD 4 = 3)']
+            };
+            
+            let html = '';
+            
+            for (const [suiteName, testNames] of Object.entries(testSuites)) {
+                html += `<div class="test-section">`;
+                html += `<h2>${suiteName}</h2>`;
+                
+                for (const testName of testNames) {
+                    const result = testResults.find(r => r.name.includes(testName.split(' (')[0]));
+                    if (result) {
+                        const cssClass = result.passed ? 'test-pass' : 'test-fail';
+                        const status = result.passed ? '✅ PASS' : '❌ FAIL';
+                        html += `<div class="test-result ${cssClass}">`;
+                        html += `<strong>${status}</strong> - ${result.name}`;
+                        if (result.details) {
+                            html += `<div class="test-details">${result.details}</div>`;
+                        }
+                        html += `</div>`;
+                    }
+                }
+                
+                html += `</div>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+            
+            // Display summary
+            const totalTests = testsPassed + testsFailed;
+            const passRate = ((testsPassed / totalTests) * 100).toFixed(1);
+            const summaryClass = testsFailed === 0 ? 'test-pass' : 'test-fail';
+            
+            summaryDiv.innerHTML = `
+                <div class="test-summary ${summaryClass}">
+                    <strong>Test Summary:</strong> ${testsPassed}/${totalTests} tests passed (${passRate}%)
+                    ${testsFailed > 0 ? `<br><strong>${testsFailed} tests failed</strong>` : '<br><strong>All tests passed! 🎉</strong>'}
+                </div>
+            `;
+        }
+        
+        // Auto-run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            runAllTests();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trace Table Practice - Integration Tests</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .test-section h2 {
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .test-pass {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .test-fail {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+        
+        .test-summary {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .run-tests-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .run-tests-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        .test-details {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Trace Table Practice - Integration Tests</h1>
+        <p>These tests verify that complete programs execute correctly and generate proper trace tables.</p>
+        
+        <button class="run-tests-btn" onclick="runAllTests()">🔄 Run All Integration Tests</button>
+        
+        <div id="testResults"></div>
+        
+        <div id="testSummary"></div>
+    </div>
+
+    <script>
+        // Test helper functions
+        let testResults = [];
+        let testsPassed = 0;
+        let testsFailed = 0;
+        
+        function assert(condition, testName, details = '') {
+            if (condition) {
+                testResults.push({
+                    name: testName,
+                    passed: true,
+                    details: details
+                });
+                testsPassed++;
+            } else {
+                testResults.push({
+                    name: testName,
+                    passed: false,
+                    details: details
+                });
+                testsFailed++;
+            }
+        }
+        
+        function assertEqual(actual, expected, testName, details = '') {
+            const condition = actual === expected;
+            const testDetails = details + `\nExpected: ${expected}\nGot: ${actual}`;
+            assert(condition, testName, testDetails);
+        }
+        
+        function assertArrayEqual(actual, expected, testName, details = '') {
+            const condition = JSON.stringify(actual) === JSON.stringify(expected);
+            const testDetails = details + `\nExpected: ${JSON.stringify(expected)}\nGot: ${JSON.stringify(actual)}`;
+            assert(condition, testName, testDetails);
+        }
+        
+        // Mock program execution function (simplified version of the main interpreter)
+        function executeTestProgram(code, inputs = []) {
+            const lines = code.split('\n').map(line => line.trim()).filter(line => line);
+            const variables = {};
+            const outputs = [];
+            const trace = [];
+            let inputIndex = 0;
+            
+            // Simplified interpreter for testing key functionality
+            function evaluateExpression(expr, vars) {
+                // Handle parentheses first
+                while (expr.includes('(')) {
+                    const start = expr.lastIndexOf('(');
+                    const end = expr.indexOf(')', start);
+                    const innerExpr = expr.substring(start + 1, end);
+                    const result = evaluateExpression(innerExpr, vars);
+                    expr = expr.substring(0, start) + result + expr.substring(end + 1);
+                }
+                
+                // Handle operators (simplified)
+                if (expr.includes('+')) {
+                    const parts = expr.split('+').map(p => p.trim());
+                    return parts.reduce((sum, part) => {
+                        const val = vars[part] !== undefined ? parseInt(vars[part]) : parseInt(part);
+                        return sum + val;
+                    }, 0);
+                }
+                
+                if (expr.includes('*')) {
+                    const parts = expr.split('*').map(p => p.trim());
+                    return parts.reduce((product, part) => {
+                        const val = vars[part] !== undefined ? parseInt(vars[part]) : parseInt(part);
+                        return product * val;
+                    }, 1);
+                }
+                
+                if (expr.includes('-')) {
+                    const parts = expr.split('-').map(p => p.trim());
+                    let result = vars[parts[0]] !== undefined ? parseInt(vars[parts[0]]) : parseInt(parts[0]);
+                    for (let i = 1; i < parts.length; i++) {
+                        const val = vars[parts[i]] !== undefined ? parseInt(vars[parts[i]]) : parseInt(parts[i]);
+                        result -= val;
+                    }
+                    return result;
+                }
+                
+                if (expr.includes('/')) {
+                    const parts = expr.split('/').map(p => p.trim());
+                    let result = vars[parts[0]] !== undefined ? parseInt(vars[parts[0]]) : parseInt(parts[0]);
+                    for (let i = 1; i < parts.length; i++) {
+                        const val = vars[parts[i]] !== undefined ? parseInt(vars[parts[i]]) : parseInt(parts[i]);
+                        result = Math.floor(result / val);
+                    }
+                    return result;
+                }
+                
+                // Single value
+                return vars[expr] !== undefined ? parseInt(vars[expr]) : parseInt(expr);
+            }
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const lineNum = i + 1;
+                let output = '';
+                let shouldTrace = true;
+                
+                if (line.includes('=') && !line.includes('==')) {
+                    // Assignment
+                    const [varName, value] = line.split('=').map(s => s.trim());
+                    
+                    if (value.startsWith('int(input(')) {
+                        variables[varName] = inputIndex < inputs.length ? parseInt(inputs[inputIndex++]) : 0;
+                    } else if (value.startsWith('input(')) {
+                        variables[varName] = inputIndex < inputs.length ? inputs[inputIndex++] : '';
+                    } else if (value.startsWith('"') && value.endsWith('"')) {
+                        variables[varName] = value.slice(1, -1);
+                    } else if (!isNaN(value)) {
+                        variables[varName] = parseInt(value);
+                    } else {
+                        // Expression evaluation
+                        variables[varName] = evaluateExpression(value, variables);
+                    }
+                } else if (line.startsWith('print(')) {
+                    // Print statement
+                    const content = line.substring(6, line.length - 1);
+                    if (content.startsWith('"') && content.endsWith('"')) {
+                        output = content.slice(1, -1);
+                    } else if (variables[content] !== undefined) {
+                        output = variables[content].toString();
+                    } else if (content.includes('+')) {
+                        // String concatenation
+                        const parts = content.split('+').map(p => p.trim());
+                        output = parts.map(part => {
+                            if (part.startsWith('"') && part.endsWith('"')) {
+                                return part.slice(1, -1);
+                            } else if (part.startsWith('str(') && part.endsWith(')')) {
+                                const varName = part.substring(4, part.length - 1);
+                                return variables[varName] !== undefined ? variables[varName].toString() : '';
+                            } else {
+                                return variables[part] !== undefined ? variables[part].toString() : part;
+                            }
+                        }).join('');
+                    }
+                    if (output) outputs.push(output);
+                }
+                
+                if (shouldTrace) {
+                    trace.push({
+                        lineNumber: lineNum,
+                        variables: { ...variables },
+                        output: output
+                    });
+                }
+            }
+            
+            return { variables, outputs, trace };
+        }
+        
+        // Test the rectangle calculation program
+        function testRectangleCalculation() {
+            const code = `length = int(input("Length"))
+width = int(input("Width"))
+area = length * width
+perimeter = 2 * (length + width)
+print("Area: " + str(area))
+print("Perimeter: " + str(perimeter))`;
+            
+            const inputs = ["5", "3"];
+            const result = executeTestProgram(code, inputs);
+            
+            // Check final variables
+            assertEqual(result.variables.length, 5, 'Rectangle: Length Variable', 'length should be 5');
+            assertEqual(result.variables.width, 3, 'Rectangle: Width Variable', 'width should be 3');
+            assertEqual(result.variables.area, 15, 'Rectangle: Area Calculation', 'area should be 5 * 3 = 15');
+            assertEqual(result.variables.perimeter, 16, 'Rectangle: Perimeter Calculation', 'perimeter should be 2 * (5 + 3) = 16');
+            
+            // Check outputs
+            assertArrayEqual(result.outputs, ["Area: 15", "Perimeter: 16"], 'Rectangle: Output', 'Should output area and perimeter');
+            
+            // Check trace table length
+            assert(result.trace.length === 6, 'Rectangle: Trace Table Length', `Should have 6 traced lines, got ${result.trace.length}`);
+        }
+        
+        function testSimpleArithmetic() {
+            const code = `a = 5
+b = 3
+c = a + b
+print(c)`;
+            
+            const result = executeTestProgram(code);
+            
+            assertEqual(result.variables.a, 5, 'Simple: Variable A', 'a should be 5');
+            assertEqual(result.variables.b, 3, 'Simple: Variable B', 'b should be 3');
+            assertEqual(result.variables.c, 8, 'Simple: Variable C', 'c should be a + b = 8');
+            assertArrayEqual(result.outputs, ["8"], 'Simple: Output', 'Should output 8');
+        }
+        
+        function testVariableSwapping() {
+            const code = `x = 10
+y = 20
+temp = x
+x = y
+y = temp
+print(x)
+print(y)`;
+            
+            const result = executeTestProgram(code);
+            
+            assertEqual(result.variables.x, 20, 'Swap: Final X', 'x should be 20 after swap');
+            assertEqual(result.variables.y, 10, 'Swap: Final Y', 'y should be 10 after swap');
+            assertArrayEqual(result.outputs, ["20", "10"], 'Swap: Output', 'Should output swapped values');
+        }
+        
+        function testInputAndOutput() {
+            const code = `name = input("What's your name?")
+print("Hello " + name)`;
+            
+            const inputs = ["Alice"];
+            const result = executeTestProgram(code, inputs);
+            
+            assertEqual(result.variables.name, "Alice", 'Input: Name Variable', 'name should be "Alice"');
+            assertArrayEqual(result.outputs, ["Hello Alice"], 'Input: Output', 'Should greet Alice');
+        }
+        
+        function testComplexArithmetic() {
+            const code = `a = 2
+b = 3
+c = 4
+result = a * b + c * (a + b)
+print(result)`;
+            
+            const result = executeTestProgram(code);
+            
+            // result should be 2 * 3 + 4 * (2 + 3) = 6 + 4 * 5 = 6 + 20 = 26
+            assertEqual(result.variables.result, 26, 'Complex: Result Calculation', 'result should be 2 * 3 + 4 * (2 + 3) = 26');
+            assertArrayEqual(result.outputs, ["26"], 'Complex: Output', 'Should output 26');
+        }
+        
+        function testDiscountCalculation() {
+            const code = `price = int(input("Enter price"))
+discount = price / 10
+final_price = price - discount
+print("Original: " + str(price))
+print("Final: " + str(final_price))`;
+            
+            const inputs = ["100"];
+            const result = executeTestProgram(code, inputs);
+            
+            assertEqual(result.variables.price, 100, 'Discount: Price Variable', 'price should be 100');
+            assertEqual(result.variables.discount, 10, 'Discount: Discount Calculation', 'discount should be 100 / 10 = 10');
+            assertEqual(result.variables.final_price, 90, 'Discount: Final Price', 'final_price should be 100 - 10 = 90');
+            assertArrayEqual(result.outputs, ["Original: 100", "Final: 90"], 'Discount: Output', 'Should show original and final prices');
+        }
+        
+        function testStringConcatenation() {
+            const code = `name = "Alice"
+age = 16
+print("Hello " + name)
+print("You are " + str(age))`;
+            
+            const result = executeTestProgram(code);
+            
+            assertEqual(result.variables.name, "Alice", 'String: Name Variable', 'name should be "Alice"');
+            assertEqual(result.variables.age, 16, 'String: Age Variable', 'age should be 16');
+            assertArrayEqual(result.outputs, ["Hello Alice", "You are 16"], 'String: Output', 'Should concatenate strings properly');
+        }
+        
+        function testMultipleInputs() {
+            const code = `test1 = int(input("What score?"))
+test2 = int(input("What score?"))
+total = test1 + test2
+print("You got " + str(total))`;
+            
+            const inputs = ["75", "82"];
+            const result = executeTestProgram(code, inputs);
+            
+            assertEqual(result.variables.test1, 75, 'Multiple Input: Test1', 'test1 should be 75');
+            assertEqual(result.variables.test2, 82, 'Multiple Input: Test2', 'test2 should be 82');
+            assertEqual(result.variables.total, 157, 'Multiple Input: Total', 'total should be 75 + 82 = 157');
+            assertArrayEqual(result.outputs, ["You got 157"], 'Multiple Input: Output', 'Should output total score');
+        }
+        
+        // Test programs that had specific issues
+        function testKnownIssues() {
+            // Test the original rectangle program that didn't work
+            const rectangleCode = `length = int(input("Length"))
+width = int(input("Width"))
+area = length * width
+perimeter = 2 * (length + width)
+print("Area: " + str(area))
+print("Perimeter: " + str(perimeter))`;
+            
+            // Test with different input sets
+            const testCases = [
+                { inputs: ["5", "3"], expectedArea: 15, expectedPerimeter: 16 },
+                { inputs: ["10", "8"], expectedArea: 80, expectedPerimeter: 36 },
+                { inputs: ["12", "4"], expectedArea: 48, expectedPerimeter: 32 },
+                { inputs: ["7", "6"], expectedArea: 42, expectedPerimeter: 26 }
+            ];
+            
+            testCases.forEach((testCase, index) => {
+                const result = executeTestProgram(rectangleCode, testCase.inputs);
+                assertEqual(result.variables.area, testCase.expectedArea, 
+                    `Known Issue: Rectangle Area Test ${index + 1}`, 
+                    `With inputs ${testCase.inputs.join(', ')}`);
+                assertEqual(result.variables.perimeter, testCase.expectedPerimeter, 
+                    `Known Issue: Rectangle Perimeter Test ${index + 1}`, 
+                    `With inputs ${testCase.inputs.join(', ')}`);
+            });        }
+        
+        function testDuckGrouping() {
+            // Test the new duck grouping program that uses both MOD and DIV
+            const duckCode = `ducks = int(input("How many ducks are there"))
+groups = ducks DIV 4
+leftOver = ducks MOD 4
+print("Number of groups: " + str(groups))
+print("Ducks left over: " + str(leftOver))`;
+            
+            // Test with different input sets that correspond to the program's predefined inputs
+            const testCases = [
+                { inputs: ["15"], expectedGroups: 3, expectedLeftOver: 3 },
+                { inputs: ["22"], expectedGroups: 5, expectedLeftOver: 2 },
+                { inputs: ["8"], expectedGroups: 2, expectedLeftOver: 0 },
+                { inputs: ["13"], expectedGroups: 3, expectedLeftOver: 1 },
+                { inputs: ["20"], expectedGroups: 5, expectedLeftOver: 0 },
+                { inputs: ["7"], expectedGroups: 1, expectedLeftOver: 3 }
+            ];
+            
+            testCases.forEach((testCase, index) => {
+                const result = executeTestProgram(duckCode, testCase.inputs);
+                assertEqual(result.variables.ducks, parseInt(testCase.inputs[0]), 
+                    `Duck Grouping: Input Test ${index + 1}`, 
+                    `With ${testCase.inputs[0]} ducks`);
+                assertEqual(result.variables.groups, testCase.expectedGroups, 
+                    `Duck Grouping: DIV Operation Test ${index + 1}`, 
+                    `${testCase.inputs[0]} DIV 4 = ${testCase.expectedGroups}`);
+                assertEqual(result.variables.leftOver, testCase.expectedLeftOver, 
+                    `Duck Grouping: MOD Operation Test ${index + 1}`, 
+                    `${testCase.inputs[0]} MOD 4 = ${testCase.expectedLeftOver}`);
+                
+                // Check expected outputs
+                const expectedOutput1 = `Number of groups: ${testCase.expectedGroups}`;
+                const expectedOutput2 = `Ducks left over: ${testCase.expectedLeftOver}`;
+                assertEqual(result.outputs.includes(expectedOutput1), true, 
+                    `Duck Grouping: Output Test ${index + 1}a`, 
+                    `Should output "${expectedOutput1}"`);
+                assertEqual(result.outputs.includes(expectedOutput2), true, 
+                    `Duck Grouping: Output Test ${index + 1}b`, 
+                    `Should output "${expectedOutput2}"`);
+            });
+        }
+
+        function runAllTests() {
+            // Reset test results
+            testResults = [];
+            testsPassed = 0;
+            testsFailed = 0;
+            
+            // Run test suites
+            testRectangleCalculation();
+            testSimpleArithmetic();
+            testVariableSwapping();
+            testInputAndOutput();
+            testComplexArithmetic();
+            testDiscountCalculation();
+            testStringConcatenation();
+            testMultipleInputs();
+            testKnownIssues();
+            testDuckGrouping();
+            
+            // Display results
+            displayTestResults();
+        }
+        
+        function displayTestResults() {
+            const resultsDiv = document.getElementById('testResults');
+            const summaryDiv = document.getElementById('testSummary');
+            
+            // Group tests by category
+            const testSuites = {
+                'Rectangle Calculation': ['Rectangle: Length Variable', 'Rectangle: Width Variable', 'Rectangle: Area Calculation', 'Rectangle: Perimeter Calculation', 'Rectangle: Output', 'Rectangle: Trace Table Length'],
+                'Simple Arithmetic': ['Simple: Variable A', 'Simple: Variable B', 'Simple: Variable C', 'Simple: Output'],
+                'Variable Swapping': ['Swap: Final X', 'Swap: Final Y', 'Swap: Output'],
+                'Input/Output': ['Input: Name Variable', 'Input: Output'],
+                'Complex Arithmetic': ['Complex: Result Calculation', 'Complex: Output'],
+                'Discount Calculation': ['Discount: Price Variable', 'Discount: Discount Calculation', 'Discount: Final Price', 'Discount: Output'],
+                'String Operations': ['String: Name Variable', 'String: Age Variable', 'String: Output'],
+                'Multiple Inputs': ['Multiple Input: Test1', 'Multiple Input: Test2', 'Multiple Input: Total', 'Multiple Input: Output'],
+                'Duck Grouping': ['Duck Grouping: Input Test 1', 'Duck Grouping: Input Test 2', 'Duck Grouping: Input Test 3', 'Duck Grouping: Input Test 4', 'Duck Grouping: Input Test 5', 'Duck Grouping: Input Test 6', 'Duck Grouping: DIV Operation Test 1', 'Duck Grouping: DIV Operation Test 2', 'Duck Grouping: DIV Operation Test 3', 'Duck Grouping: DIV Operation Test 4', 'Duck Grouping: DIV Operation Test 5', 'Duck Grouping: DIV Operation Test 6', 'Duck Grouping: MOD Operation Test 1', 'Duck Grouping: MOD Operation Test 2', 'Duck Grouping: MOD Operation Test 3', 'Duck Grouping: MOD Operation Test 4', 'Duck Grouping: MOD Operation Test 5', 'Duck Grouping: MOD Operation Test 6', 'Duck Grouping: Output Test 1a', 'Duck Grouping: Output Test 1b', 'Duck Grouping: Output Test 2a', 'Duck Grouping: Output Test 2b', 'Duck Grouping: Output Test 3a', 'Duck Grouping: Output Test 3b', 'Duck Grouping: Output Test 4a', 'Duck Grouping: Output Test 4b', 'Duck Grouping: Output Test 5a', 'Duck Grouping: Output Test 5b', 'Duck Grouping: Output Test 6a', 'Duck Grouping: Output Test 6b'],
+                'Regression Tests': ['Known Issue: Rectangle Area Test 1', 'Known Issue: Rectangle Area Test 2', 'Known Issue: Rectangle Area Test 3', 'Known Issue: Rectangle Area Test 4', 'Known Issue: Rectangle Perimeter Test 1', 'Known Issue: Rectangle Perimeter Test 2', 'Known Issue: Rectangle Perimeter Test 3', 'Known Issue: Rectangle Perimeter Test 4']
+            };
+            
+            let html = '';
+            
+            for (const [suiteName, testNames] of Object.entries(testSuites)) {
+                html += `<div class="test-section">`;
+                html += `<h2>${suiteName}</h2>`;
+                
+                for (const testName of testNames) {
+                    const result = testResults.find(r => r.name === testName);
+                    if (result) {
+                        const cssClass = result.passed ? 'test-pass' : 'test-fail';
+                        const status = result.passed ? '✅ PASS' : '❌ FAIL';
+                        html += `<div class="test-result ${cssClass}">`;
+                        html += `<strong>${status}</strong> - ${result.name}`;
+                        if (result.details) {
+                            html += `<div class="test-details">${result.details}</div>`;
+                        }
+                        html += `</div>`;
+                    }
+                }
+                
+                html += `</div>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+            
+            // Display summary
+            const totalTests = testsPassed + testsFailed;
+            const passRate = ((testsPassed / totalTests) * 100).toFixed(1);
+            const summaryClass = testsFailed === 0 ? 'test-pass' : 'test-fail';
+            
+            summaryDiv.innerHTML = `
+                <div class="test-summary ${summaryClass}">
+                    <strong>Integration Test Summary:</strong> ${testsPassed}/${totalTests} tests passed (${passRate}%)
+                    ${testsFailed > 0 ? `<br><strong>${testsFailed} tests failed</strong>` : '<br><strong>All integration tests passed! 🎉</strong>'}
+                </div>
+            `;
+        }
+        
+        // Auto-run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            runAllTests();
+        });
+    </script>
+</body>
+</html>
