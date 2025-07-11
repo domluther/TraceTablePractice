@@ -6,29 +6,12 @@ export const programs = {
 b = 3
 c = a + b
 print(c)`,
-            description: "Simple arithmetic"
-        },
-        {
-            code: `name = "Alice"
-age = 16
-print("Hello " + name)
-print("You are " + str(age))`,
-            description: "String concatenation"
-        },
-        {
-            code: `x = 10
-y = 20
-temp = x
-x = y
-y = temp
-print(x)
-print(y)`,
-            description: "Variable swapping"
+            description: "Basic addition with variables"
         },
         {
             code: `name = input("What's your name?")
 print("Hello " + name)`,
-            description: "Simple input and output",
+            description: "Name input and greeting",
             inputSets: [
                 ["Alice"],
                 ["Bob"],
@@ -37,60 +20,23 @@ print("Hello " + name)`,
             ]
         },
         {
-            code: `age = int(input("How old are you?"))
-if age < 18 then
-    print("You are a student!")
-else
-    print("You finished school")
-endif`,
-            description: "Age checker with conditions",
-            inputSets: [
-                ["16"],
-                ["20"],
-                ["17"],
-                ["25"]
-            ]
+            code: `name = "Alice"
+age = 16
+print("Hello " + name)
+print("You are " + str(age))`,
+            description: "Text and number display"
         },
         {
             code: `test1 = int(input("What score?"))
 test2 = int(input("What score?"))
 total = test1 + test2
 print("You got " + str(total))`,
-            description: "Adding two test scores",
+            description: "Test score calculator",
             inputSets: [
                 ["70", "25"],
                 ["80", "15"],
                 ["60", "30"],
                 ["90", "10"]
-            ]
-        },
-        {
-            code: `price = int(input("Enter price"))
-discount = price * (10 / 100)
-final_price = price - discount
-print("Original: " + str(price))
-print("Final: " + str(final_price))`,
-            description: "Calculate 10% discount",
-            inputSets: [
-                ["50"],
-                ["100"],
-                ["80"],
-                ["120"]
-            ]
-        },
-        {
-            code: `length = int(input("Length"))
-width = int(input("Width"))
-area = length * width
-perimeter = 2 * (length + width)
-print("Area: " + str(area))
-print("Perimeter: " + str(perimeter))`,
-            description: "Rectangle calculations",
-            inputSets: [
-                ["5", "3"],
-                ["10", "8"],
-                ["12", "4"],
-                ["7", "6"]
             ]
         },
         {
@@ -101,12 +47,56 @@ else
     print("It's cool today")
 endif
 print(str(temperature) + " degrees C")`,
-            description: "Temperature feedback with condition",
+            description: "Weather checker based on temperature",
             inputSets: [
                 ["30"],
                 ["20"],
                 ["15"],
                 ["28"]
+            ]
+        },
+        {
+            code: `age = int(input("How old are you?"))
+if age < 18 then
+    print("You are a student!")
+else
+    print("You finished school")
+endif`,
+            description: "Student status checker",
+            inputSets: [
+                ["16"],
+                ["20"],
+                ["17"],
+                ["25"]
+            ]
+        },
+        {
+            code: `length = int(input("Length"))
+width = int(input("Width"))
+area = length * width
+perimeter = 2 * (length + width)
+print("Area: " + str(area))
+print("Perimeter: " + str(perimeter))`,
+            description: "Rectangle area and perimeter calculator",
+            inputSets: [
+                ["5", "3"],
+                ["10", "8"],
+                ["12", "4"],
+                ["7", "6"]
+            ]
+        },
+        {
+            code: `price = int(input("Enter price"))
+discount = price * (10 / 100)
+final_price = price - discount
+print("Original: " + str(price))
+print("Final: " + str(final_price))`,
+            description: "10% discount calculator",
+            inputSets: [
+                ["50"],
+                ["100"],
+                ["80"],
+                ["120"]
             ]
         },
         {
@@ -119,7 +109,7 @@ if hours > 40 then
     print("Bonus earned!")
 endif
 print("Total pay: " + str(pay))`,
-            description: "Pay calculator with bonus",
+            description: "Overtime pay calculator",
             inputSets: [
                 ["35"],
                 ["45"],
@@ -134,16 +124,32 @@ full_name = first_name + " " + last_name
 initials = first_name.left(1) + last_name.left(1)
 print("Full name: " + full_name)
 print("Initials: " + initials)`,
-            description: "Name processing with string methods",
+            description: "Name formatter with initials",
             inputSets: [
                 ["John", "Smith"],
                 ["Emma", "Jones"],
                 ["Alex", "Brown"],
                 ["Sarah", "Wilson"]
             ]
+        },
+        {
+            code: `x = 10
+y = 20
+temp = x
+x = y
+y = temp
+print(x)
+print(y)`,
+            description: "Variable swapping technique"
         }
     ],
     medium: [
+        {
+            code: `for x = 0 to 2
+    print(x*2)
+next x`,
+            description: "Simple multiplication table"
+        },
         {
             code: `total = 0
 for i = 1 to 3
@@ -151,7 +157,7 @@ for i = 1 to 3
     print(total)
 next i
 print("Final: " + str(total))`,
-            description: "For loop with accumulator"
+            description: "Running total in for loop"
         },
         {
             code: `count = 0
@@ -160,7 +166,17 @@ while count < 3
     print("Count: " + str(count))
 endwhile
 print("Finished counting")`,
-            description: "While loop with counter"
+            description: "Counter using while loop"
+        },
+        {
+            code: `for x = 0 to 5
+    if x < 3 then
+        print("less than 3")
+    else
+        print("3 or above")
+    endif
+next x`,
+            description: "Number range classifier"
         },
         {
             code: `score = 75
@@ -172,52 +188,94 @@ else
     print("Grade C")
 endif
 print("Score: " + str(score))`,
-            description: "If-elseif-else statements"
+            description: "Grade calculator with multiple conditions"
         },
         {
-            code: `surname = input("Enter surname")
-year = input("Enter starting year")
-staffID = surname + str(year)
-while staffID.length < 10
-    staffID = staffID + "x"
-endwhile
-print("ID " + staffID)`,
-            description: "Staff ID generator with input",
+            code: `for x = 1 to 3
+    country = "France"
+    print(country.substring(x, 1))
+next x`,
+            description: "Character extraction from text"
+        },
+        {
+            code: `for x = 0 to 2
+    choice = input("Enter a word")
+    case = input("upper or lower")
+    if case == "upper" then
+        print(choice.upper)
+    else
+        print(choice.lower)
+    endif
+next x`,
+            description: "Text case converter",
             inputSets: [
-                ["Kofi", "2021"],
-                ["Smith", "2023"],
-                ["Lee", "2020"],
-                ["Brown", "2024"],
-                ["Chen", "2022"]
+                ["hello", "upper", "world", "lower", "test", "upper"],
+                ["cat", "lower", "DOG", "upper", "fish", "lower"],
+                ["APPLE", "lower", "banana", "upper", "Orange", "lower"],
+                ["yes", "upper", "NO", "lower", "maybe", "upper"]
             ]
         },
         {
-            code: `x = 15
-y = 0
-while x > 0
-    y = y + 1
-    x = x - y
-endwhile
-print(y)`,
-            description: "While loop with variable decrement"
+            code: `for x = 1 to 3
+    name = input("Enter a name")
+    length = name.length
+    print(x * length)
+next x`,
+            description: "Name length multiplier",
+            inputSets: [
+                ["Alice", "Bob", "Kate"],
+                ["Sam", "Ann", "Alex"],
+                ["Jo", "Max", "Eve"],
+                ["Tom", "Sue", "Dan"]
+            ]
         },
         {
-            code: `initial1 = input("Enter first initial")
-initial2 = input("Enter second initial")
-num = random(1,99)
-while num < 75
-    num = num * 10
-endwhile
-userCode = initial1 + initial2 + str(num)
-print(userCode)`,
-            description: "User code generator with loops",
+            code: `for x = 1 to 4
+    if x < 3 then
+        print("it's Jeff")    
+    else
+        num = int(input("Enter a number"))
+        print(x * num)
+    endif
+next x`,
+            description: "Conditional input with multiplication",
             inputSets: [
-                ["A", "Z"],
-                ["M", "K"],
-                ["P", "Q"],
-                ["X", "Y"]
-            ],
-            randomValues: [3, 8, 15, 42, 99]
+                ["5", "6"],
+                ["3", "8"],
+                ["7", "4"],
+                ["2", "10"]
+            ]
+        },
+        {
+            code: `for x = 1 to 3
+    country = "United Kingdom"     
+    num = int(input("Enter a number"))
+    letter = country.substring(num, 1)
+    print(letter)
+next x`,
+            description: "Character picker by position",
+            inputSets: [
+                ["2", "5", "8"],
+                ["0", "7", "3"],
+                ["1", "4", "9"],
+                ["6", "10", "2"]
+            ]
+        },
+        {
+            code: `ducks = int(input("How many ducks are there"))
+groups = ducks DIV 4
+leftOver = ducks MOD 4
+print("Number of groups: " + str(groups))
+print("Ducks left over: " + str(leftOver))`,
+            description: "Duck grouping with division and remainder",
+            inputSets: [
+                ["7"],
+                ["3"],
+                ["8"],
+                ["16"],
+                ["13"],
+                ["6"]
+            ]
         },
         {
             code: `jumpLength = float(input("Enter jump length"))
@@ -231,7 +289,7 @@ if jumpLength > 2 then
 else
     print("Jump not long enough")
 endif`,
-            description: "Long jump qualification",
+            description: "Sports team qualification checker",
             inputSets: [
                 ["2.5", "9"],
                 ["3.1", "11"],
@@ -254,7 +312,7 @@ if yearGroup != 10 then
     score = score * 2
 endif
 print("The score is", score)`,
-            description: "Long jump scoring system",
+            description: "Athletic performance scoring system",
             inputSets: [
                 ["2.5", "9"],
                 ["5.2", "10"],
@@ -264,96 +322,20 @@ print("The score is", score)`,
             ]
         },
         {
-            code: `for x = 0 to 2
-    print(x*2)
-next x`,
-            description: "For loop with multiplication"
-        },
-        {
-            code: `for x = 0 to 5
-    if x < 3 then
-        print("less than 3")
-    else
-        print("3 or above")
-    endif
-next x`,
-            description: "For loop with conditional output"
-        },
-        {
-            code: `for x = 0 to 2
-    choice = input("Enter a word")
-    case = input("upper or lower")
-    if case == "upper" then
-        print(choice.upper)
-    else
-        print(choice.lower)
-    endif
-next x`,
-            description: "For loop with string methods",
+            code: `surname = input("Enter surname")
+year = input("Enter starting year")
+staffID = surname + str(year)
+while staffID.length < 10
+    staffID = staffID + "x"
+endwhile
+print("ID " + staffID)`,
+            description: "Staff ID generator with padding",
             inputSets: [
-                ["hello", "upper", "world", "lower", "test", "upper"],
-                ["cat", "lower", "DOG", "upper", "fish", "lower"],
-                ["APPLE", "lower", "banana", "upper", "Orange", "lower"],
-                ["yes", "upper", "NO", "lower", "maybe", "upper"]
-            ]
-        },
-        {
-            code: `x=1
-country = "France"
-print(country.substring(x, 2))`,
-            description: "Substring"
-        },
-        {
-            code: `for x = 1 to 3
-    country = "France"
-    print(country.substring(x, 1))
-next x`,
-            description: "Array indexing with string"
-        },
-        {
-            code: `for x = 1 to 4
-    if x < 3 then
-        print("it's Jeff")    
-    else
-        num = int(input("Enter a number"))
-        print(x * num)
-    endif
-next x`,
-            description: "For loop with conditional input",
-            inputSets: [
-                ["5", "6"],
-                ["3", "8"],
-                ["7", "4"],
-                ["2", "10"]
-            ]
-        },
-        {
-            code: `for x = 1 to 3
-    name = input("Enter a name")
-    length = name.length
-    print(x * length)
-next x`,
-            description: "For loop with string length calculation",
-            inputSets: [
-                ["Alice", "Bob", "Kate"],
-                ["Sam", "Ann", "Alex"],
-                ["Jo", "Max", "Eve"],
-                ["Tom", "Sue", "Dan"]
-            ]
-        },
-        {
-            code: `for x = 1 to 3
-    country = "United Kingdom"     
-    num = int(input("Enter a number"))
-    letter = country.substring(num, 1)
-    print(letter)
-next x`,
-            description: "For loop with substring indexing",
-            inputSets: [
-                ["2", "5", "8"],
-                ["0", "7", "3"],
-                ["1", "4", "9"],
-                ["6", "10", "2"]
+                ["Kofi", "2021"],
+                ["Smith", "2023"],
+                ["Lee", "2020"],
+                ["Brown", "2024"],
+                ["Chen", "2022"]
             ]
         },
         {
@@ -366,7 +348,7 @@ next x`,
         print(num * x)
     endif
 next x`,
-            description: "For loop with operator selection",
+            description: "Calculator with modulo and multiplication",
             inputSets: [
                 ["10", "%", "12", "*", "8", "%", "15", "*"],
                 ["9", "*", "6", "%", "14", "*", "4", "%"],
@@ -375,20 +357,32 @@ next x`,
             ]
         },
         {
-            code: `ducks = int(input("How many ducks are there"))
-groups = ducks DIV 4
-leftOver = ducks MOD 4
-print("Number of groups: " + str(groups))
-print("Ducks left over: " + str(leftOver))`,
-            description: "Duck grouping with MOD and DIV operators",
+            code: `x = 15
+y = 0
+while x > 0
+    y = y + 1
+    x = x - y
+endwhile
+print(y)`,
+            description: "Mathematical sequence with decreasing values"
+        },
+        {
+            code: `initial1 = input("Enter first initial")
+initial2 = input("Enter second initial")
+num = random(1,99)
+while num < 75
+    num = num * 10
+endwhile
+userCode = initial1 + initial2 + str(num)
+print(userCode)`,
+            description: "Random user code generator",
             inputSets: [
-                ["7"],
-                ["3"],
-                ["8"],
-                ["16"],
-                ["13"],
-                ["6"]
-            ]
+                ["A", "Z"],
+                ["M", "K"],
+                ["P", "Q"],
+                ["X", "Y"]
+            ],
+            randomValues: [3, 8, 15, 42, 99]
         }
     ],
     hard: [
@@ -403,7 +397,7 @@ for i = 0 to 2
     print("Sum so far: " + str(total))
 next i
 print("Average: " + str(total / 3))`,
-            description: "Array processing"
+            description: "Array processing with running totals"
         },
         {
             code: `do
@@ -411,7 +405,7 @@ print("Average: " + str(total / 3))`,
     print("You guessed " + x)
 until x == "parrot"
 print("Correct!")`,
-            description: "Do-until loop with password check",
+            description: "Password validation with do-until loop",
             inputSets: [
                 ["hello", "123", "parrot"],
                 ["password", "parrot"],
