@@ -58,7 +58,7 @@
         .test-summary {
             font-size: 1.2em;
             font-weight: 600;
-            margin-top: 20px;
+            margin: 20px 0;
             padding: 15px;
             border-radius: 8px;
         }
@@ -86,20 +86,81 @@
             color: #666;
             margin-top: 5px;
         }
+        
+        .toggle-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .toggle-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+        
+        .hide-passed .test-result.test-pass {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🧪 Trace Table Practice - Unit Tests</h1>
         
+        <div id="testSummary"></div>
+        
         <button class="run-tests-btn" onclick="runAllTests()">🔄 Run All Tests</button>
+        <button class="toggle-btn" id="togglePassedBtn" onclick="togglePassedTests()" title="Toggle passed tests visibility (Shortcut: H key)">👁️ Show Passed Tests</button>
         
         <div id="testResults"></div>
-        
-        <div id="testSummary"></div>
     </div>
 
     <script type="module">
+        /*
+         * ======================================================================
+         * IMPORTANT NOTES FOR FUTURE AI/DEVELOPERS ADDING TESTS:
+         * ======================================================================
+         * 
+         * 1. TEST COUNT CONSISTENCY:
+         *    - The total test count comes from testsPassed + testsFailed
+         *    - The hidden test count comes from document.querySelectorAll('.test-result.test-pass').length
+         *    - These MUST match or you'll get a confusing UI like "194/194 tests passed but 179 hidden"
+         * 
+         * 2. WHEN ADDING NEW TESTS:
+         *    a) Create your test function (e.g., function testMyNewFeature() { ... })
+         *    b) Call it EXACTLY ONCE in runAllTests() 
+         *    c) Add ALL test names from your function to the testSuites object
+         *    d) Use the EXACT test name strings - they must match perfectly
+         * 
+         * 3. COMMON MISTAKES TO AVOID:
+         *    - Don't call the same test function twice (causes duplicate tests)
+         *    - Don't forget to add test names to testSuites object (causes missing display)
+         *    - Don't change test names without updating testSuites (causes missing display)
+         *    - Test names in testSuites must match the first part before any " (" 
+         * 
+         * 4. DEBUGGING TEST COUNT MISMATCHES:
+         *    - Check for duplicate function calls in runAllTests()
+         *    - Check that all test names from your functions are in testSuites
+         *    - Use browser console to compare testResults.length vs rendered elements
+         * 
+         * 5. TEST NAMING CONVENTION:
+         *    - Use descriptive names: "Should calculate correct total"
+         *    - Avoid special characters that might break string matching
+         *    - Include context in parentheses if needed: "Array access (index 0)"
+         * 
+         * ======================================================================
+         */
+        
         // Import the actual production Interpreter class
         import { Interpreter } from './js/interpreter.js';
         
@@ -807,6 +868,34 @@ next i`;
             assertEqual(testInterpreter.outputs[1], 'Two', 'Second loop should print "Two"');
         }
         
+        // Validation function to check for test count mismatches
+        function validateTestCounts() {
+            const totalTests = testsPassed + testsFailed;
+            const displayedTests = document.querySelectorAll('.test-result').length;
+            const passedTests = testsPassed;
+            const displayedPassedTests = document.querySelectorAll('.test-result.test-pass').length;
+            
+            console.log('=== TEST COUNT VALIDATION ===');
+            console.log(`Total tests run: ${totalTests}`);
+            console.log(`Total tests displayed: ${displayedTests}`);
+            console.log(`Passed tests counted: ${passedTests}`);
+            console.log(`Passed tests displayed: ${displayedPassedTests}`);
+            
+            if (totalTests !== displayedTests) {
+                console.error(`❌ MISMATCH: ${totalTests - displayedTests} tests run but not displayed!`);
+                console.error('Check that all test names are in the testSuites object');
+            }
+            
+            if (passedTests !== displayedPassedTests) {
+                console.error(`❌ MISMATCH: ${passedTests - displayedPassedTests} passed tests not displayed!`);
+                console.error('This will cause incorrect "hidden" counts in the UI');
+            }
+            
+            if (totalTests === displayedTests && passedTests === displayedPassedTests) {
+                console.log('✅ All test counts match perfectly!');
+            }
+        }
+        
         function runAllTests() {
             // Reset test results
             testResults = [];
@@ -837,10 +926,14 @@ next i`;
             testForLoopWithNegativeStep();
             testForLoopBackwardCompatibility();
             testSwitchCase();
-            testSwitchCase();
+            // NOTE: testSwitchCase() was accidentally called twice here, causing a count mismatch
+            // REMOVED DUPLICATE: testSwitchCase(); 
             
             // Display results
             displayTestResults();
+            
+            // Validate test counts (for debugging)
+            validateTestCounts();
         }
         
         function displayTestResults() {
@@ -859,7 +952,7 @@ next i`;
                 'String Methods': ['First name .left(1) should return "J"', 'Last name .left(1) should return "S"', 'Initials concatenation should return "JS"', 'Should detect as string concatenation', 'String .upper method', 'String .lower method'],
                 'String Integration': ['Numeric Operation with String Variables Present', 'Addition with String Variables Present'],
                 'Duck Grouping': ['Duck Grouping DIV (15 DIV 4 = 3)', 'Duck Grouping MOD (15 MOD 4 = 3)', 'Duck Grouping DIV (22 DIV 4 = 5)', 'Duck Grouping MOD (22 MOD 4 = 2)', 'Duck Grouping DIV (8 DIV 4 = 2)', 'Duck Grouping MOD (8 MOD 4 = 0)', 'Duck Grouping DIV (7 DIV 4 = 1)', 'Duck Grouping MOD (7 MOD 4 = 3)'],
-                'Type Conversions': ['float(input()) should convert "3.14" to 3.14', 'real(input()) should convert "3.14" to 3.14', 'jumpLength should be 3.1 as float', 'yearGroup should be 11', 'Comparison 3.1 > 2 should be true'],
+                'Type Conversions': ['float(input()) should convert "3.14" to 3.14', 'real(input()) should convert "3.14" to 3.14', 'jumpLength should be 3.1 as float', 'yearGroup should be 11 as float', 'Comparison 3.1 > 2 should be true'],
                 'Nested Conditionals': ['jumpLength should be 2.2', 'yearGroup should be 8', 'Should have exactly 1 output', 'Should print "You are too young" for yearGroup=8', 'Line 1 should execute (jumpLength assignment)', 'Line 2 should execute (yearGroup assignment)', 'Line 3 should NOT execute (if condition not traced)', 'Line 4 should NOT execute (if condition not traced)', 'Line 5 should NOT execute (yearGroup >= 10 is false)', 'Line 7 should execute (else branch print)'],
                 'For Loop Execution': ['x should be 2 after loop completion', 'Should have exactly 3 outputs', 'First output should be "0"', 'Second output should be "2"', 'Third output should be "4"', 'Should have exactly 6 trace entries', 'First trace should be line 1 (x=0)', 'Second trace should be line 2 (print 0)', 'Third trace should be line 1 (x=1)', 'Fourth trace should be line 2 (print 2)', 'Fifth trace should be line 1 (x=2)', 'Sixth trace should be line 2 (print 4)', 'First trace should change x to 0', 'Third trace should change x to 1', 'Fifth trace should change x to 2', 'Second trace should have output "0"', 'Fourth trace should have output "2"', 'Sixth trace should have output "4"'],
                 'String Methods in Print': ['name should be "hello"', 'city should be "WORLD"', 'Should have exactly 3 outputs', 'First output should be "HELLO"', 'Second output should be "world"', 'Third output should be "5"', 'Line 1 should be traced (name input)', 'Line 2 should be traced (city input)', 'Line 3 should be traced (print name.upper)', 'Line 4 should be traced (print city.lower)', 'Line 5 should be traced (print name.length)', 'Line 3 trace should have output "HELLO"', 'Line 4 trace should have output "world"', 'Line 5 trace should have output "5"'],
@@ -898,6 +991,15 @@ next i`;
             
             resultsDiv.innerHTML = html;
             
+            // Default to hiding passed test results (but always show summary)
+            const container = document.querySelector('.container');
+            const toggleBtn = document.getElementById('togglePassedBtn');
+            
+            container.classList.add('hide-passed');
+            const passedCount = document.querySelectorAll('.test-result.test-pass').length;
+            toggleBtn.textContent = `👁️ Show Passed Tests (${passedCount} hidden)`;
+            toggleBtn.classList.add('active');
+            
             // Display summary
             const totalTests = testsPassed + testsFailed;
             const passRate = ((testsPassed / totalTests) * 100).toFixed(1);
@@ -911,12 +1013,40 @@ next i`;
             `;
         }
         
-        // Make runAllTests available globally for the button
+        // Toggle function to hide/show passed tests
+        function togglePassedTests() {
+            const container = document.querySelector('.container');
+            const toggleBtn = document.getElementById('togglePassedBtn');
+            
+            if (container.classList.contains('hide-passed')) {
+                // Show passed tests
+                container.classList.remove('hide-passed');
+                toggleBtn.textContent = '👁️ Hide Passed Tests';
+                toggleBtn.classList.remove('active');
+            } else {
+                // Hide passed tests
+                container.classList.add('hide-passed');
+                const passedCount = document.querySelectorAll('.test-result.test-pass').length;
+                toggleBtn.textContent = `👁️ Show Passed Tests (${passedCount} hidden)`;
+                toggleBtn.classList.add('active');
+            }
+        }
+        
+        // Make functions available globally
         window.runAllTests = runAllTests;
+        window.togglePassedTests = togglePassedTests;
         
         // Auto-run tests on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Don't set initial state here - let the test results determine the state
             runAllTests();
+        });
+        
+        // Add keyboard shortcut (H key) to toggle passed tests
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'h' || event.key === 'H') {
+                togglePassedTests();
+            }
         });
     </script>
 </body>

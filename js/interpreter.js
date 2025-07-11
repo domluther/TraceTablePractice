@@ -416,6 +416,48 @@ export class Interpreter {
                 if (oldValue !== vars[varName]) {
                     changeRecord[varName] = vars[varName];
                 }
+            } else if (value.startsWith('int(') && value.endsWith(')')) {
+                // int() function - convert to integer
+                const inner = value.substring(4, value.length - 1).trim();
+                const oldValue = vars[varName];
+                if (vars[inner] !== undefined) {
+                    vars[varName] = parseInt(vars[inner]);
+                } else if (!isNaN(inner)) {
+                    vars[varName] = parseInt(inner);
+                } else {
+                    vars[varName] = 0;
+                }
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
+            } else if (value.startsWith('float(') && value.endsWith(')')) {
+                // float() function - convert to float
+                const inner = value.substring(6, value.length - 1).trim();
+                const oldValue = vars[varName];
+                if (vars[inner] !== undefined) {
+                    vars[varName] = parseFloat(vars[inner]);
+                } else if (!isNaN(inner)) {
+                    vars[varName] = parseFloat(inner);
+                } else {
+                    vars[varName] = 0.0;
+                }
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
+            } else if (value.startsWith('real(') && value.endsWith(')')) {
+                // real() function - convert to real/float
+                const inner = value.substring(5, value.length - 1).trim();
+                const oldValue = vars[varName];
+                if (vars[inner] !== undefined) {
+                    vars[varName] = parseFloat(vars[inner]);
+                } else if (!isNaN(inner)) {
+                    vars[varName] = parseFloat(inner);
+                } else {
+                    vars[varName] = 0.0;
+                }
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (vars[value] !== undefined) {
                 // Variable assignment
                 const oldValue = vars[varName];
@@ -758,11 +800,13 @@ export class Interpreter {
         }
 
         isArithmeticExpression(value) {
-            // Don't treat string methods or str() function as arithmetic expressions
+            // Don't treat string methods or type conversion functions as arithmetic expressions
             if (value.includes('.substring(') || value.includes('.left(') || 
                 value.includes('.right(') || value.includes('.upper') || 
                 value.includes('.lower') || value.includes('.length') ||
-                value.startsWith('str(')) {
+                value.startsWith('str(') || value.startsWith('int(') ||
+                value.startsWith('float(') || value.startsWith('real(') ||
+                value.startsWith('bool(')) {
                 return false;
             }
             
