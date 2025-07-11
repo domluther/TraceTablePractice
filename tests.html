@@ -500,6 +500,48 @@
             assertEqual(line4Trace.output, 'world', 'Line 4 trace should have output "world"');
             assertEqual(line5Trace.output, '5', 'Line 5 trace should have output "5"');
         }
+
+        function testSubstringWithVariable() {
+            // Test substring method with variable parameters
+            const testInterpreter = new Interpreter();
+            const testProgram = { inputs: [], randomValue: undefined };
+            
+            const result = testInterpreter.executeProgram(`
+                for x = 1 to 3
+                    country = "France"
+                    print(country.substring(x, 1))
+                next x
+            `, testProgram);
+            
+            // Check variable values
+            assertEqual(testInterpreter.variables.x, 3, 'x should be 3 after loop completion');
+            assertEqual(testInterpreter.variables.country, 'France', 'country should be "France"');
+            
+            // Check outputs - should extract characters at positions 1, 2, 3 (r, a, n)
+            assertEqual(testInterpreter.outputs.length, 3, 'Should have exactly 3 outputs');
+            assertEqual(testInterpreter.outputs[0], 'r', 'First output should be "r" (position 1)');
+            assertEqual(testInterpreter.outputs[1], 'a', 'Second output should be "a" (position 2)');
+            assertEqual(testInterpreter.outputs[2], 'n', 'Third output should be "n" (position 3)');
+            
+            // Check trace pattern - should alternate between x assignment and print
+            const executedLines = testInterpreter.trace.map(entry => entry.lineNumber);
+            assertEqual(executedLines.length, 9, 'Should have exactly 9 trace entries');
+            
+            // Pattern should be: 1(x=1), 2(country="France"), 3(print), 1(x=2), 2(country="France"), 3(print), 1(x=3), 2(country="France"), 3(print)
+            assertEqual(executedLines[0], 1, 'First trace should be line 1 (x=1)');
+            assertEqual(executedLines[1], 2, 'Second trace should be line 2 (country assignment)');
+            assertEqual(executedLines[2], 3, 'Third trace should be line 3 (print substring)');
+            assertEqual(executedLines[3], 1, 'Fourth trace should be line 1 (x=2)');
+            assertEqual(executedLines[4], 2, 'Fifth trace should be line 2 (country assignment)');
+            assertEqual(executedLines[5], 3, 'Sixth trace should be line 3 (print substring)');
+            
+            // Verify substring outputs in trace entries
+            const line3Traces = testInterpreter.trace.filter(entry => entry.lineNumber === 3);
+            assertEqual(line3Traces.length, 3, 'Should have 3 traces for line 3');
+            assertEqual(line3Traces[0].output, 'r', 'First substring trace should output "r"');
+            assertEqual(line3Traces[1].output, 'a', 'Second substring trace should output "a"');
+            assertEqual(line3Traces[2].output, 'n', 'Third substring trace should output "n"');
+        }
         
         function runAllTests() {
             // Reset test results
@@ -521,6 +563,7 @@
             testNestedConditionalExecution();
             testForLoopExecution();
             testStringMethodsInPrint();
+            testSubstringWithVariable();
             
             // Display results
             displayTestResults();
@@ -545,7 +588,8 @@
                 'Type Conversions': ['float(input()) should convert "3.14" to 3.14', 'real(input()) should convert "3.14" to 3.14', 'jumpLength should be 3.1 as float', 'yearGroup should be 11 as float', 'Comparison 3.1 > 2 should be true'],
                 'Nested Conditionals': ['jumpLength should be 2.2', 'yearGroup should be 8', 'Should have exactly 1 output', 'Should print "You are too young" for yearGroup=8', 'Line 1 should execute (jumpLength assignment)', 'Line 2 should execute (yearGroup assignment)', 'Line 3 should NOT execute (if condition not traced)', 'Line 4 should NOT execute (if condition not traced)', 'Line 5 should NOT execute (yearGroup >= 10 is false)', 'Line 7 should execute (else branch print)'],
                 'For Loop Execution': ['x should be 2 after loop completion', 'Should have exactly 3 outputs', 'First output should be "0"', 'Second output should be "2"', 'Third output should be "4"', 'Should have exactly 6 trace entries', 'First trace should be line 1 (x=0)', 'Second trace should be line 2 (print 0)', 'Third trace should be line 1 (x=1)', 'Fourth trace should be line 2 (print 2)', 'Fifth trace should be line 1 (x=2)', 'Sixth trace should be line 2 (print 4)', 'First trace should change x to 0', 'Third trace should change x to 1', 'Fifth trace should change x to 2', 'Second trace should have output "0"', 'Fourth trace should have output "2"', 'Sixth trace should have output "4"'],
-                'String Methods in Print': ['name should be "hello"', 'city should be "WORLD"', 'Should have exactly 3 outputs', 'First output should be "HELLO"', 'Second output should be "world"', 'Third output should be "5"', 'Line 1 should be traced (name input)', 'Line 2 should be traced (city input)', 'Line 3 should be traced (print name.upper)', 'Line 4 should be traced (print city.lower)', 'Line 5 should be traced (print name.length)', 'Line 3 trace should have output "HELLO"', 'Line 4 trace should have output "world"', 'Line 5 trace should have output "5"']
+                'String Methods in Print': ['name should be "hello"', 'city should be "WORLD"', 'Should have exactly 3 outputs', 'First output should be "HELLO"', 'Second output should be "world"', 'Third output should be "5"', 'Line 1 should be traced (name input)', 'Line 2 should be traced (city input)', 'Line 3 should be traced (print name.upper)', 'Line 4 should be traced (print city.lower)', 'Line 5 should be traced (print name.length)', 'Line 3 trace should have output "HELLO"', 'Line 4 trace should have output "world"', 'Line 5 trace should have output "5"'],
+                'Substring with Variables': ['x should be 3 after loop completion', 'country should be "France"', 'Should have exactly 3 outputs', 'First output should be "r" (position 1)', 'Second output should be "a" (position 2)', 'Third output should be "n" (position 3)', 'Should have exactly 9 trace entries', 'First trace should be line 1 (x=1)', 'Second trace should be line 2 (country assignment)', 'Third trace should be line 3 (print substring)', 'Fourth trace should be line 1 (x=2)', 'Fifth trace should be line 2 (country assignment)', 'Sixth trace should be line 3 (print substring)', 'Should have 3 traces for line 3', 'First substring trace should output "r"', 'Second substring trace should output "a"', 'Third substring trace should output "n"']
             };
             
             let html = '';

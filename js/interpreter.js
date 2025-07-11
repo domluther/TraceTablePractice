@@ -10,6 +10,11 @@ export class Interpreter {
         this.currentProgram = null;
     }
 
+    // Convenience method for executing code without a program object
+    execute(code) {
+        return this.executeProgram(code, { inputs: [], randomValue: undefined });
+    }
+
     executeProgram(code, program) {
         // Initialize state
         this.variables = {};
@@ -23,8 +28,11 @@ export class Interpreter {
         const lines = code.split('\n').map(line => line.trim()).filter(line => line);
         
         let i = 0;
+        let executionSteps = 0;
+        const maxExecutionSteps = 1000; // Safety limit
         
-        while (i < lines.length) {
+        while (i < lines.length && executionSteps < maxExecutionSteps) {
+            executionSteps++;
             const line = lines[i];
             const lineNum = i + 1;
             
@@ -50,10 +58,13 @@ export class Interpreter {
                 if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
                     this.addTraceEntry(lineNum, this.variables, result.output, result.changedVariables);
                 }
-                i++;
-            }
+                i++;            }
         }
         
+        if (executionSteps >= maxExecutionSteps) {
+            throw new Error('Execution exceeded maximum steps - possible infinite loop detected');
+        }
+
         return {
             trace: this.trace,
             variables: Object.keys(this.variables),
@@ -186,11 +197,33 @@ export class Interpreter {
                 }
             } else if (value.includes('.substring(')) {
                 // String substring method - extract substring(start, length)
-                const match = value.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                const match = value.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
                 if (match && vars[match[1]] !== undefined) {
                     const sourceVar = match[1];
-                    const start = parseInt(match[2]);
-                    const length = parseInt(match[3]);
+                    const startParam = match[2].trim();
+                    const lengthParam = match[3].trim();
+                    
+                    // Parse start parameter (could be variable or literal)
+                    // substring uses 0-based indexing (like JavaScript)
+                    let start;
+                    if (vars[startParam] !== undefined) {
+                        start = parseInt(vars[startParam]); // Use 0-based indexing directly
+                    } else if (!isNaN(startParam)) {
+                        start = parseInt(startParam); // Use 0-based indexing directly
+                    } else {
+                        start = 0; // fallback
+                    }
+                    
+                    // Parse length parameter (could be variable or literal)
+                    let length;
+                    if (vars[lengthParam] !== undefined) {
+                        length = parseInt(vars[lengthParam]);
+                    } else if (!isNaN(lengthParam)) {
+                        length = parseInt(lengthParam);
+                    } else {
+                        length = 1; // fallback
+                    }
+                    
                     vars[varName] = vars[sourceVar].toString().substring(start, start + length);
                     changeRecord[varName] = vars[varName];
                 }
@@ -290,11 +323,32 @@ export class Interpreter {
                             result += str.substring(str.length - length);
                         }
                     } else if (part.includes('.substring(')) {
-                        const match = part.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                        const match = part.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
                         if (match && vars[match[1]] !== undefined) {
                             const varName = match[1];
-                            const start = parseInt(match[2]);
-                            const length = parseInt(match[3]);
+                            const startParam = match[2].trim();
+                            const lengthParam = match[3].trim();
+                            
+                            // Parse start parameter (could be variable or literal)
+                            let start;
+                            if (vars[startParam] !== undefined) {
+                                start = parseInt(vars[startParam]); // Use 0-based indexing
+                            } else if (!isNaN(startParam)) {
+                                start = parseInt(startParam); // Use 0-based indexing
+                            } else {
+                                start = 0; // fallback
+                            }
+                            
+                            // Parse length parameter (could be variable or literal)
+                            let length;
+                            if (vars[lengthParam] !== undefined) {
+                                length = parseInt(vars[lengthParam]);
+                            } else if (!isNaN(lengthParam)) {
+                                length = parseInt(lengthParam);
+                            } else {
+                                length = 1; // fallback
+                            }
+                            
                             result += vars[varName].toString().substring(start, start + length);
                         }
                     } else if (vars[part] !== undefined) {
@@ -347,11 +401,32 @@ export class Interpreter {
                 }
             } else if (content.includes('.substring(')) {
                 // Handle string .substring() method
-                const match = content.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                const match = content.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
                 if (match && vars[match[1]] !== undefined) {
                     const varName = match[1];
-                    const start = parseInt(match[2]);
-                    const length = parseInt(match[3]);
+                    const startParam = match[2].trim();
+                    const lengthParam = match[3].trim();
+                    
+                    // Parse start parameter (could be variable or literal)
+                    let start;
+                    if (vars[startParam] !== undefined) {
+                        start = parseInt(vars[startParam]); // Use 0-based indexing
+                    } else if (!isNaN(startParam)) {
+                        start = parseInt(startParam); // Use 0-based indexing
+                    } else {
+                        start = 0; // fallback
+                    }
+                    
+                    // Parse length parameter (could be variable or literal)
+                    let length;
+                    if (vars[lengthParam] !== undefined) {
+                        length = parseInt(vars[lengthParam]);
+                    } else if (!isNaN(lengthParam)) {
+                        length = parseInt(lengthParam);
+                    } else {
+                        length = 1; // fallback
+                    }
+                    
                     output = vars[varName].toString().substring(start, start + length);
                 }
             } else if (vars[content] !== undefined) {
@@ -436,32 +511,41 @@ export class Interpreter {
                 }
             } else if (part.includes('.substring(')) {
                 // Handle string substring method
-                const match = part.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                const match = part.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
                 if (match && vars[match[1]] !== undefined) {
-                    const varName = match[1];
-                    const start = parseInt(match[2]);
-                    const length = parseInt(match[3]);
-                    result += vars[varName].toString().substring(start, start + length);
+                    const sourceVar = match[1];
+                    const startParam = match[2].trim();
+                    const lengthParam = match[3].trim();
+                    
+                    // Parse start parameter (could be variable or literal)
+                    let start;
+                    if (vars[startParam] !== undefined) {
+                        start = parseInt(vars[startParam]); // Use 0-based indexing
+                    } else if (!isNaN(startParam)) {
+                        start = parseInt(startParam); // Use 0-based indexing
+                    } else {
+                        start = 0; // fallback
+                    }
+                    
+                    // Parse length parameter (could be variable or literal)
+                    let length;
+                    if (vars[lengthParam] !== undefined) {
+                        length = parseInt(vars[lengthParam]);
+                    } else if (!isNaN(lengthParam)) {
+                        length = parseInt(lengthParam);
+                    } else {
+                        length = 1; // fallback
+                    }
+                    
+                    result += vars[sourceVar].toString().substring(start, start + length);
                 }
-            } else if (part.includes('.upper')) {
-                // Handle string upper method
-                const varName = part.split('.')[0];
-                if (vars[varName] !== undefined) {
-                    result += vars[varName].toString().toUpperCase();
-                }
-            } else if (part.includes('.lower')) {
-                // Handle string lower method
-                const varName = part.split('.')[0];
-                if (vars[varName] !== undefined) {
-                    result += vars[varName].toString().toLowerCase();
-                }
+            } else if (part === '""') {
+                result += '';
+            } else if (part.startsWith('"') && part.endsWith('"')) {
+                // String literal
+                result += part.slice(1, -1);
             } else if (vars[part] !== undefined) {
                 result += vars[part].toString();
-            } else if (part.startsWith('str(') && part.endsWith(')')) {
-                const varName = part.substring(4, part.length - 1);
-                if (vars[varName] !== undefined) {
-                    result += vars[varName].toString();
-                }
             }
         });
         return result;

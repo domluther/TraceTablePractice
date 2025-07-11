@@ -295,9 +295,15 @@ next x`,
             ]
         },
         {
+            code: `x=1
+country = "France"
+character = country.substring(x, 2)`,
+            description: "Substring"
+        },
+        {
             code: `for x = 1 to 3
     country = "France"
-    print(country[x])
+    print(country.substring(x, 1))
 next x`,
             description: "Array indexing with string"
         },
