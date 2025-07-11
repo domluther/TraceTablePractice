@@ -914,6 +914,203 @@ print("Correct!")`,
                     return vars[operand];
                 }
             }
+
+            function evaluateArithmeticExpression(expression, vars) {
+                // Remove all spaces for easier parsing
+                expression = expression.replace(/\s+/g, '');
+                
+                // Handle parentheses by recursively evaluating inner expressions
+                while (expression.includes('(')) {
+                    let depth = 0;
+                    let start = -1;
+                    
+                    for (let i = 0; i < expression.length; i++) {
+                        if (expression[i] === '(') {
+                            if (depth === 0) start = i;
+                            depth++;
+                        } else if (expression[i] === ')') {
+                            depth--;
+                            if (depth === 0) {
+                                const innerExpr = expression.substring(start + 1, i);
+                                const result = evaluateArithmeticExpression(innerExpr, vars);
+                                expression = expression.substring(0, start) + result + expression.substring(i + 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Handle operators in order of precedence
+                // First handle ^ (exponentiation) - right to left
+                while (expression.includes('^')) {
+                    const lastPos = expression.lastIndexOf('^');
+                    const leftPart = expression.substring(0, lastPos);
+                    const rightPart = expression.substring(lastPos + 1);
+                    
+                    // Find left operand
+                    let leftOperand = '';
+                    for (let i = leftPart.length - 1; i >= 0; i--) {
+                        if (/[A-Za-z0-9_]/.test(leftPart[i])) {
+                            leftOperand = leftPart[i] + leftOperand;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // Find right operand
+                    let rightOperand = '';
+                    for (let i = 0; i < rightPart.length; i++) {
+                        if (/[A-Za-z0-9_]/.test(rightPart[i])) {
+                            rightOperand += rightPart[i];
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    const leftVal = getExpressionValue(leftOperand, vars);
+                    const rightVal = getExpressionValue(rightOperand, vars);
+                    const result = Math.pow(leftVal, rightVal);
+                    
+                    expression = leftPart.substring(0, leftPart.length - leftOperand.length) + 
+                                result + 
+                                rightPart.substring(rightOperand.length);
+                }
+                
+                // Then handle *, /, DIV, MOD (left to right)
+                expression = handleLeftToRightOperators(expression, ['*', '/', 'DIV', 'MOD'], vars);
+                
+                // Finally handle +, - (left to right)
+                expression = handleLeftToRightOperators(expression, ['+', '-'], vars);
+                
+                // At this point, expression should be a single value
+                return getExpressionValue(expression, vars);
+            }
+            
+            function getExpressionValue(operand, vars) {
+                // Handle array access
+                if (operand.includes('[') && operand.includes(']')) {
+                    const arrayMatch = operand.match(/(\w+)\[(\w+)\]/);
+                    if (arrayMatch) {
+                        const arrayName = arrayMatch[1];
+                        const indexVar = arrayMatch[2];
+                        
+                        if (vars[arrayName] && Array.isArray(vars[arrayName])) {
+                            const index = vars[indexVar] !== undefined ? parseInt(vars[indexVar]) : parseInt(indexVar);
+                            if (index >= 0 && index < vars[arrayName].length) {
+                                return vars[arrayName][index];
+                            }
+                        }
+                    }
+                    return 0;
+                }
+                
+                // Handle regular variables
+                if (vars[operand] !== undefined) {
+                    return parseInt(vars[operand]);
+                }
+                
+                // Handle numeric literals
+                if (!isNaN(operand)) {
+                    return parseInt(operand);
+                }
+                
+                return 0;
+            }
+            
+            function handleLeftToRightOperators(expression, operators, vars) {
+                let changed = true;
+                while (changed) {
+                    changed = false;
+                    
+                    // Find the leftmost operator from our list
+                    let earliestPos = expression.length;
+                    let earliestOp = null;
+                    let earliestLength = 0;
+                    
+                    for (const op of operators) {
+                        let pos = 0;
+                        while (pos < expression.length) {
+                            if (op === 'DIV' || op === 'MOD') {
+                                // Find whole word operators
+                                pos = expression.indexOf(op, pos);
+                                if (pos === -1) break;
+                                
+                                // Check if it's a whole word (not part of another word)
+                                if ((pos === 0 || !/[A-Za-z0-9_]/.test(expression[pos - 1])) &&
+                                    (pos + op.length === expression.length || !/[A-Za-z0-9_]/.test(expression[pos + op.length]))) {
+                                    if (pos < earliestPos) {
+                                        earliestPos = pos;
+                                        earliestOp = op;
+                                        earliestLength = op.length;
+                                    }
+                                    break;
+                                }
+                                pos++;
+                            } else {
+                                pos = expression.indexOf(op, pos);
+                                if (pos === -1) break;
+                                
+                                if (pos < earliestPos) {
+                                    earliestPos = pos;
+                                    earliestOp = op;
+                                    earliestLength = 1;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (earliestOp && earliestPos < expression.length) {
+                        // Find left operand
+                        let leftStart = earliestPos - 1;
+                        while (leftStart >= 0 && /[A-Za-z0-9_\[\]]/.test(expression[leftStart])) {
+                            leftStart--;
+                        }
+                        leftStart++;
+                        
+                        // Find right operand
+                        let rightEnd = earliestPos + earliestLength;
+                        while (rightEnd < expression.length && /[A-Za-z0-9_\[\]]/.test(expression[rightEnd])) {
+                            rightEnd++;
+                        }
+                        
+                        const leftOperand = expression.substring(leftStart, earliestPos);
+                        const rightOperand = expression.substring(earliestPos + earliestLength, rightEnd);
+                        
+                        if (leftOperand && rightOperand) {
+                            const leftVal = getExpressionValue(leftOperand, vars);
+                            const rightVal = getExpressionValue(rightOperand, vars);
+                            let result;
+                            
+                            switch (earliestOp) {
+                                case '+':
+                                    result = leftVal + rightVal;
+                                    break;
+                                case '-':
+                                    result = leftVal - rightVal;
+                                    break;
+                                case '*':
+                                    result = leftVal * rightVal;
+                                    break;
+                                case '/':
+                                    result = Math.floor(leftVal / rightVal);
+                                    break;
+                                case 'DIV':
+                                    result = Math.floor(leftVal / rightVal);
+                                    break;
+                                case 'MOD':
+                                    result = leftVal % rightVal;
+                                    break;
+                            }
+                            
+                            expression = expression.substring(0, leftStart) + result + expression.substring(rightEnd);
+                            changed = true;
+                        }
+                    }
+                }
+                
+                return expression;
+            }
             
             function executeStatement(line, lineNum, vars) {
                 let output = '';
@@ -1018,46 +1215,33 @@ print("Correct!")`,
                     } else if (!isNaN(value)) {
                         vars[varName] = parseInt(value);
                     } else {
-                        // Simple expression evaluation
-                        if (value.includes('+')) {
+                        // Expression evaluation - check if it's string concatenation first
+                        if (value.includes('+') && 
+                            (value.includes('"') || 
+                             value.split('+').some(op => {
+                                 const trimmed = op.trim();
+                                 return vars[trimmed] !== undefined && typeof vars[trimmed] === 'string';
+                             }))) {
+                            // String concatenation
                             const operands = value.split('+').map(op => op.trim());
                             let result = '';
-                            let isStringConcat = false;
                             
                             operands.forEach(op => {
                                 if (op.startsWith('"') && op.endsWith('"')) {
                                     result += op.slice(1, -1);
-                                    isStringConcat = true;
                                 } else if (getVariableValue(op, vars) !== undefined) {
-                                    const opValue = getVariableValue(op, vars);
-                                    if (isStringConcat || typeof opValue === 'string') {
-                                        result += opValue.toString();
-                                        isStringConcat = true;
-                                    } else {
-                                        result = (result === '' ? 0 : parseInt(result)) + opValue;
-                                    }
+                                    result += getVariableValue(op, vars).toString();
                                 } else if (vars[op] !== undefined) {
-                                    if (isStringConcat || typeof vars[op] === 'string') {
-                                        result += vars[op].toString();
-                                        isStringConcat = true;
-                                    } else {
-                                        result = (result === '' ? 0 : parseInt(result)) + vars[op];
-                                    }
+                                    result += vars[op].toString();
                                 } else if (op.startsWith('str(') && op.endsWith(')')) {
                                     const varName = op.substring(4, op.length - 1);
                                     if (vars[varName] !== undefined) {
                                         result += vars[varName].toString();
-                                        isStringConcat = true;
                                     }
                                 } else if (op.includes('.length')) {
                                     const varName = op.split('.')[0];
                                     if (vars[varName] !== undefined) {
-                                        if (isStringConcat) {
-                                            result += vars[varName].toString().length.toString();
-                                        } else {
-                                            result = (result === '' ? 0 : parseInt(result)) + vars[varName].toString().length;
-                                        }
-                                        isStringConcat = true;
+                                        result += vars[varName].toString().length.toString();
                                     }
                                 } else if (op.includes('.left(')) {
                                     const match = op.match(/(\w+)\.left\((\d+)\)/);
@@ -1065,7 +1249,6 @@ print("Correct!")`,
                                         const varName = match[1];
                                         const length = parseInt(match[2]);
                                         result += vars[varName].toString().substring(0, length);
-                                        isStringConcat = true;
                                     }
                                 } else if (op.includes('.right(')) {
                                     const match = op.match(/(\w+)\.right\((\d+)\)/);
@@ -1074,7 +1257,6 @@ print("Correct!")`,
                                         const length = parseInt(match[2]);
                                         const str = vars[varName].toString();
                                         result += str.substring(str.length - length);
-                                        isStringConcat = true;
                                     }
                                 } else if (op.includes('.substring(')) {
                                     const match = op.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
@@ -1083,144 +1265,18 @@ print("Correct!")`,
                                         const start = parseInt(match[2]);
                                         const length = parseInt(match[3]);
                                         result += vars[varName].toString().substring(start, start + length);
-                                        isStringConcat = true;
                                     }
                                 } else if (!isNaN(op)) {
-                                    if (isStringConcat) {
-                                        result += op;
-                                    } else {
-                                        result = (result === '' ? 0 : parseInt(result)) + parseInt(op);
-                                    }
+                                    result += op;
                                 }
                             });
                             
                             vars[varName] = result;
-                        } else if (value.includes('*')) {
-                            // Multiplication
-                            const operands = value.split('*').map(op => op.trim());
-                            let result = 1;
-                            
-                            operands.forEach(op => {
-                                if (getVariableValue(op, vars) !== undefined) {
-                                    result *= getVariableValue(op, vars);
-                                } else if (vars[op] !== undefined) {
-                                    result *= vars[op];
-                                } else if (!isNaN(op)) {
-                                    result *= parseInt(op);
-                                }
-                            });
-                            
-                            vars[varName] = result;
-                        } else if (value.includes('-')) {
-                            // Subtraction
-                            const operands = value.split('-').map(op => op.trim());
-                            let result = 0;
-                            
-                            operands.forEach((op, index) => {
-                                if (vars[op] !== undefined) {
-                                    if (index === 0) {
-                                        result = vars[op];
-                                    } else {
-                                        result -= vars[op];
-                                    }
-                                } else if (!isNaN(op)) {
-                                    if (index === 0) {
-                                        result = parseInt(op);
-                                    } else {
-                                        result -= parseInt(op);
-                                    }
-                                }
-                            });
-                            
-                            vars[varName] = result;
-                        } else if (value.includes('^')) {
-                            // Exponentiation (power)
-                            const operands = value.split('^').map(op => op.trim());
-                            let result = 1;
-                            
-                            operands.forEach((op, index) => {
-                                if (vars[op] !== undefined) {
-                                    if (index === 0) {
-                                        result = vars[op];
-                                    } else {
-                                        result = Math.pow(result, vars[op]);
-                                    }
-                                } else if (!isNaN(op)) {
-                                    if (index === 0) {
-                                        result = parseInt(op);
-                                    } else {
-                                        result = Math.pow(result, parseInt(op));
-                                    }
-                                }
-                            });
-                            
-                            vars[varName] = result;
-                        } else if (value.includes(' DIV ')) {
-                            // Integer division
-                            const operands = value.split(' DIV ').map(op => op.trim());
-                            let result = 0;
-                            
-                            operands.forEach((op, index) => {
-                                if (vars[op] !== undefined) {
-                                    if (index === 0) {
-                                        result = vars[op];
-                                    } else {
-                                        result = Math.floor(result / vars[op]);
-                                    }
-                                } else if (!isNaN(op)) {
-                                    if (index === 0) {
-                                        result = parseInt(op);
-                                    } else {
-                                        result = Math.floor(result / parseInt(op));
-                                    }
-                                }
-                            });
-                            
-                            vars[varName] = result;
-                        } else if (value.includes('/')) {
-                            // Regular division (keeping for backward compatibility)
-                            const operands = value.split('/').map(op => op.trim());
-                            let result = 0;
-                            
-                            operands.forEach((op, index) => {
-                                if (vars[op] !== undefined) {
-                                    if (index === 0) {
-                                        result = vars[op];
-                                    } else {
-                                        result = Math.floor(result / vars[op]); // Integer division for GCSE
-                                    }
-                                } else if (!isNaN(op)) {
-                                    if (index === 0) {
-                                        result = parseInt(op);
-                                    } else {
-                                        result = Math.floor(result / parseInt(op)); // Integer division for GCSE
-                                    }
-                                }
-                            });
-                            
-                            vars[varName] = result;
-                        } else if (value.includes(' MOD ')) {
-                            // Modulo (remainder) - GCSE standard
-                            const operands = value.split(' MOD ').map(op => op.trim());
-                            let result = 0;
-                            
-                            operands.forEach((op, index) => {
-                                if (vars[op] !== undefined) {
-                                    if (index === 0) {
-                                        result = vars[op];
-                                    } else {
-                                        result = result % vars[op];
-                                    }
-                                } else if (!isNaN(op)) {
-                                    if (index === 0) {
-                                        result = parseInt(op);
-                                    } else {
-                                        result = result % parseInt(op);
-                                    }
-                                }
-                            });
-                            
-                            vars[varName] = result;
+                        } else if (value.includes('+') || value.includes('-') || value.includes('*') || 
+                                  value.includes('/') || value.includes('^') || value.includes(' DIV ') || 
+                                  value.includes(' MOD ') || value.includes('(')) {
+                            // Arithmetic expression (including parentheses)
+                            vars[varName] = evaluateArithmeticExpression(value, vars);
                         } else if (vars[value] !== undefined) {
                             vars[varName] = vars[value];
                         }
