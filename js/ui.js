@@ -37,6 +37,16 @@ export class UI {
         document.getElementById('markBtn').addEventListener('click', () => {
             this.markAnswer();
         });
+
+        // Clear table button
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            this.clearTable();
+        });
+
+        // Shuffle inputs button
+        document.getElementById('shuffleBtn').addEventListener('click', () => {
+            this.shuffleInputs();
+        });
     }
 
     updateProgramTable() {
@@ -145,5 +155,34 @@ export class UI {
         }
         
         return result;
+    }
+
+    clearTable() {
+        // Clear all input fields in the trace table
+        const table = document.getElementById('traceTable');
+        const inputs = table.querySelectorAll('input');
+        
+        inputs.forEach(input => {
+            input.value = '';
+            // Remove any highlighting classes
+            input.classList.remove('correct', 'incorrect', 'partial');
+        });
+        
+        // Hide feedback
+        document.getElementById('feedback').style.display = 'none';
+    }
+
+    shuffleInputs() {
+        // Clear the table first
+        this.clearTable();
+        
+        // Only shuffle if we have a current program loaded
+        if (!this.currentProgram) {
+            alert('Please select a program first');
+            return;
+        }
+        
+        // Regenerate the same program with different inputs
+        this.generateSpecificProgram(this.currentDifficulty, this.currentProgramIndex);
     }
 }

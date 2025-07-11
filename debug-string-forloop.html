@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug String Methods in For Loop</title>
+</head>
+<body>
+    <h1>Debug String Methods in For Loop</h1>
+    <div id="output"></div>
+
+    <script type="module">
+        import { Interpreter } from './js/interpreter.js';
+        
+        const interpreter = new Interpreter();
+        const program = { 
+            inputs: ["hello", "upper", "world", "lower", "test", "upper"], 
+            randomValue: undefined 
+        };
+        
+        const code = `for x = 0 to 2
+    choice = input("Enter a word")
+    case = input("upper or lower")
+    if case == "upper" then
+        print(choice.upper)
+    else
+        print(choice.lower)
+    endif
+next x`;
+
+        console.log("Running string methods in for loop program");
+        console.log("Inputs:", program.inputs);
+        
+        const result = interpreter.executeProgram(code, program);
+        
+        console.log("Variables:", interpreter.variables);
+        console.log("Outputs:", interpreter.outputs);
+        console.log("Trace entries:");
+        interpreter.trace.forEach((entry, index) => {
+            console.log(`${index + 1}. Line ${entry.lineNumber}: Variables = ${JSON.stringify(entry.variables)}, Output = ${entry.output || 'none'}, Changed = ${JSON.stringify(entry.changedVariables)}`);
+        });
+        
+        console.log("Expected outputs: HELLO, world, TEST");
+        console.log("Expected trace pattern should include lines 2, 3, 5, 7 for each iteration");
+        
+        const outputDiv = document.getElementById('output');
+        outputDiv.innerHTML = `
+            <h2>String Methods For Loop Results</h2>
+            <p><strong>Variables:</strong> ${JSON.stringify(interpreter.variables)}</p>
+            <p><strong>Outputs:</strong> ${JSON.stringify(interpreter.outputs)}</p>
+            <p><strong>Expected Outputs:</strong> ["HELLO", "world", "TEST"]</p>
+            <p><strong>Trace Lines:</strong> ${interpreter.trace.map(t => t.lineNumber).join(', ')}</p>
+            <h3>Trace Details:</h3>
+            ${interpreter.trace.map((entry, index) => 
+                `<p>${index + 1}. Line ${entry.lineNumber}: Variables = ${JSON.stringify(entry.variables)}, Output = ${entry.output || 'none'}</p>`
+            ).join('')}
+        `;
+    </script>
+</body>
+</html>

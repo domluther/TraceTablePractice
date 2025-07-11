@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug For Loop</title>
+</head>
+<body>
+    <h1>Debug For Loop Program</h1>
+    <div id="output"></div>
+
+    <script type="module">
+        import { Interpreter } from './js/interpreter.js';
+        
+        const interpreter = new Interpreter();
+        const program = { inputs: [], randomValue: undefined };
+        
+        const code = `for x = 0 to 2
+    print(x*2)
+next x`;
+
+        console.log("Running for loop program");
+        
+        const result = interpreter.executeProgram(code, program);
+        
+        console.log("Variables:", interpreter.variables);
+        console.log("Outputs:", interpreter.outputs);
+        console.log("Trace entries:");
+        interpreter.trace.forEach((entry, index) => {
+            console.log(`${index + 1}. Line ${entry.lineNumber}: Variables = ${JSON.stringify(entry.variables)}, Output = ${entry.output || 'none'}, Changed = ${JSON.stringify(entry.changedVariables)}`);
+        });
+        
+        console.log("Expected trace pattern: Line 1 (x=0), Line 2 (print 0), Line 1 (x=1), Line 2 (print 2), Line 1 (x=2), Line 2 (print 4)");
+        console.log("Actual trace lines:", interpreter.trace.map(t => t.lineNumber));
+        
+        const outputDiv = document.getElementById('output');
+        outputDiv.innerHTML = `
+            <h2>For Loop Execution Results</h2>
+            <p><strong>Variables:</strong> ${JSON.stringify(interpreter.variables)}</p>
+            <p><strong>Outputs:</strong> ${JSON.stringify(interpreter.outputs)}</p>
+            <p><strong>Trace Lines:</strong> ${interpreter.trace.map(t => t.lineNumber).join(', ')}</p>
+            <p><strong>Expected:</strong> 1, 2, 1, 2, 1, 2</p>
+            <h3>Trace Details:</h3>
+            ${interpreter.trace.map((entry, index) => 
+                `<p>${index + 1}. Line ${entry.lineNumber}: Variables = ${JSON.stringify(entry.variables)}, Output = ${entry.output || 'none'}</p>`
+            ).join('')}
+        `;
+    </script>
+</body>
+</html>

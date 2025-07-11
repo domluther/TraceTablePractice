@@ -246,6 +246,9 @@ export class Interpreter {
                         if (vars[varName] !== undefined) {
                             result += vars[varName].toString();
                         }
+                    } else if (this.isArithmeticExpression(part)) {
+                        // Handle arithmetic expressions in print arguments
+                        result += this.evaluateArithmeticExpression(part, vars).toString();
                     }
                 });
                 output = result;
@@ -304,6 +307,53 @@ export class Interpreter {
                     }
                 });
                 output = result;
+            } else if (this.isArithmeticExpression(content)) {
+                // Handle arithmetic expressions like print(x*2)
+                output = this.evaluateArithmeticExpression(content, vars).toString();
+            } else if (content.includes('.upper')) {
+                // Handle string .upper method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().toUpperCase();
+                }
+            } else if (content.includes('.lower')) {
+                // Handle string .lower method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().toLowerCase();
+                }
+            } else if (content.includes('.length')) {
+                // Handle string .length method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().length.toString();
+                }
+            } else if (content.includes('.left(')) {
+                // Handle string .left() method
+                const match = content.match(/(\w+)\.left\((\d+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const length = parseInt(match[2]);
+                    output = vars[varName].toString().substring(0, length);
+                }
+            } else if (content.includes('.right(')) {
+                // Handle string .right() method
+                const match = content.match(/(\w+)\.right\((\d+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const length = parseInt(match[2]);
+                    const str = vars[varName].toString();
+                    output = str.substring(str.length - length);
+                }
+            } else if (content.includes('.substring(')) {
+                // Handle string .substring() method
+                const match = content.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const start = parseInt(match[2]);
+                    const length = parseInt(match[3]);
+                    output = vars[varName].toString().substring(start, start + length);
+                }
             } else if (vars[content] !== undefined) {
                 output = vars[content].toString();
             } else if (content.startsWith('str(') && content.endsWith(')')) {
@@ -936,7 +986,7 @@ export class Interpreter {
             
             // Execute the loop
             for (let loopVal = startVal; loopVal <= endVal; loopVal++) {
-                // Set the loop variable and trace the for line
+                // Set the loop variable - trace this as if it's an assignment on the for line
                 this.variables[loopVar] = loopVal;
                 const forLineChanges = {};
                 forLineChanges[loopVar] = loopVal;
@@ -946,9 +996,26 @@ export class Interpreter {
                 for (let bodyLine = i + 1; bodyLine < nextLineIndex; bodyLine++) {
                     const bodyLineCode = lines[bodyLine];
                     const bodyLineNum = bodyLine + 1;
-                    const result = this.executeStatement(bodyLineCode, bodyLineNum, this.variables);
-                    if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
-                        this.addTraceEntry(bodyLineNum, this.variables, result.output, result.changedVariables);
+                    
+                    // Check if this line is a nested control structure
+                    if (bodyLineCode.startsWith('if ') && bodyLineCode.includes(' then')) {
+                        // Handle nested if statement
+                        bodyLine = this.handleIfStatement(lines, bodyLine) - 1; // -1 because the for loop will increment
+                    } else if (bodyLineCode.startsWith('while ')) {
+                        // Handle nested while loop
+                        bodyLine = this.handleWhileLoop(lines, bodyLine) - 1;
+                    } else if (bodyLineCode === 'do') {
+                        // Handle nested do-until loop
+                        bodyLine = this.handleDoUntilLoop(lines, bodyLine) - 1;
+                    } else if (bodyLineCode.startsWith('for ') && bodyLineCode.includes(' to ')) {
+                        // Handle nested for loop
+                        bodyLine = this.handleForLoop(lines, bodyLine) - 1;
+                    } else {
+                        // Regular statement
+                        const result = this.executeStatement(bodyLineCode, bodyLineNum, this.variables);
+                        if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
+                            this.addTraceEntry(bodyLineNum, this.variables, result.output, result.changedVariables);
+                        }
                     }
                 }
             }

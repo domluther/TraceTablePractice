@@ -416,6 +416,90 @@
             assertEqual(executedLines.includes(5), false, 'Line 5 should NOT execute (yearGroup >= 10 is false)');
             assertEqual(executedLines.includes(7), true, 'Line 7 should execute (else branch print)');
         }
+
+        function testForLoopExecution() {
+            // Test the basic for loop with arithmetic expression in print statement
+            const testInterpreter = new Interpreter();
+            const testProgram = { inputs: [], randomValue: undefined };
+            
+            const result = testInterpreter.executeProgram(`
+                for x = 0 to 2
+                    print(x*2)
+                next x
+            `, testProgram);
+            
+            // Check variable values
+            assertEqual(testInterpreter.variables.x, 2, 'x should be 2 after loop completion');
+            
+            // Check outputs - should have 3 outputs: 0, 2, 4
+            assertEqual(testInterpreter.outputs.length, 3, 'Should have exactly 3 outputs');
+            assertEqual(testInterpreter.outputs[0], '0', 'First output should be "0"');
+            assertEqual(testInterpreter.outputs[1], '2', 'Second output should be "2"');
+            assertEqual(testInterpreter.outputs[2], '4', 'Third output should be "4"');
+            
+            // Check that the trace table has the correct alternating pattern
+            // Expected: Line 1 (x=0), Line 2 (print 0), Line 1 (x=1), Line 2 (print 2), Line 1 (x=2), Line 2 (print 4)
+            const executedLines = testInterpreter.trace.map(entry => entry.lineNumber);
+            
+            assertEqual(executedLines.length, 6, 'Should have exactly 6 trace entries');
+            assertEqual(executedLines[0], 1, 'First trace should be line 1 (x=0)');
+            assertEqual(executedLines[1], 2, 'Second trace should be line 2 (print 0)');
+            assertEqual(executedLines[2], 1, 'Third trace should be line 1 (x=1)');
+            assertEqual(executedLines[3], 2, 'Fourth trace should be line 2 (print 2)');
+            assertEqual(executedLines[4], 1, 'Fifth trace should be line 1 (x=2)');
+            assertEqual(executedLines[5], 2, 'Sixth trace should be line 2 (print 4)');
+            
+            // Check variable changes in trace entries
+            assertEqual(testInterpreter.trace[0].changedVariables.x, 0, 'First trace should change x to 0');
+            assertEqual(testInterpreter.trace[2].changedVariables.x, 1, 'Third trace should change x to 1');
+            assertEqual(testInterpreter.trace[4].changedVariables.x, 2, 'Fifth trace should change x to 2');
+            
+            // Check outputs in trace entries
+            assertEqual(testInterpreter.trace[1].output, '0', 'Second trace should have output "0"');
+            assertEqual(testInterpreter.trace[3].output, '2', 'Fourth trace should have output "2"');
+            assertEqual(testInterpreter.trace[5].output, '4', 'Sixth trace should have output "4"');
+        }
+
+        function testStringMethodsInPrint() {
+            // Test string methods directly in print statements
+            const testInterpreter = new Interpreter();
+            const testProgram = { inputs: ["hello", "WORLD"], randomValue: undefined };
+            
+            const result = testInterpreter.executeProgram(`
+                name = input("Enter name")
+                city = input("Enter city")
+                print(name.upper)
+                print(city.lower)
+                print(name.length)
+            `, testProgram);
+            
+            // Check variable values
+            assertEqual(testInterpreter.variables.name, 'hello', 'name should be "hello"');
+            assertEqual(testInterpreter.variables.city, 'WORLD', 'city should be "WORLD"');
+            
+            // Check outputs
+            assertEqual(testInterpreter.outputs.length, 3, 'Should have exactly 3 outputs');
+            assertEqual(testInterpreter.outputs[0], 'HELLO', 'First output should be "HELLO"');
+            assertEqual(testInterpreter.outputs[1], 'world', 'Second output should be "world"');
+            assertEqual(testInterpreter.outputs[2], '5', 'Third output should be "5"');
+            
+            // Check trace entries - should trace input assignments and print statements
+            const executedLines = testInterpreter.trace.map(entry => entry.lineNumber);
+            assertEqual(executedLines.includes(1), true, 'Line 1 should be traced (name input)');
+            assertEqual(executedLines.includes(2), true, 'Line 2 should be traced (city input)');
+            assertEqual(executedLines.includes(3), true, 'Line 3 should be traced (print name.upper)');
+            assertEqual(executedLines.includes(4), true, 'Line 4 should be traced (print city.lower)');
+            assertEqual(executedLines.includes(5), true, 'Line 5 should be traced (print name.length)');
+            
+            // Verify the outputs in trace entries
+            const line3Trace = testInterpreter.trace.find(entry => entry.lineNumber === 3);
+            const line4Trace = testInterpreter.trace.find(entry => entry.lineNumber === 4);
+            const line5Trace = testInterpreter.trace.find(entry => entry.lineNumber === 5);
+            
+            assertEqual(line3Trace.output, 'HELLO', 'Line 3 trace should have output "HELLO"');
+            assertEqual(line4Trace.output, 'world', 'Line 4 trace should have output "world"');
+            assertEqual(line5Trace.output, '5', 'Line 5 trace should have output "5"');
+        }
         
         function runAllTests() {
             // Reset test results
@@ -435,6 +519,8 @@
             testDuckGrouping();
             testTypeConversions();
             testNestedConditionalExecution();
+            testForLoopExecution();
+            testStringMethodsInPrint();
             
             // Display results
             displayTestResults();
@@ -457,7 +543,9 @@
                 'String Integration': ['Numeric Operation with String Variables Present', 'Addition with String Variables Present'],
                 'Duck Grouping': ['Duck Grouping DIV (15 DIV 4 = 3)', 'Duck Grouping MOD (15 MOD 4 = 3)', 'Duck Grouping DIV (22 DIV 4 = 5)', 'Duck Grouping MOD (22 MOD 4 = 2)', 'Duck Grouping DIV (8 DIV 4 = 2)', 'Duck Grouping MOD (8 MOD 4 = 0)', 'Duck Grouping DIV (7 DIV 4 = 1)', 'Duck Grouping MOD (7 MOD 4 = 3)'],
                 'Type Conversions': ['float(input()) should convert "3.14" to 3.14', 'real(input()) should convert "3.14" to 3.14', 'jumpLength should be 3.1 as float', 'yearGroup should be 11 as float', 'Comparison 3.1 > 2 should be true'],
-                'Nested Conditionals': ['jumpLength should be 2.2', 'yearGroup should be 8', 'Should have exactly 1 output', 'Should print "You are too young" for yearGroup=8', 'Line 1 should execute (jumpLength assignment)', 'Line 2 should execute (yearGroup assignment)', 'Line 3 should NOT execute (if condition not traced)', 'Line 4 should NOT execute (if condition not traced)', 'Line 5 should NOT execute (yearGroup >= 10 is false)', 'Line 7 should execute (else branch print)']
+                'Nested Conditionals': ['jumpLength should be 2.2', 'yearGroup should be 8', 'Should have exactly 1 output', 'Should print "You are too young" for yearGroup=8', 'Line 1 should execute (jumpLength assignment)', 'Line 2 should execute (yearGroup assignment)', 'Line 3 should NOT execute (if condition not traced)', 'Line 4 should NOT execute (if condition not traced)', 'Line 5 should NOT execute (yearGroup >= 10 is false)', 'Line 7 should execute (else branch print)'],
+                'For Loop Execution': ['x should be 2 after loop completion', 'Should have exactly 3 outputs', 'First output should be "0"', 'Second output should be "2"', 'Third output should be "4"', 'Should have exactly 6 trace entries', 'First trace should be line 1 (x=0)', 'Second trace should be line 2 (print 0)', 'Third trace should be line 1 (x=1)', 'Fourth trace should be line 2 (print 2)', 'Fifth trace should be line 1 (x=2)', 'Sixth trace should be line 2 (print 4)', 'First trace should change x to 0', 'Third trace should change x to 1', 'Fifth trace should change x to 2', 'Second trace should have output "0"', 'Fourth trace should have output "2"', 'Sixth trace should have output "4"'],
+                'String Methods in Print': ['name should be "hello"', 'city should be "WORLD"', 'Should have exactly 3 outputs', 'First output should be "HELLO"', 'Second output should be "world"', 'Third output should be "5"', 'Line 1 should be traced (name input)', 'Line 2 should be traced (city input)', 'Line 3 should be traced (print name.upper)', 'Line 4 should be traced (print city.lower)', 'Line 5 should be traced (print name.length)', 'Line 3 trace should have output "HELLO"', 'Line 4 trace should have output "world"', 'Line 5 trace should have output "5"']
             };
             
             let html = '';
