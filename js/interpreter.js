@@ -402,6 +402,20 @@ export class Interpreter {
                         changeRecord[varName] = vars[varName];
                     }
                 }
+            } else if (value.startsWith('str(') && value.endsWith(')')) {
+                // str() function - convert to string
+                const inner = value.substring(4, value.length - 1).trim();
+                const oldValue = vars[varName];
+                if (vars[inner] !== undefined) {
+                    vars[varName] = vars[inner].toString();
+                } else if (!isNaN(inner)) {
+                    vars[varName] = inner.toString();
+                } else {
+                    vars[varName] = inner.toString();
+                }
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (vars[value] !== undefined) {
                 // Variable assignment
                 const oldValue = vars[varName];
@@ -744,10 +758,11 @@ export class Interpreter {
         }
 
         isArithmeticExpression(value) {
-            // Don't treat string methods as arithmetic expressions
+            // Don't treat string methods or str() function as arithmetic expressions
             if (value.includes('.substring(') || value.includes('.left(') || 
                 value.includes('.right(') || value.includes('.upper') || 
-                value.includes('.lower') || value.includes('.length')) {
+                value.includes('.lower') || value.includes('.length') ||
+                value.startsWith('str(')) {
                 return false;
             }
             
@@ -1396,6 +1411,9 @@ export class Interpreter {
                     if (bodyLineCode.startsWith('if ') && bodyLineCode.includes(' then')) {
                         // Handle nested if statement
                         bodyLine = this.handleIfStatement(lines, bodyLine) - 1; // -1 because the for loop will increment
+                    } else if (bodyLineCode.startsWith('switch ')) {
+                        // Handle nested switch statement
+                        bodyLine = this.handleSwitchStatement(lines, bodyLine) - 1;
                     } else if (bodyLineCode.startsWith('while ')) {
                         // Handle nested while loop
                         bodyLine = this.handleWhileLoop(lines, bodyLine) - 1;
