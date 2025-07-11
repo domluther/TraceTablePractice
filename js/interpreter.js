@@ -246,6 +246,27 @@ export class Interpreter {
                 // Arithmetic expression
                 vars[varName] = this.evaluateArithmeticExpression(value, vars);
                 changeRecord[varName] = vars[varName];
+            } else if (value.includes('.length')) {
+                // String length property access
+                const sourceVar = value.split('.')[0];
+                if (vars[sourceVar] !== undefined) {
+                    vars[varName] = vars[sourceVar].toString().length;
+                    changeRecord[varName] = vars[varName];
+                }
+            } else if (value.includes('.upper')) {
+                // String upper method
+                const sourceVar = value.split('.')[0];
+                if (vars[sourceVar] !== undefined) {
+                    vars[varName] = vars[sourceVar].toString().toUpperCase();
+                    changeRecord[varName] = vars[varName];
+                }
+            } else if (value.includes('.lower')) {
+                // String lower method
+                const sourceVar = value.split('.')[0];
+                if (vars[sourceVar] !== undefined) {
+                    vars[varName] = vars[sourceVar].toString().toLowerCase();
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (vars[value] !== undefined) {
                 // Variable assignment
                 vars[varName] = vars[value];
@@ -263,8 +284,9 @@ export class Interpreter {
             const content = line.substring(6, line.length - 1);
             if (content.startsWith('"') && content.endsWith('"')) {
                 output = content.slice(1, -1);
-            } else if (content.includes(',')) {
+            } else if (content.includes(',') && !content.includes('.substring(') && !content.includes('.left(') && !content.includes('.right(')) {
                 // Handle comma-separated arguments like print("The score is", score)
+                // But NOT method calls that contain commas like substring(x, 1)
                 const parts = content.split(',').map(p => p.trim());
                 let result = '';
                 parts.forEach((part, index) => {
@@ -285,6 +307,71 @@ export class Interpreter {
                     }
                 });
                 output = result;
+            } else if (content.includes('.substring(')) {
+                // Handle string .substring() method FIRST before other checks
+                const match = content.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const startParam = match[2].trim();
+                    const lengthParam = match[3].trim();
+                    
+                    // Parse start parameter (could be variable or literal)
+                    let start;
+                    if (vars[startParam] !== undefined) {
+                        start = parseInt(vars[startParam]); // Use 0-based indexing
+                    } else if (!isNaN(startParam)) {
+                        start = parseInt(startParam); // Use 0-based indexing
+                    } else {
+                        start = 0; // fallback
+                    }
+                    
+                    // Parse length parameter (could be variable or literal)
+                    let length;
+                    if (vars[lengthParam] !== undefined) {
+                        length = parseInt(vars[lengthParam]);
+                    } else if (!isNaN(lengthParam)) {
+                        length = parseInt(lengthParam);
+                    } else {
+                        length = 1; // fallback
+                    }
+                    
+                    output = vars[varName].toString().substring(start, start + length);
+                }
+            } else if (content.includes('.left(')) {
+                // Handle string .left() method
+                const match = content.match(/(\w+)\.left\((\d+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const length = parseInt(match[2]);
+                    output = vars[varName].toString().substring(0, length);
+                }
+            } else if (content.includes('.right(')) {
+                // Handle string .right() method
+                const match = content.match(/(\w+)\.right\((\d+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const length = parseInt(match[2]);
+                    const str = vars[varName].toString();
+                    output = str.substring(str.length - length);
+                }
+            } else if (content.includes('.upper')) {
+                // Handle string .upper method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().toUpperCase();
+                }
+            } else if (content.includes('.lower')) {
+                // Handle string .lower method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().toLowerCase();
+                }
+            } else if (content.includes('.length')) {
+                // Handle string .length method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().length.toString();
+                }
             } else if (content.includes('+')) {
                 // String concatenation or complex expression
                 const parts = content.split('+').map(p => p.trim());
@@ -362,73 +449,8 @@ export class Interpreter {
                 });
                 output = result;
             } else if (this.isArithmeticExpression(content)) {
-                // Handle arithmetic expressions like print(x*2)
+                // Handle arithmetic expressions like print(x*2) - AFTER checking for string methods
                 output = this.evaluateArithmeticExpression(content, vars).toString();
-            } else if (content.includes('.upper')) {
-                // Handle string .upper method
-                const varName = content.split('.')[0];
-                if (vars[varName] !== undefined) {
-                    output = vars[varName].toString().toUpperCase();
-                }
-            } else if (content.includes('.lower')) {
-                // Handle string .lower method
-                const varName = content.split('.')[0];
-                if (vars[varName] !== undefined) {
-                    output = vars[varName].toString().toLowerCase();
-                }
-            } else if (content.includes('.length')) {
-                // Handle string .length method
-                const varName = content.split('.')[0];
-                if (vars[varName] !== undefined) {
-                    output = vars[varName].toString().length.toString();
-                }
-            } else if (content.includes('.left(')) {
-                // Handle string .left() method
-                const match = content.match(/(\w+)\.left\((\d+)\)/);
-                if (match && vars[match[1]] !== undefined) {
-                    const varName = match[1];
-                    const length = parseInt(match[2]);
-                    output = vars[varName].toString().substring(0, length);
-                }
-            } else if (content.includes('.right(')) {
-                // Handle string .right() method
-                const match = content.match(/(\w+)\.right\((\d+)\)/);
-                if (match && vars[match[1]] !== undefined) {
-                    const varName = match[1];
-                    const length = parseInt(match[2]);
-                    const str = vars[varName].toString();
-                    output = str.substring(str.length - length);
-                }
-            } else if (content.includes('.substring(')) {
-                // Handle string .substring() method
-                const match = content.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
-                if (match && vars[match[1]] !== undefined) {
-                    const varName = match[1];
-                    const startParam = match[2].trim();
-                    const lengthParam = match[3].trim();
-                    
-                    // Parse start parameter (could be variable or literal)
-                    let start;
-                    if (vars[startParam] !== undefined) {
-                        start = parseInt(vars[startParam]); // Use 0-based indexing
-                    } else if (!isNaN(startParam)) {
-                        start = parseInt(startParam); // Use 0-based indexing
-                    } else {
-                        start = 0; // fallback
-                    }
-                    
-                    // Parse length parameter (could be variable or literal)
-                    let length;
-                    if (vars[lengthParam] !== undefined) {
-                        length = parseInt(vars[lengthParam]);
-                    } else if (!isNaN(lengthParam)) {
-                        length = parseInt(lengthParam);
-                    } else {
-                        length = 1; // fallback
-                    }
-                    
-                    output = vars[varName].toString().substring(start, start + length);
-                }
             } else if (vars[content] !== undefined) {
                 output = vars[content].toString();
             } else if (content.startsWith('str(') && content.endsWith(')')) {
@@ -480,6 +502,13 @@ export class Interpreter {
     }
 
     isArithmeticExpression(value) {
+        // Don't treat string methods as arithmetic expressions
+        if (value.includes('.substring(') || value.includes('.left(') || 
+            value.includes('.right(') || value.includes('.upper') || 
+            value.includes('.lower') || value.includes('.length')) {
+            return false;
+        }
+        
         // Check if the expression contains arithmetic operators
         return value.includes('+') || value.includes('-') || value.includes('*') || 
                value.includes('/') || value.includes('MOD') || value.includes('DIV') ||
@@ -538,6 +567,24 @@ export class Interpreter {
                     }
                     
                     result += vars[sourceVar].toString().substring(start, start + length);
+                }
+            } else if (part.includes('.upper')) {
+                // Handle string .upper method
+                const varName = part.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    result += vars[varName].toString().toUpperCase();
+                }
+            } else if (part.includes('.lower')) {
+                // Handle string .lower method
+                const varName = part.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    result += vars[varName].toString().toLowerCase();
+                }
+            } else if (part.includes('.length')) {
+                // Handle string .length method
+                const varName = part.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    result += vars[varName].toString().length.toString();
                 }
             } else if (part === '""') {
                 result += '';

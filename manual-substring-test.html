@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual Substring Test</title>
+</head>
+<body>
+    <h2>Manual JavaScript Substring Test</h2>
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function log(message) {
+            console.log(message);
+            const div = document.createElement('div');
+            div.textContent = message;
+            div.style.margin = '5px 0';
+            div.style.fontFamily = 'monospace';
+            results.appendChild(div);
+        }
+
+        const testString = "France";
+        log(`Test string: "${testString}"`);
+        
+        // Test what JavaScript substring returns
+        log(`substring(1, 2): "${testString.substring(1, 2)}"`);
+        log(`substring(2, 3): "${testString.substring(2, 3)}"`);
+        log(`substring(3, 4): "${testString.substring(3, 4)}"`);
+        
+        // Test with the exact parameters from our test
+        for (let x = 1; x <= 3; x++) {
+            const result = testString.substring(x, x + 1);
+            log(`x=${x}: substring(${x}, ${x + 1}) = "${result}"`);
+        }
+        
+        // Test if empty string is truthy
+        log(`Empty string is truthy: ${!!""}`);
+        log(`"r" is truthy: ${!!"r"}`);
+    </script>
+</body>
+</html>

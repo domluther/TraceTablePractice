@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Substring Fix Verification</title>
+</head>
+<body>
+    <h2>Verifying Substring Fix</h2>
+    <div id="results"></div>
+
+    <script type="module">
+        import { Interpreter } from './js/interpreter.js';
+
+        const interpreter = new Interpreter();
+        const results = document.getElementById('results');
+
+        function addResult(testName, success, details) {
+            const div = document.createElement('div');
+            div.innerHTML = `<strong>${success ? '✅' : '❌'} ${testName}:</strong> ${details}`;
+            div.style.margin = '10px 0';
+            div.style.padding = '5px';
+            div.style.backgroundColor = success ? '#d4edda' : '#f8d7da';
+            div.style.border = `1px solid ${success ? '#c3e6cb' : '#f5c6cb'}`;
+            div.style.borderRadius = '4px';
+            results.appendChild(div);
+        }
+
+        // Test 1: Assignment (should still work)
+        try {
+            const result1 = interpreter.execute(`x=1
+country = "France"
+character = country.substring(x, 2)`);
+            const hasCharacter = result1.trace.some(entry => entry.variables.character !== undefined);
+            addResult("Substring Assignment", hasCharacter, `character variable created: ${hasCharacter ? result1.trace[result1.trace.length - 1].variables.character : 'not found'}`);
+        } catch (e) {
+            addResult("Substring Assignment", false, `Error: ${e.message}`);
+        }
+
+        // Test 2: Print statement (should now work)
+        try {
+            const result2 = interpreter.execute(`x=1
+country = "France"
+print(country.substring(x, 2))`);
+            const hasOutput = result2.outputs.length > 0;
+            addResult("Substring in Print", hasOutput, `Output: "${result2.outputs[0] || 'none'}"`);
+        } catch (e) {
+            addResult("Substring in Print", false, `Error: ${e.message}`);
+        }
+
+        // Test 3: For loop with substring print (the original problem)
+        try {
+            const result3 = interpreter.execute(`for x = 1 to 3
+    country = "France"
+    print(country.substring(x, 1))
+next x`);
+            const hasExpectedOutputs = result3.outputs.length === 3;
+            addResult("For Loop with Substring Print", hasExpectedOutputs, `Outputs: [${result3.outputs.join(', ')}] (expected 3 outputs)`);
+        } catch (e) {
+            addResult("For Loop with Substring Print", false, `Error: ${e.message}`);
+        }
+
+        // Test 4: Different string methods still work
+        try {
+            const result4 = interpreter.execute(`country = "France"
+print(country.upper)`);
+            const hasUpperOutput = result4.outputs.length > 0 && result4.outputs[0] === 'FRANCE';
+            addResult("Other String Methods", hasUpperOutput, `Output: "${result4.outputs[0] || 'none'}"`);
+        } catch (e) {
+            addResult("Other String Methods", false, `Error: ${e.message}`);
+        }
+
+        // Test 5: Arithmetic expressions still work
+        try {
+            const result5 = interpreter.execute(`x = 5
+print(x * 2)`);
+            const hasArithOutput = result5.outputs.length > 0 && result5.outputs[0] === '10';
+            addResult("Arithmetic Expressions", hasArithOutput, `Output: "${result5.outputs[0] || 'none'}"`);
+        } catch (e) {
+            addResult("Arithmetic Expressions", false, `Error: ${e.message}`);
+        }
+    </script>
+</body>
+</html>

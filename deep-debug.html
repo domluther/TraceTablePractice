@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deep Substring Debug</title>
+</head>
+<body>
+    <h2>Deep Debug: Where is the "0" coming from?</h2>
+    <div id="results"></div>
+
+    <script type="module">
+        import { Interpreter } from './js/interpreter.js';
+
+        const interpreter = new Interpreter();
+        const results = document.getElementById('results');
+
+        function log(message) {
+            console.log(message);
+            const div = document.createElement('div');
+            div.textContent = message;
+            div.style.margin = '5px 0';
+            div.style.fontFamily = 'monospace';
+            results.appendChild(div);
+        }
+
+        // Override the executeStatement method to trace exactly what's happening
+        const originalExecuteStatement = interpreter.executeStatement;
+        interpreter.executeStatement = function(line, lineNum, vars) {
+            if (line.includes('substring')) {
+                log(`\n=== DEBUGGING LINE ${lineNum}: "${line}" ===`);
+                log(`Variables at start: ${JSON.stringify(vars)}`);
+                
+                // Step through the substring logic manually
+                const content = line.substring(6, line.length - 1); // Remove print( and )
+                log(`Print content: "${content}"`);
+                log(`content.includes('.substring('): ${content.includes('.substring(')}`);
+                
+                if (content.includes('.substring(')) {
+                    const match = content.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
+                    log(`Regex match: ${JSON.stringify(match)}`);
+                    
+                    if (match && vars[match[1]] !== undefined) {
+                        const varName = match[1];
+                        const startParam = match[2].trim();
+                        const lengthParam = match[3].trim();
+                        
+                        log(`  varName: ${varName}`);
+                        log(`  startParam: ${startParam}`);
+                        log(`  lengthParam: ${lengthParam}`);
+                        log(`  vars[${varName}]: "${vars[varName]}"`);
+                        log(`  vars[${startParam}]: ${vars[startParam]}`);
+                        
+                        // Parse start parameter
+                        let start;
+                        if (vars[startParam] !== undefined) {
+                            start = parseInt(vars[startParam]);
+                            log(`  start from variable: ${start}`);
+                        } else if (!isNaN(startParam)) {
+                            start = parseInt(startParam);
+                            log(`  start from literal: ${start}`);
+                        } else {
+                            start = 0;
+                            log(`  start fallback: ${start}`);
+                        }
+                        
+                        // Parse length parameter
+                        let length;
+                        if (vars[lengthParam] !== undefined) {
+                            length = parseInt(vars[lengthParam]);
+                            log(`  length from variable: ${length}`);
+                        } else if (!isNaN(lengthParam)) {
+                            length = parseInt(lengthParam);
+                            log(`  length from literal: ${length}`);
+                        } else {
+                            length = 1;
+                            log(`  length fallback: ${length}`);
+                        }
+                        
+                        const str = vars[varName].toString();
+                        const substringResult = str.substring(start, start + length);
+                        log(`  "${str}".substring(${start}, ${start + length}) = "${substringResult}"`);
+                        log(`  substringResult type: ${typeof substringResult}`);
+                        log(`  substringResult truthy: ${!!substringResult}`);
+                    }
+                }
+                
+                // Call the original method
+                const result = originalExecuteStatement.call(this, line, lineNum, vars);
+                
+                log(`Result output: "${result.output}"`);
+                log(`Result output type: ${typeof result.output}`);
+                log(`Result shouldTrace: ${result.shouldTrace}`);
+                log(`Result changedVariables: ${JSON.stringify(result.changedVariables)}`);
+                
+                return result;
+            } else {
+                return originalExecuteStatement.call(this, line, lineNum, vars);
+            }
+        };
+
+        // Test the exact failing scenario
+        log("=== Testing Exact Unit Test Scenario ===");
+        
+        try {
+            const result = interpreter.executeProgram(`
+                for x = 1 to 3
+                    country = "France"
+                    print(country.substring(x, 1))
+                next x
+            `, { inputs: [], randomValue: undefined });
+            
+            log(`\nFinal outputs: [${result.outputs.join(', ')}]`);
+            log(`Expected: [r, a, n]`);
+            
+            // Check trace entries for line 3 (the print statement)
+            const line3Traces = result.trace.filter(entry => entry.lineNumber === 3);
+            log(`\nLine 3 trace entries: ${line3Traces.length}`);
+            line3Traces.forEach((entry, index) => {
+                log(`  Trace ${index + 1}: output="${entry.output}", vars=${JSON.stringify(entry.variables)}`);
+            });
+            
+        } catch (e) {
+            log(`❌ Error: ${e.message}`);
+        }
+
+        // Test manual substring execution
+        log("\n=== Manual Substring Test ===");
+        try {
+            const testVars = { country: "France", x: 1 };
+            const testLine = 'print(country.substring(x, 1))';
+            
+            log(`Testing: ${testLine}`);
+            log(`Variables: ${JSON.stringify(testVars)}`);
+            
+            const manualResult = interpreter.executeStatement(testLine, 999, testVars);
+            log(`Manual result: output="${manualResult.output}"`);
+            
+        } catch (e) {
+            log(`❌ Manual test error: ${e.message}`);
+        }
+    </script>
+</body>
+</html>

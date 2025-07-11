@@ -297,7 +297,7 @@ next x`,
         {
             code: `x=1
 country = "France"
-character = country.substring(x, 2)`,
+print(country.substring(x, 2))`,
             description: "Substring"
         },
         {
@@ -342,10 +342,10 @@ next x`,
             code: `for x = 1 to 3
     country = "United Kingdom"     
     num = int(input("Enter a number"))
-    letter = country[num]
-    print(country[x] + letter)
+    letter = country.substring(num, 1)
+    print(letter)
 next x`,
-            description: "For loop with string indexing",
+            description: "For loop with substring indexing",
             inputSets: [
                 ["2", "5", "8"],
                 ["0", "7", "3"],

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Substring Print Debug Test</title>
+</head>
+<body>
+    <h2>Testing Substring in Print Statements</h2>
+    <div id="results"></div>
+
+    <script type="module">
+        import { Interpreter } from './js/interpreter.js';
+
+        const interpreter = new Interpreter();
+        const results = document.getElementById('results');
+
+        // Test 1: Substring in assignment (should work)
+        console.log("=== Test 1: Substring in assignment ===");
+        try {
+            const result1 = interpreter.execute(`x=1
+country = "France"
+character = country.substring(x, 2)`);
+            console.log("✅ Assignment test passed");
+            console.log("Variables:", result1.variables);
+            console.log("Trace:", result1.trace);
+        } catch (e) {
+            console.log("❌ Assignment test failed:", e.message);
+        }
+
+        // Test 2: Substring in print statement (problematic)
+        console.log("\n=== Test 2: Substring in print statement ===");
+        try {
+            const result2 = interpreter.execute(`x=1
+country = "France"
+print(country.substring(x, 2))`);
+            console.log("✅ Print test passed");
+            console.log("Variables:", result2.variables);
+            console.log("Outputs:", result2.outputs);
+            console.log("Trace:", result2.trace);
+        } catch (e) {
+            console.log("❌ Print test failed:", e.message);
+        }
+
+        // Test the individual methods
+        console.log("\n=== Debug: Testing method checks ===");
+        const testContent = "country.substring(x, 2)";
+        const testVars = { x: 1, country: "France" };
+        
+        console.log("Content:", testContent);
+        console.log("isStringConcatenation:", interpreter.isStringConcatenation(testContent, testVars));
+        console.log("isArithmeticExpression:", interpreter.isArithmeticExpression(testContent));
+        console.log("includes .substring(:", testContent.includes('.substring('));
+    </script>
+</body>
+</html>
