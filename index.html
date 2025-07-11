@@ -482,6 +482,84 @@ print("You got " + str(total))`,
                         ["65", "70"],
                         ["95", "92"]
                     ]
+                },
+                {
+                    code: `price = int(input("Enter price"))
+discount = price / 10
+final_price = price - discount
+print("Original: " + str(price))
+print("Final: " + str(final_price))`,
+                    description: "Calculate 10% discount",
+                    inputSets: [
+                        ["50"],
+                        ["100"],
+                        ["80"],
+                        ["120"]
+                    ]
+                },
+                {
+                    code: `length = int(input("Length"))
+width = int(input("Width"))
+area = length * width
+perimeter = 2 * (length + width)
+print("Area: " + str(area))
+print("Perimeter: " + str(perimeter))`,
+                    description: "Rectangle calculations",
+                    inputSets: [
+                        ["5", "3"],
+                        ["10", "8"],
+                        ["12", "4"],
+                        ["7", "6"]
+                    ]
+                },
+                {
+                    code: `temperature = int(input("Temperature in Celsius"))
+if temperature > 25 then
+    print("It's warm today")
+else
+    print("It's cool today")
+endif
+print(str(temperature) + " degrees C")`,
+                    description: "Temperature feedback with condition",
+                    inputSets: [
+                        ["30"],
+                        ["20"],
+                        ["15"],
+                        ["28"]
+                    ]
+                },
+                {
+                    code: `hours = int(input("Hours worked"))
+rate = 10
+pay = hours * rate
+if hours > 40 then
+    bonus = 50
+    pay = pay + bonus
+    print("Bonus earned!")
+endif
+print("Total pay: " + str(pay))`,
+                    description: "Pay calculator with bonus",
+                    inputSets: [
+                        ["35"],
+                        ["45"],
+                        ["40"],
+                        ["50"]
+                    ]
+                },
+                {
+                    code: `first_name = input("First name")
+last_name = input("Last name")
+full_name = first_name + " " + last_name
+initials = first_name.left(1) + last_name.left(1)
+print("Full name: " + full_name)
+print("Initials: " + initials)`,
+                    description: "Name processing with string methods",
+                    inputSets: [
+                        ["John", "Smith"],
+                        ["Emma", "Jones"],
+                        ["Alex", "Brown"],
+                        ["Sarah", "Wilson"]
+                    ]
                 }
             ],
             medium: [
@@ -701,9 +779,9 @@ next x`,
                     description: "For loop with operator selection",
                     inputSets: [
                         ["10", "%", "15", "*", "8", "%", "20", "*"],
-                        ["12", "*", "9", "%", "14", "*", "7", "%"],
-                        ["16", "%", "11", "*", "6", "%", "18", "*"],
-                        ["13", "*", "17", "%", "5", "*", "22", "%"]
+                        ["12", "*", "8", "%", "14", "*", "6", "%"],
+                        ["16", "%", "10", "*", "6", "%", "15", "*"],
+                        ["14", "*", "16", "%", "5", "*", "20", "%"]
                     ]
                 }
             ],
@@ -720,18 +798,6 @@ for i = 0 to 2
 next i
 print("Average: " + str(total / 3))`,
                     description: "Array processing"
-                },
-                {
-                    code: `function factorial(n)
-    if n <= 1
-        return 1
-    else
-        return n * factorial(n - 1)
-    endif
-endfunction
-result = factorial(4)
-print("4! = " + str(result))`,
-                    description: "Recursive function"
                 },
                 {
                     code: `do
@@ -827,16 +893,69 @@ print("Correct!")`,
                 });
             }
             
+            function getVariableValue(operand, vars) {
+                // Helper function to get value from variable or array access
+                if (operand.includes('[') && operand.includes(']')) {
+                    // Array access like nums[i]
+                    const arrayMatch = operand.match(/(\w+)\[(\w+)\]/);
+                    if (arrayMatch) {
+                        const arrayName = arrayMatch[1];
+                        const indexVar = arrayMatch[2];
+                        
+                        if (vars[arrayName] && Array.isArray(vars[arrayName]) && vars[indexVar] !== undefined) {
+                            const index = parseInt(vars[indexVar]);
+                            if (index >= 0 && index < vars[arrayName].length) {
+                                return vars[arrayName][index];
+                            }
+                        }
+                    }
+                    return undefined;
+                } else {
+                    return vars[operand];
+                }
+            }
+            
             function executeStatement(line, lineNum, vars) {
                 let output = '';
+                let shouldTrace = true; // Flag to determine if this line should be traced
                 
-                if (line.includes('=') && !line.includes('==') && !line.includes('!=') && !line.includes('<=') && !line.includes('>=')) {
+                if (line.startsWith('array ')) {
+                    // Array declaration like "array nums[3]"
+                    const match = line.match(/array\s+(\w+)\[(\d+)\]/);
+                    if (match) {
+                        const arrayName = match[1];
+                        const arraySize = parseInt(match[2]);
+                        // Initialize array with undefined values
+                        vars[arrayName] = new Array(arraySize);
+                        for (let i = 0; i < arraySize; i++) {
+                            vars[arrayName][i] = undefined;
+                        }
+                        shouldTrace = false; // Don't trace array declarations
+                    }
+                } else if (line.includes('=') && !line.includes('==') && !line.includes('!=') && !line.includes('<=') && !line.includes('>=')) {
                     // Assignment
                     const parts = line.split('=');
                     const varName = parts[0].trim();
                     const value = parts[1].trim();
                     
-                    if (value.startsWith('input(')) {
+                    // Check if this is an array element assignment like "nums[0] = 10"
+                    if (varName.includes('[') && varName.includes(']')) {
+                        const arrayMatch = varName.match(/(\w+)\[(\d+)\]/);
+                        if (arrayMatch) {
+                            const arrayName = arrayMatch[1];
+                            const index = parseInt(arrayMatch[2]);
+                            
+                            if (vars[arrayName] && Array.isArray(vars[arrayName])) {
+                                if (!isNaN(value)) {
+                                    vars[arrayName][index] = parseInt(value);
+                                } else if (value.startsWith('"') && value.endsWith('"')) {
+                                    vars[arrayName][index] = value.slice(1, -1);
+                                } else if (vars[value] !== undefined) {
+                                    vars[arrayName][index] = vars[value];
+                                }
+                            }
+                        }
+                    } else if (value.startsWith('input(')) {
                         // Input statement - use predefined input value
                         if (inputIndex < inputs.length) {
                             vars[varName] = inputs[inputIndex];
@@ -868,6 +987,34 @@ print("Correct!")`,
                         }
                     } else if (value.startsWith('"') && value.endsWith('"')) {
                         vars[varName] = value.slice(1, -1);
+                    } else if (value.includes('.length')) {
+                        const sourceVar = value.split('.')[0];
+                        if (vars[sourceVar] !== undefined) {
+                            vars[varName] = vars[sourceVar].toString().length;
+                        }
+                    } else if (value.includes('.left(')) {
+                        const match = value.match(/(\w+)\.left\((\d+)\)/);
+                        if (match && vars[match[1]] !== undefined) {
+                            const sourceVar = match[1];
+                            const length = parseInt(match[2]);
+                            vars[varName] = vars[sourceVar].toString().substring(0, length);
+                        }
+                    } else if (value.includes('.right(')) {
+                        const match = value.match(/(\w+)\.right\((\d+)\)/);
+                        if (match && vars[match[1]] !== undefined) {
+                            const sourceVar = match[1];
+                            const length = parseInt(match[2]);
+                            const str = vars[sourceVar].toString();
+                            vars[varName] = str.substring(str.length - length);
+                        }
+                    } else if (value.includes('.substring(')) {
+                        const match = value.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                        if (match && vars[match[1]] !== undefined) {
+                            const sourceVar = match[1];
+                            const start = parseInt(match[2]);
+                            const length = parseInt(match[3]);
+                            vars[varName] = vars[sourceVar].toString().substring(start, start + length);
+                        }
                     } else if (!isNaN(value)) {
                         vars[varName] = parseInt(value);
                     } else {
@@ -881,6 +1028,14 @@ print("Correct!")`,
                                 if (op.startsWith('"') && op.endsWith('"')) {
                                     result += op.slice(1, -1);
                                     isStringConcat = true;
+                                } else if (getVariableValue(op, vars) !== undefined) {
+                                    const opValue = getVariableValue(op, vars);
+                                    if (isStringConcat || typeof opValue === 'string') {
+                                        result += opValue.toString();
+                                        isStringConcat = true;
+                                    } else {
+                                        result = (result === '' ? 0 : parseInt(result)) + opValue;
+                                    }
                                 } else if (vars[op] !== undefined) {
                                     if (isStringConcat || typeof vars[op] === 'string') {
                                         result += vars[op].toString();
@@ -892,6 +1047,42 @@ print("Correct!")`,
                                     const varName = op.substring(4, op.length - 1);
                                     if (vars[varName] !== undefined) {
                                         result += vars[varName].toString();
+                                        isStringConcat = true;
+                                    }
+                                } else if (op.includes('.length')) {
+                                    const varName = op.split('.')[0];
+                                    if (vars[varName] !== undefined) {
+                                        if (isStringConcat) {
+                                            result += vars[varName].toString().length.toString();
+                                        } else {
+                                            result = (result === '' ? 0 : parseInt(result)) + vars[varName].toString().length;
+                                        }
+                                        isStringConcat = true;
+                                    }
+                                } else if (op.includes('.left(')) {
+                                    const match = op.match(/(\w+)\.left\((\d+)\)/);
+                                    if (match && vars[match[1]] !== undefined) {
+                                        const varName = match[1];
+                                        const length = parseInt(match[2]);
+                                        result += vars[varName].toString().substring(0, length);
+                                        isStringConcat = true;
+                                    }
+                                } else if (op.includes('.right(')) {
+                                    const match = op.match(/(\w+)\.right\((\d+)\)/);
+                                    if (match && vars[match[1]] !== undefined) {
+                                        const varName = match[1];
+                                        const length = parseInt(match[2]);
+                                        const str = vars[varName].toString();
+                                        result += str.substring(str.length - length);
+                                        isStringConcat = true;
+                                    }
+                                } else if (op.includes('.substring(')) {
+                                    const match = op.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                                    if (match && vars[match[1]] !== undefined) {
+                                        const varName = match[1];
+                                        const start = parseInt(match[2]);
+                                        const length = parseInt(match[3]);
+                                        result += vars[varName].toString().substring(start, start + length);
                                         isStringConcat = true;
                                     }
                                 } else if (!isNaN(op)) {
@@ -910,7 +1101,9 @@ print("Correct!")`,
                             let result = 1;
                             
                             operands.forEach(op => {
-                                if (vars[op] !== undefined) {
+                                if (getVariableValue(op, vars) !== undefined) {
+                                    result *= getVariableValue(op, vars);
+                                } else if (vars[op] !== undefined) {
                                     result *= vars[op];
                                 } else if (!isNaN(op)) {
                                     result *= parseInt(op);
@@ -1047,19 +1240,58 @@ print("Correct!")`,
                         if (vars[varName] !== undefined) {
                             output = vars[varName].toString().toLowerCase();
                         }
+                    } else if (content.includes('.length')) {
+                        const varName = content.split('.')[0];
+                        if (vars[varName] !== undefined) {
+                            output = vars[varName].toString().length.toString();
+                        }
+                    } else if (content.includes('.left(')) {
+                        const match = content.match(/(\w+)\.left\((\d+)\)/);
+                        if (match && vars[match[1]] !== undefined) {
+                            const varName = match[1];
+                            const length = parseInt(match[2]);
+                            output = vars[varName].toString().substring(0, length);
+                        }
+                    } else if (content.includes('.right(')) {
+                        const match = content.match(/(\w+)\.right\((\d+)\)/);
+                        if (match && vars[match[1]] !== undefined) {
+                            const varName = match[1];
+                            const length = parseInt(match[2]);
+                            const str = vars[varName].toString();
+                            output = str.substring(str.length - length);
+                        }
+                    } else if (content.includes('.substring(')) {
+                        const match = content.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                        if (match && vars[match[1]] !== undefined) {
+                            const varName = match[1];
+                            const start = parseInt(match[2]);
+                            const length = parseInt(match[3]);
+                            output = vars[varName].toString().substring(start, start + length);
+                        }
                     } else if (content.includes('[') && content.includes(']')) {
-                        // Array indexing like country[x] (0-based indexing)
+                        // Array indexing like nums[i] or country[x]
                         const match = content.match(/(\w+)\[(\w+)\]/);
                         if (match) {
                             const arrayVar = match[1];
                             const indexVar = match[2];
                             if (vars[arrayVar] !== undefined && vars[indexVar] !== undefined) {
-                                const arrayValue = vars[arrayVar].toString();
-                                const index = parseInt(vars[indexVar]); // Direct 0-based index
-                                if (index >= 0 && index < arrayValue.length) {
-                                    output = arrayValue[index];
+                                if (Array.isArray(vars[arrayVar])) {
+                                    // Handle actual arrays
+                                    const index = parseInt(vars[indexVar]);
+                                    if (index >= 0 && index < vars[arrayVar].length) {
+                                        output = vars[arrayVar][index].toString();
+                                    } else {
+                                        output = ''; // Index out of bounds
+                                    }
                                 } else {
-                                    output = ''; // Index out of bounds
+                                    // Handle string indexing (existing functionality)
+                                    const arrayValue = vars[arrayVar].toString();
+                                    const index = parseInt(vars[indexVar]); // Direct 0-based index
+                                    if (index >= 0 && index < arrayValue.length) {
+                                        output = arrayValue[index];
+                                    } else {
+                                        output = ''; // Index out of bounds
+                                    }
                                 }
                             }
                         }
@@ -1082,6 +1314,34 @@ print("Correct!")`,
                                 const varName = part.split('.')[0];
                                 if (vars[varName] !== undefined) {
                                     result += vars[varName].toString().toLowerCase();
+                                }
+                            } else if (part.includes('.length')) {
+                                const varName = part.split('.')[0];
+                                if (vars[varName] !== undefined) {
+                                    result += vars[varName].toString().length.toString();
+                                }
+                            } else if (part.includes('.left(')) {
+                                const match = part.match(/(\w+)\.left\((\d+)\)/);
+                                if (match && vars[match[1]] !== undefined) {
+                                    const varName = match[1];
+                                    const length = parseInt(match[2]);
+                                    result += vars[varName].toString().substring(0, length);
+                                }
+                            } else if (part.includes('.right(')) {
+                                const match = part.match(/(\w+)\.right\((\d+)\)/);
+                                if (match && vars[match[1]] !== undefined) {
+                                    const varName = match[1];
+                                    const length = parseInt(match[2]);
+                                    const str = vars[varName].toString();
+                                    result += str.substring(str.length - length);
+                                }
+                            } else if (part.includes('.substring(')) {
+                                const match = part.match(/(\w+)\.substring\((\d+),\s*(\d+)\)/);
+                                if (match && vars[match[1]] !== undefined) {
+                                    const varName = match[1];
+                                    const start = parseInt(match[2]);
+                                    const length = parseInt(match[3]);
+                                    result += vars[varName].toString().substring(start, start + length);
                                 }
                             } else if (vars[part] !== undefined) {
                                 result += vars[part].toString();
@@ -1172,7 +1432,7 @@ print("Correct!")`,
                     if (output) outputs.push(output);
                 }
                 
-                return output;
+                return { output, shouldTrace };
             }
             
             let i = 0;
@@ -1354,8 +1614,10 @@ print("Correct!")`,
                         for (let bodyLine = executionStart; bodyLine < executionEnd; bodyLine++) {
                             const bodyLineCode = lines[bodyLine];
                             const bodyLineNum = bodyLine + 1;
-                            const output = executeStatement(bodyLineCode, bodyLineNum, variables);
-                            addTraceEntry(bodyLineNum, variables, output);
+                            const result = executeStatement(bodyLineCode, bodyLineNum, variables);
+                            if (result.shouldTrace) {
+                                addTraceEntry(bodyLineNum, variables, result.output);
+                            }
                         }
                     }
                     
@@ -1386,8 +1648,10 @@ print("Correct!")`,
                         for (let bodyLine = i + 1; bodyLine < endwhileIndex; bodyLine++) {
                             const bodyLineCode = lines[bodyLine];
                             const bodyLineNum = bodyLine + 1;
-                            const output = executeStatement(bodyLineCode, bodyLineNum, variables);
-                            addTraceEntry(bodyLineNum, variables, output);
+                            const result = executeStatement(bodyLineCode, bodyLineNum, variables);
+                            if (result.shouldTrace) {
+                                addTraceEntry(bodyLineNum, variables, result.output);
+                            }
                         }
                     }
                     
@@ -1416,8 +1680,10 @@ print("Correct!")`,
                         for (let bodyLine = i + 1; bodyLine < untilIndex; bodyLine++) {
                             const bodyLineCode = lines[bodyLine];
                             const bodyLineNum = bodyLine + 1;
-                            const output = executeStatement(bodyLineCode, bodyLineNum, variables);
-                            addTraceEntry(bodyLineNum, variables, output);
+                            const result = executeStatement(bodyLineCode, bodyLineNum, variables);
+                            if (result.shouldTrace) {
+                                addTraceEntry(bodyLineNum, variables, result.output);
+                            }
                         }
                         
                         // Get the until condition
@@ -1465,8 +1731,10 @@ print("Correct!")`,
                             for (let bodyLine = i + 1; bodyLine < nextLineIndex; bodyLine++) {
                                 const bodyLineCode = lines[bodyLine];
                                 const bodyLineNum = bodyLine + 1;
-                                const output = executeStatement(bodyLineCode, bodyLineNum, variables);
-                                addTraceEntry(bodyLineNum, variables, output);
+                                const result = executeStatement(bodyLineCode, bodyLineNum, variables);
+                                if (result.shouldTrace) {
+                                    addTraceEntry(bodyLineNum, variables, result.output);
+                                }
                             }
                         }
                         
@@ -1480,8 +1748,10 @@ print("Correct!")`,
                     continue;
                 } else {
                     // Regular statement
-                    const output = executeStatement(line, lineNum, variables);
-                    addTraceEntry(lineNum, variables, output);
+                    const result = executeStatement(line, lineNum, variables);
+                    if (result.shouldTrace) {
+                        addTraceEntry(lineNum, variables, result.output);
+                    }
                 }
                 
                 i++;
