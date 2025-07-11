@@ -383,6 +383,71 @@ print(userCode)`,
                 ["X", "Y"]
             ],
             randomValues: [3, 8, 15, 42, 99]
+        },
+        {
+            code: `day = input("Enter day abbreviation")
+switch day:
+case "Mon":
+    print("Monday")
+case "Tue":
+    print("Tuesday")
+case "Wed":
+    print("Wednesday")
+default:
+    print("Not a weekday")
+endswitch`,
+            description: "Day name converter using switch/case",
+            inputSets: [
+                ["Mon"],
+                ["Tue"],
+                ["Wed"],
+                ["Fri"],
+                ["Sun"]
+            ]
+        },
+        {
+            code: `grade = input("Enter grade letter")
+switch grade:
+case "A":
+    print("Excellent - 90+ marks")
+case "B":
+    print("Good - 80+ marks")
+case "C":
+    print("Pass - 70+ marks")
+default:
+    print("Below pass level")
+endswitch
+print("Grade: " + grade)`,
+            description: "Grade feedback using switch/case",
+            inputSets: [
+                ["A"],
+                ["B"],
+                ["C"],
+                ["D"],
+                ["F"]
+            ]
+        },
+        {
+            code: `for i = 1 to 3
+    color = input("Enter traffic light color")
+    switch color:
+    case "red":
+        print("Stop")
+    case "amber":
+        print("Get ready")
+    case "green":
+        print("Go")
+    default:
+        print("Invalid color")
+    endswitch
+next i`,
+            description: "Traffic light system with switch/case in loop",
+            inputSets: [
+                ["red", "amber", "green"],
+                ["green", "red", "amber"],
+                ["amber", "green", "blue"],
+                ["red", "yellow", "green"]
+            ]
         }
     ],
     hard: [

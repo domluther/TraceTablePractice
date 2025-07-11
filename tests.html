@@ -545,6 +545,268 @@
             assertEqual(line3Traces[2].output, 'n', 'Third substring trace should output "n"');
         }
         
+        function testComments() {
+            const testInterpreter = new Interpreter();
+            
+            // Test that comments are completely ignored
+            const codeWithComments = `// This is a comment
+x = 5
+// Another comment here
+y = 10
+// Final comment
+z = x + y`;
+            
+            const result = testInterpreter.execute(codeWithComments);
+            
+            // Verify that only assignment lines are traced, comments are ignored
+            assertEqual(testInterpreter.variables.x, 5, 'x should be 5 despite comments');
+            assertEqual(testInterpreter.variables.y, 10, 'y should be 10 despite comments');
+            assertEqual(testInterpreter.variables.z, 15, 'z should be 15 (x + y)');
+            
+            // Check that only 3 trace entries exist (no comment lines)
+            assertEqual(testInterpreter.trace.length, 3, 'Should have exactly 3 trace entries (no comments traced)');
+            
+            // Verify correct line numbers (should skip comment lines)
+            assertEqual(testInterpreter.trace[0].lineNumber, 2, 'First trace should be line 2 (x = 5)');
+            assertEqual(testInterpreter.trace[1].lineNumber, 4, 'Second trace should be line 4 (y = 10)');
+            assertEqual(testInterpreter.trace[2].lineNumber, 6, 'Third trace should be line 6 (z = x + y)');
+        }
+        
+        function testBoolCasting() {
+            const testInterpreter = new Interpreter();
+            
+            // Test bool() with different input types
+            const boolTestCode = `// Test bool() casting
+isTrue = bool("True")
+isFalse = bool("False")
+isZero = bool(0)
+isOne = bool(1)
+isEmpty = bool("")
+hasText = bool("hello")
+fromVar = bool(isTrue)`;
+            
+            const result = testInterpreter.execute(boolTestCode);
+            
+            // Test string conversions
+            assertEqual(testInterpreter.variables.isTrue, true, 'bool("True") should be true');
+            assertEqual(testInterpreter.variables.isFalse, false, 'bool("False") should be false');
+            
+            // Test numeric conversions
+            assertEqual(testInterpreter.variables.isZero, false, 'bool(0) should be false');
+            assertEqual(testInterpreter.variables.isOne, true, 'bool(1) should be true');
+            
+            // Test variable conversion
+            assertEqual(testInterpreter.variables.fromVar, true, 'bool(isTrue) should be true');
+            
+            // Test case insensitivity
+            const caseTestCode = `lowerTrue = bool("true")
+upperFalse = bool("FALSE")`;
+            const caseResult = testInterpreter.execute(caseTestCode);
+            assertEqual(testInterpreter.variables.lowerTrue, true, 'bool("true") should be true (case insensitive)');
+            assertEqual(testInterpreter.variables.upperFalse, false, 'bool("FALSE") should be false (case insensitive)');
+        }
+        
+        function testConstants() {
+            const testInterpreter = new Interpreter();
+            
+            // Test constant declaration and usage
+            const constCode = `const pi = 3.14159
+const vat = 0.2
+price = 100
+total = price * (1 + vat)
+area = pi * 5 * 5`;
+            
+            const result = testInterpreter.execute(constCode);
+            
+            // Verify constant values
+            assertEqual(testInterpreter.variables.pi, 3.14159, 'const pi should be 3.14159');
+            assertEqual(testInterpreter.variables.vat, 0.2, 'const vat should be 0.2');
+            
+            // Verify calculations using constants
+            assertEqual(testInterpreter.variables.total, 120, 'total should be 120 (100 * 1.2)');
+            assert(Math.abs(testInterpreter.variables.area - 78.53975) < 0.001, 'area should be approximately 78.54 (pi * 25)');
+            
+            // Test that constants are tracked
+            assert(testInterpreter.constants.pi === true, 'pi should be marked as constant');
+            assert(testInterpreter.constants.vat === true, 'vat should be marked as constant');
+            assert(testInterpreter.constants.price === undefined, 'price should not be marked as constant');
+            
+            // Test constant reassignment protection
+            const reassignCode = `const x = 5
+x = 10
+y = x`;
+            const reassignResult = testInterpreter.execute(reassignCode);
+            
+            // Constant should remain unchanged despite reassignment attempt
+            assertEqual(testInterpreter.variables.x, 5, 'const x should remain 5 despite reassignment attempt');
+            assertEqual(testInterpreter.variables.y, 5, 'y should be 5 (using original x value)');
+        }
+        
+        function testForLoopWithPositiveStep() {
+            const testInterpreter = new Interpreter();
+            
+            // Test for loop with positive step
+            const positiveStepCode = `for i = 2 to 10 step 2
+    print(i)
+next i`;
+            
+            const result = testInterpreter.execute(positiveStepCode);
+            
+            // Should print even numbers: 2, 4, 6, 8, 10
+            assertEqual(testInterpreter.outputs.length, 5, 'Should have 5 outputs for step 2');
+            assertEqual(testInterpreter.outputs[0], '2', 'First output should be "2"');
+            assertEqual(testInterpreter.outputs[1], '4', 'Second output should be "4"');
+            assertEqual(testInterpreter.outputs[2], '6', 'Third output should be "6"');
+            assertEqual(testInterpreter.outputs[3], '8', 'Fourth output should be "8"');
+            assertEqual(testInterpreter.outputs[4], '10', 'Fifth output should be "10"');
+            
+            // Test with step 3
+            const step3Code = `for j = 1 to 10 step 3
+    print(j)
+next j`;
+            
+            const step3Result = testInterpreter.execute(step3Code);
+            assertEqual(testInterpreter.outputs.length, 4, 'Should have 4 outputs for step 3 (1,4,7,10)');
+            assertEqual(testInterpreter.outputs[0], '1', 'First output should be "1"');
+            assertEqual(testInterpreter.outputs[1], '4', 'Second output should be "4"');
+            assertEqual(testInterpreter.outputs[2], '7', 'Third output should be "7"');
+            assertEqual(testInterpreter.outputs[3], '10', 'Fourth output should be "10"');
+        }
+        
+        function testForLoopWithNegativeStep() {
+            const testInterpreter = new Interpreter();
+            
+            // Test for loop with negative step (countdown)
+            const negativeStepCode = `for i = 10 to 0 step -1
+    print(i)
+next i`;
+            
+            const result = testInterpreter.execute(negativeStepCode);
+            
+            // Should print countdown: 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+            assertEqual(testInterpreter.outputs.length, 11, 'Should have 11 outputs for countdown');
+            assertEqual(testInterpreter.outputs[0], '10', 'First output should be "10"');
+            assertEqual(testInterpreter.outputs[1], '9', 'Second output should be "9"');
+            assertEqual(testInterpreter.outputs[9], '1', 'Tenth output should be "1"');
+            assertEqual(testInterpreter.outputs[10], '0', 'Eleventh output should be "0"');
+            
+            // Test with negative step -2
+            const step2Code = `for j = 10 to 0 step -2
+    print(j)
+next j`;
+            
+            const step2Result = testInterpreter.execute(step2Code);
+            assertEqual(testInterpreter.outputs.length, 6, 'Should have 6 outputs for step -2 (10,8,6,4,2,0)');
+            assertEqual(testInterpreter.outputs[0], '10', 'First output should be "10"');
+            assertEqual(testInterpreter.outputs[1], '8', 'Second output should be "8"');
+            assertEqual(testInterpreter.outputs[2], '6', 'Third output should be "6"');
+            assertEqual(testInterpreter.outputs[3], '4', 'Fourth output should be "4"');
+            assertEqual(testInterpreter.outputs[4], '2', 'Fifth output should be "2"');
+            assertEqual(testInterpreter.outputs[5], '0', 'Sixth output should be "0"');
+        }
+        
+        function testForLoopBackwardCompatibility() {
+            const testInterpreter = new Interpreter();
+            
+            // Test that standard for loops still work (no step specified)
+            const standardForCode = `for k = 1 to 3
+    print(k)
+next k`;
+            
+            const result = testInterpreter.execute(standardForCode);
+            
+            // Should work like step 1 (default)
+            assertEqual(testInterpreter.outputs.length, 3, 'Should have 3 outputs for standard for loop');
+            assertEqual(testInterpreter.outputs[0], '1', 'First output should be "1"');
+            assertEqual(testInterpreter.outputs[1], '2', 'Second output should be "2"');
+            assertEqual(testInterpreter.outputs[2], '3', 'Third output should be "3"');
+            
+            // Test trace entries for step functionality
+            const traceTestCode = `for m = 5 to 7 step 1
+    print(m)
+next m`;
+            
+            const traceResult = testInterpreter.execute(traceTestCode);
+            
+            // Verify trace entries include loop variable changes
+            const loopTraces = testInterpreter.trace.filter(entry => entry.lineNumber === 1);
+            assertEqual(loopTraces.length, 3, 'Should have 3 traces for loop variable (m=5,6,7)');
+            assertEqual(loopTraces[0].changedVariables.m, 5, 'First loop trace should set m=5');
+            assertEqual(loopTraces[1].changedVariables.m, 6, 'Second loop trace should set m=6');
+            assertEqual(loopTraces[2].changedVariables.m, 7, 'Third loop trace should set m=7');
+        }
+        
+        function testSwitchCase() {
+            const testInterpreter = new Interpreter();
+            
+            // Test basic switch/case with string matching
+            const basicSwitchCode = `day = "Mon"
+switch day:
+case "Mon":
+    print("Monday")
+case "Tue":
+    print("Tuesday")
+default:
+    print("Unknown day")
+endswitch
+print("Done")`;
+            
+            const result = testInterpreter.execute(basicSwitchCode);
+            
+            // Should match "Mon" case and print "Monday"
+            assertEqual(testInterpreter.variables.day, 'Mon', 'day should be "Mon"');
+            assertEqual(testInterpreter.outputs.length, 2, 'Should have exactly 2 outputs');
+            assertEqual(testInterpreter.outputs[0], 'Monday', 'First output should be "Monday"');
+            assertEqual(testInterpreter.outputs[1], 'Done', 'Second output should be "Done"');
+            
+            // Test default case
+            const defaultCaseCode = `color = "purple"
+switch color:
+case "red":
+    print("Stop")
+case "green":
+    print("Go")
+default:
+    print("Invalid color")
+endswitch`;
+            
+            const result2 = testInterpreter.execute(defaultCaseCode);
+            assertEqual(testInterpreter.variables.color, 'purple', 'color should be "purple"');
+            assertEqual(testInterpreter.outputs.length, 1, 'Should have exactly 1 output for default case');
+            assertEqual(testInterpreter.outputs[0], 'Invalid color', 'Should execute default case');
+            
+            // Test switch with no default (no match)
+            const noMatchCode = `grade = "X"
+switch grade:
+case "A":
+    print("Excellent")
+case "B":
+    print("Good")
+endswitch
+print("Finished")`;
+            
+            const result3 = testInterpreter.execute(noMatchCode);
+            assertEqual(testInterpreter.variables.grade, 'X', 'grade should be "X"');
+            assertEqual(testInterpreter.outputs.length, 1, 'Should have 1 output (no case matched)');
+            assertEqual(testInterpreter.outputs[0], 'Finished', 'Should only execute after endswitch');
+            
+            // Test switch inside loop
+            const loopSwitchCode = `for i = 1 to 2
+    num = str(i)
+    switch num:
+    case "1":
+        print("One")
+    case "2":
+        print("Two")
+    endswitch
+next i`;
+            
+            const result4 = testInterpreter.execute(loopSwitchCode);
+            assertEqual(testInterpreter.outputs.length, 2, 'Should have 2 outputs from loop');
+            assertEqual(testInterpreter.outputs[0], 'One', 'First loop should print "One"');
+            assertEqual(testInterpreter.outputs[1], 'Two', 'Second loop should print "Two"');
+        }
+        
         function runAllTests() {
             // Reset test results
             testResults = [];
@@ -567,6 +829,16 @@
             testStringMethodsInPrint();
             testSubstringWithVariable();
             
+            // Test newly implemented features
+            testComments();
+            testBoolCasting();
+            testConstants();
+            testForLoopWithPositiveStep();
+            testForLoopWithNegativeStep();
+            testForLoopBackwardCompatibility();
+            testSwitchCase();
+            testSwitchCase();
+            
             // Display results
             displayTestResults();
         }
@@ -587,11 +859,18 @@
                 'String Methods': ['First name .left(1) should return "J"', 'Last name .left(1) should return "S"', 'Initials concatenation should return "JS"', 'Should detect as string concatenation', 'String .upper method', 'String .lower method'],
                 'String Integration': ['Numeric Operation with String Variables Present', 'Addition with String Variables Present'],
                 'Duck Grouping': ['Duck Grouping DIV (15 DIV 4 = 3)', 'Duck Grouping MOD (15 MOD 4 = 3)', 'Duck Grouping DIV (22 DIV 4 = 5)', 'Duck Grouping MOD (22 MOD 4 = 2)', 'Duck Grouping DIV (8 DIV 4 = 2)', 'Duck Grouping MOD (8 MOD 4 = 0)', 'Duck Grouping DIV (7 DIV 4 = 1)', 'Duck Grouping MOD (7 MOD 4 = 3)'],
-                'Type Conversions': ['float(input()) should convert "3.14" to 3.14', 'real(input()) should convert "3.14" to 3.14', 'jumpLength should be 3.1 as float', 'yearGroup should be 11 as float', 'Comparison 3.1 > 2 should be true'],
+                'Type Conversions': ['float(input()) should convert "3.14" to 3.14', 'real(input()) should convert "3.14" to 3.14', 'jumpLength should be 3.1 as float', 'yearGroup should be 11', 'Comparison 3.1 > 2 should be true'],
                 'Nested Conditionals': ['jumpLength should be 2.2', 'yearGroup should be 8', 'Should have exactly 1 output', 'Should print "You are too young" for yearGroup=8', 'Line 1 should execute (jumpLength assignment)', 'Line 2 should execute (yearGroup assignment)', 'Line 3 should NOT execute (if condition not traced)', 'Line 4 should NOT execute (if condition not traced)', 'Line 5 should NOT execute (yearGroup >= 10 is false)', 'Line 7 should execute (else branch print)'],
                 'For Loop Execution': ['x should be 2 after loop completion', 'Should have exactly 3 outputs', 'First output should be "0"', 'Second output should be "2"', 'Third output should be "4"', 'Should have exactly 6 trace entries', 'First trace should be line 1 (x=0)', 'Second trace should be line 2 (print 0)', 'Third trace should be line 1 (x=1)', 'Fourth trace should be line 2 (print 2)', 'Fifth trace should be line 1 (x=2)', 'Sixth trace should be line 2 (print 4)', 'First trace should change x to 0', 'Third trace should change x to 1', 'Fifth trace should change x to 2', 'Second trace should have output "0"', 'Fourth trace should have output "2"', 'Sixth trace should have output "4"'],
                 'String Methods in Print': ['name should be "hello"', 'city should be "WORLD"', 'Should have exactly 3 outputs', 'First output should be "HELLO"', 'Second output should be "world"', 'Third output should be "5"', 'Line 1 should be traced (name input)', 'Line 2 should be traced (city input)', 'Line 3 should be traced (print name.upper)', 'Line 4 should be traced (print city.lower)', 'Line 5 should be traced (print name.length)', 'Line 3 trace should have output "HELLO"', 'Line 4 trace should have output "world"', 'Line 5 trace should have output "5"'],
-                'Substring with Variables': ['x should be 3 after loop completion', 'country should be "France"', 'Should have exactly 3 outputs', 'First output should be "r" (position 1)', 'Second output should be "a" (position 2)', 'Third output should be "n" (position 3)', 'Should have exactly 7 trace entries', 'First trace should be line 1 (x=1)', 'Second trace should be line 2 (country assignment)', 'Third trace should be line 3 (print substring)', 'Fourth trace should be line 1 (x=2)', 'Fifth trace should be line 3 (print substring)', 'Sixth trace should be line 1 (x=3)', 'Seventh trace should be line 3 (print substring)', 'Should have 3 traces for line 3', 'First substring trace should output "r"', 'Second substring trace should output "a"', 'Third substring trace should output "n"']
+                'Substring with Variables': ['x should be 3 after loop completion', 'country should be "France"', 'Should have exactly 3 outputs', 'First output should be "r" (position 1)', 'Second output should be "a" (position 2)', 'Third output should be "n" (position 3)', 'Should have exactly 7 trace entries', 'First trace should be line 1 (x=1)', 'Second trace should be line 2 (country assignment)', 'Third trace should be line 3 (print substring)', 'Fourth trace should be line 1 (x=2)', 'Fifth trace should be line 3 (print substring)', 'Sixth trace should be line 1 (x=3)', 'Seventh trace should be line 3 (print substring)', 'Should have 3 traces for line 3', 'First substring trace should output "r"', 'Second substring trace should output "a"', 'Third substring trace should output "n"'],
+                'Comments': ['x should be 5 despite comments', 'y should be 10 despite comments', 'z should be 15 (x + y)', 'Should have exactly 3 trace entries (no comments traced)', 'First trace should be line 2 (x = 5)', 'Second trace should be line 4 (y = 10)', 'Third trace should be line 6 (z = x + y)'],
+                'Bool Casting': ['bool("True") should be true', 'bool("False") should be false', 'bool(0) should be false', 'bool(1) should be true', 'bool(isTrue) should be true', 'bool("true") should be true (case insensitive)', 'bool("FALSE") should be false (case insensitive)'],
+                'Constants': ['const pi should be 3.14159', 'const vat should be 0.2', 'total should be 120 (100 * 1.2)', 'area should be approximately 78.54 (pi * 25)', 'pi should be marked as constant', 'vat should be marked as constant', 'price should not be marked as constant', 'const x should remain 5 despite reassignment attempt', 'y should be 5 (using original x value)'],
+                'For Loop - Positive Step': ['Should have 5 outputs for step 2', 'First output should be "2"', 'Second output should be "4"', 'Third output should be "6"', 'Fourth output should be "8"', 'Fifth output should be "10"', 'Should have 4 outputs for step 3 (1,4,7,10)', 'First output should be "1"', 'Second output should be "4"', 'Third output should be "7"', 'Fourth output should be "10"'],
+                'For Loop - Negative Step': ['Should have 11 outputs for countdown', 'First output should be "10"', 'Second output should be "9"', 'Tenth output should be "1"', 'Eleventh output should be "0"', 'Should have 6 outputs for step -2 (10,8,6,4,2,0)', 'First output should be "10"', 'Second output should be "8"', 'Third output should be "6"', 'Fourth output should be "4"', 'Fifth output should be "2"', 'Sixth output should be "0"'],
+                'For Loop - Backward Compatibility': ['Should have 3 outputs for standard for loop', 'First output should be "1"', 'Second output should be "2"', 'Third output should be "3"', 'Should have 3 traces for loop variable (m=5,6,7)', 'First loop trace should set m=5', 'Second loop trace should set m=6', 'Third loop trace should set m=7'],
+                'Switch/Case': ['day should be "Mon"', 'Should have exactly 2 outputs', 'First output should be "Monday"', 'Second output should be "Done"', 'color should be "purple"', 'Should have exactly 1 output for default case', 'Should execute default case', 'grade should be "X"', 'Should have 1 output (no case matched)', 'Should only execute after endswitch', 'Should have 2 outputs from loop', 'First loop should print "One"', 'Second loop should print "Two"']
             };
             
             let html = '';

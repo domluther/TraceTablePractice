@@ -419,8 +419,7 @@ export class Interpreter {
                         changeRecord[varName] = vars[varName];
                     }
                 }
-            }
-        } else if (line.startsWith('print(')) {
+            } else if (line.startsWith('print(')) {
                 // Print statement - doesn't change variables, only produces output
                 const content = line.substring(6, line.length - 1);
                 if (content.startsWith('"') && content.endsWith('"')) {
@@ -604,9 +603,9 @@ export class Interpreter {
             }
             
             return { output, shouldTrace, changedVariables: changeRecord };
-    }
+        }
 
-    evaluateExpression(expression, vars) {
+        evaluateExpression(expression, vars) {
             // Handle type conversions and simple expressions
             expression = expression.trim();
             
@@ -1423,17 +1422,17 @@ export class Interpreter {
         }
 
         handleSwitchStatement(lines, i) {
-            // Switch statement: switch variableName:
+            // Switch statement: switch variableName :
             const line = lines[i];
             
-            // Extract the switch variable (format: "switch varName:")
-            const switchMatch = line.match(/switch\s+(\w+):/);
+            // Extract the switch variable (format: "switch varName :")
+            const switchMatch = line.match(/switch\s+(\w+)\s*:/);
             if (!switchMatch) {
                 return i + 1; // Skip if invalid syntax
             }
             
             const switchVar = switchMatch[1];
-            const switchValue = this.variables[switchVar]; // Get raw value, not parsed
+            const switchValue = this.getExpressionValue(switchVar, this.variables);
             
             // Find all case statements and default, plus endswitch
             let endswitchIndex = -1;
