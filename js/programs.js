@@ -58,10 +58,10 @@ total = test1 + test2
 print("You got " + str(total))`,
             description: "Adding two test scores",
             inputSets: [
-                ["75", "82"],
-                ["90", "88"],
-                ["65", "70"],
-                ["95", "92"]
+                ["70", "25"],
+                ["80", "15"],
+                ["60", "30"],
+                ["90", "10"]
             ]
         },
         {
@@ -187,7 +187,8 @@ print("ID " + staffID)`,
                 ["Kofi", "2021"],
                 ["Smith", "2023"],
                 ["Lee", "2020"],
-                ["Brown", "2024"]
+                ["Brown", "2024"],
+                ["Chen", "2022"]
             ]
         },
         {
@@ -235,7 +236,8 @@ endif`,
                 ["2.5", "9"],
                 ["3.1", "11"],
                 ["1.8", "10"],
-                ["2.2", "8"]
+                ["2.2", "8"],
+                ["2.8", "12"]
             ]
         },
         {
@@ -257,7 +259,8 @@ print("The score is", score)`,
                 ["2.5", "9"],
                 ["5.2", "10"],
                 ["3.8", "11"],
-                ["1.9", "8"]
+                ["1.9", "8"],
+                ["4.5", "12"]
             ]
         },
         {
@@ -318,10 +321,10 @@ next x`,
 next x`,
             description: "For loop with conditional input",
             inputSets: [
-                ["5", "8"],
-                ["3", "10"],
+                ["5", "6"],
+                ["3", "8"],
                 ["7", "4"],
-                ["2", "6"]
+                ["2", "10"]
             ]
         },
         {
@@ -332,10 +335,10 @@ next x`,
 next x`,
             description: "For loop with string length calculation",
             inputSets: [
-                ["Alice", "Bob", "Charlie"],
-                ["Sam", "Jennifer", "Alex"],
-                ["Jo", "Michael", "Diana"],
-                ["Max", "Catherine", "Tom"]
+                ["Alice", "Bob", "Kate"],
+                ["Sam", "Ann", "Alex"],
+                ["Jo", "Max", "Eve"],
+                ["Tom", "Sue", "Dan"]
             ]
         },
         {
@@ -349,7 +352,7 @@ next x`,
             inputSets: [
                 ["2", "5", "8"],
                 ["0", "7", "3"],
-                ["4", "1", "9"],
+                ["1", "4", "9"],
                 ["6", "10", "2"]
             ]
         },
@@ -360,15 +363,15 @@ next x`,
     if operator == "%" then
         print(num MOD x)
     else
-        print(num*x)
+        print(num * x)
     endif
 next x`,
             description: "For loop with operator selection",
             inputSets: [
-                ["10", "%", "15", "*", "8", "%", "20", "*"],
-                ["12", "*", "8", "%", "14", "*", "6", "%"],
-                ["16", "%", "10", "*", "6", "%", "15", "*"],
-                ["14", "*", "16", "%", "5", "*", "20", "%"]
+                ["10", "%", "12", "*", "8", "%", "15", "*"],
+                ["9", "*", "6", "%", "14", "*", "4", "%"],
+                ["16", "%", "8", "*", "6", "%", "12", "*"],
+                ["15", "*", "10", "%", "5", "*", "18", "%"]
             ]
         },
         {
@@ -379,12 +382,12 @@ print("Number of groups: " + str(groups))
 print("Ducks left over: " + str(leftOver))`,
             description: "Duck grouping with MOD and DIV operators",
             inputSets: [
-                ["15"],
-                ["22"],
+                ["7"],
+                ["3"],
                 ["8"],
+                ["16"],
                 ["13"],
-                ["20"],
-                ["7"]
+                ["6"]
             ]
         }
     ],

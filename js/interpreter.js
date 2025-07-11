@@ -114,76 +114,114 @@ export class Interpreter {
                     const index = parseInt(arrayMatch[2]);
                     
                     if (vars[arrayName] && Array.isArray(vars[arrayName])) {
+                        const oldValue = vars[arrayName][index];
+                        let newValue;
                         if (!isNaN(value)) {
-                            vars[arrayName][index] = parseInt(value);
+                            newValue = parseInt(value);
                         } else if (value.startsWith('"') && value.endsWith('"')) {
-                            vars[arrayName][index] = value.slice(1, -1);
+                            newValue = value.slice(1, -1);
                         } else if (vars[value] !== undefined) {
-                            vars[arrayName][index] = vars[value];
+                            newValue = vars[value];
                         }
-                        changeRecord[arrayName] = vars[arrayName];
+                        vars[arrayName][index] = newValue;
+                        if (oldValue !== newValue) {
+                            changeRecord[arrayName] = vars[arrayName];
+                        }
                     }
                 }
             } else if (value.startsWith('input(')) {
                 // Input statement - use predefined input value
                 if (this.inputIndex < this.inputs.length) {
+                    const oldValue = vars[varName];
                     vars[varName] = this.inputs[this.inputIndex];
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                     this.inputIndex++;
                 } else {
+                    const oldValue = vars[varName];
                     vars[varName] = "undefined_input";
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value.startsWith('int(input(')) {
                 // int(input()) statement - use predefined input value and convert to integer
                 if (this.inputIndex < this.inputs.length) {
+                    const oldValue = vars[varName];
                     vars[varName] = parseInt(this.inputs[this.inputIndex]);
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                     this.inputIndex++;
                 } else {
+                    const oldValue = vars[varName];
                     vars[varName] = 0;
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value.startsWith('float(input(')) {
                 // float(input()) statement - use predefined input value and convert to float
                 if (this.inputIndex < this.inputs.length) {
+                    const oldValue = vars[varName];
                     vars[varName] = parseFloat(this.inputs[this.inputIndex]);
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                     this.inputIndex++;
                 } else {
+                    const oldValue = vars[varName];
                     vars[varName] = 0.0;
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value.startsWith('real(input(')) {
                 // real(input()) statement - use predefined input value and convert to float (alternative syntax)
                 if (this.inputIndex < this.inputs.length) {
+                    const oldValue = vars[varName];
                     vars[varName] = parseFloat(this.inputs[this.inputIndex]);
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                     this.inputIndex++;
                 } else {
+                    const oldValue = vars[varName];
                     vars[varName] = 0.0;
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value.startsWith('random(')) {
                 // random() statement - use predefined random value
+                const oldValue = vars[varName];
                 if (this.currentProgram.randomValue !== undefined) {
                     vars[varName] = this.currentProgram.randomValue;
                 } else {
                     vars[varName] = Math.floor(Math.random() * 10) + 1;
                 }
-                changeRecord[varName] = vars[varName];
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (this.isStringConcatenation(value, vars)) {
                 // String concatenation - check this BEFORE individual string methods
+                const oldValue = vars[varName];
                 vars[varName] = this.evaluateStringConcatenation(value, vars);
-                changeRecord[varName] = vars[varName];
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (value.includes('.left(')) {
                 // String left method - extract left N characters
                 const match = value.match(/(\w+)\.left\((\d+)\)/);
                 if (match && vars[match[1]] !== undefined) {
                     const sourceVar = match[1];
                     const length = parseInt(match[2]);
+                    const oldValue = vars[varName];
                     vars[varName] = vars[sourceVar].toString().substring(0, length);
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value.includes('.right(')) {
                 // String right method - extract right N characters
@@ -192,8 +230,11 @@ export class Interpreter {
                     const sourceVar = match[1];
                     const length = parseInt(match[2]);
                     const str = vars[sourceVar].toString();
+                    const oldValue = vars[varName];
                     vars[varName] = str.substring(str.length - length);
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value.includes('.substring(')) {
                 // String substring method - extract substring(start, length)
@@ -224,59 +265,92 @@ export class Interpreter {
                         length = 1; // fallback
                     }
                     
+                    const oldValue = vars[varName];
                     vars[varName] = vars[sourceVar].toString().substring(start, start + length);
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value === '""') {
+                const oldValue = vars[varName];
                 vars[varName] = '';
-                changeRecord[varName] = vars[varName];
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (value.startsWith('"') && value.endsWith('"')) {
                 // String literal
+                const oldValue = vars[varName];
                 vars[varName] = value.slice(1, -1);
-                changeRecord[varName] = vars[varName];
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (!isNaN(value)) {
                 // Numeric literal - use parseFloat to handle both integers and decimals
+                const oldValue = vars[varName];
                 vars[varName] = parseFloat(value);
-                changeRecord[varName] = vars[varName];
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (this.isStringConcatenation(value, vars)) {
                 // String concatenation
+                const oldValue = vars[varName];
                 vars[varName] = this.evaluateStringConcatenation(value, vars);
-                changeRecord[varName] = vars[varName];
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (this.isArithmeticExpression(value)) {
                 // Arithmetic expression
+                const oldValue = vars[varName];
                 vars[varName] = this.evaluateArithmeticExpression(value, vars);
-                changeRecord[varName] = vars[varName];
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (value.includes('.length')) {
                 // String length property access
                 const sourceVar = value.split('.')[0];
                 if (vars[sourceVar] !== undefined) {
+                    const oldValue = vars[varName];
                     vars[varName] = vars[sourceVar].toString().length;
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value.includes('.upper')) {
                 // String upper method
                 const sourceVar = value.split('.')[0];
                 if (vars[sourceVar] !== undefined) {
+                    const oldValue = vars[varName];
                     vars[varName] = vars[sourceVar].toString().toUpperCase();
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (value.includes('.lower')) {
                 // String lower method
                 const sourceVar = value.split('.')[0];
                 if (vars[sourceVar] !== undefined) {
+                    const oldValue = vars[varName];
                     vars[varName] = vars[sourceVar].toString().toLowerCase();
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             } else if (vars[value] !== undefined) {
                 // Variable assignment
+                const oldValue = vars[varName];
                 vars[varName] = vars[value];
-                changeRecord[varName] = vars[varName];
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (value.includes('[') && value.includes(']')) {
                 // Array access
                 const arrayValue = this.getVariableValue(value, vars);
                 if (arrayValue !== undefined) {
+                    const oldValue = vars[varName];
                     vars[varName] = arrayValue;
-                    changeRecord[varName] = vars[varName];
+                    if (oldValue !== vars[varName]) {
+                        changeRecord[varName] = vars[varName];
+                    }
                 }
             }
         } else if (line.startsWith('print(')) {
