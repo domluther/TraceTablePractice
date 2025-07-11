@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCSE Computer Science - Trace Table Practice</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Trace Table Practice</h1>
+            <p>Master GCSE Computer Science algorithms with interactive trace tables</p>
+        </div>
+        
+        <div class="content">
+            <div class="controls">
+                <h2>Program Settings</h2>
+                
+                <div class="control-group">
+                    <label for="difficulty">Difficulty:</label>
+                    <select id="difficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="mode">Mode:</label>
+                    <select id="mode">
+                        <option value="random">Random Program</option>
+                        <option value="select">Select Program</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <select id="programChoice" style="display: none;">
+                        <!-- Options populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <button id="generateBtn" class="btn">Generate Program</button>
+                </div>
+            </div>
+            
+            <div class="code-section">
+                <div class="code-display">
+                    <h3>Program Code</h3>
+                    <div id="codeDisplay" class="code-content">
+                        Click "Generate Program" to start practicing!
+                    </div>
+                </div>
+                
+                <div class="trace-section">
+                    <h3>Trace Table</h3>
+                    <div class="trace-table-container">
+                        <table id="traceTable" class="trace-table">
+                            <thead>
+                                <tr>
+                                    <!-- Table headers populated by JavaScript -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Table rows populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mark-btn-container">
+                <button id="markBtn" class="btn btn-secondary">Mark My Answer</button>
+            </div>
+            
+            <div id="feedback" class="feedback" style="display: none;">
+                <!-- Feedback populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import modules
+        import { programs } from './js/programs.js';
+        import { TraceTable } from './js/trace-table.js';
+
+        // Global state
+        let currentProgram = null;
+        let expectedTrace = [];
+        let programVariables = [];
+        const traceTable = new TraceTable();
+
+        // Initialize application
+        function init() {
+            setupEventListeners();
+            updateProgramChoices();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('difficulty').addEventListener('change', updateProgramChoices);
+            document.getElementById('mode').addEventListener('change', updateProgramChoices);
+            document.getElementById('generateBtn').addEventListener('click', generateProgram);
+            document.getElementById('markBtn').addEventListener('click', () => traceTable.markAnswer());
+        }
+
+        function updateProgramChoices() {
+            const difficulty = document.getElementById('difficulty').value;
+            const mode = document.getElementById('mode').value;
+            const programChoice = document.getElementById('programChoice');
+            
+            if (mode === 'select') {
+                programChoice.style.display = 'inline-block';
+                programChoice.innerHTML = '';
+                
+                programs[difficulty].forEach((program, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = program.description;
+                    programChoice.appendChild(option);
+                });
+            } else {
+                programChoice.style.display = 'none';
+            }
+        }
+
+        function generateProgram() {
+            const difficulty = document.getElementById('difficulty').value;
+            const mode = document.getElementById('mode').value;
+            const programList = programs[difficulty];
+            
+            let randomProgram;
+            
+            if (mode === 'select') {
+                const selectedIndex = parseInt(document.getElementById('programChoice').value);
+                randomProgram = programList[selectedIndex];
+            } else {
+                randomProgram = programList[Math.floor(Math.random() * programList.length)];
+            }
+            
+            currentProgram = { ...randomProgram };
+            
+            if (currentProgram.inputSets && currentProgram.inputSets.length > 0) {
+                const randomInputSet = currentProgram.inputSets[Math.floor(Math.random() * currentProgram.inputSets.length)];
+                currentProgram.inputs = randomInputSet;
+            }
+            
+            if (currentProgram.randomValues && currentProgram.randomValues.length > 0) {
+                const randomValue = currentProgram.randomValues[Math.floor(Math.random() * currentProgram.randomValues.length)];
+                currentProgram.randomValue = randomValue;
+            }
+            
+            displayCode(currentProgram.code);
+            executeProgram(currentProgram.code);
+            traceTable.createTraceTable(expectedTrace, programVariables);
+            
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        function displayCode(code) {
+            const lines = code.split('\\n');
+            let numberedCode = '';
+            
+            lines.forEach((line, index) => {
+                numberedCode += `<span class="line-number">${index + 1}</span>${line}\\n`;
+            });
+            
+            if (currentProgram.inputs && currentProgram.inputs.length > 0) {
+                numberedCode += `\\n<span style="color: #90cdf4;">Input values: ${currentProgram.inputs.map(input => `"${input}"`).join(', ')}</span>`;
+            }
+            
+            if (currentProgram.randomValue !== undefined) {
+                numberedCode += `\\n<span style="color: #90cdf4;">Random value: ${currentProgram.randomValue}</span>`;
+            }
+            
+            document.getElementById('codeDisplay').innerHTML = numberedCode;
+        }
+
+        // INTERPRETER LOGIC - This is the complex part that remains inline for now
+        // In a future refactoring, this could be moved to the interpreter module
+        function executeProgram(code) {
+            const lines = code.split('\\n').map(line => line.trim()).filter(line => line);
+            const variables = {};
+            const outputs = [];
+            const trace = [];
+            
+            const inputs = currentProgram.inputs || [];
+            let inputIndex = 0;
+            
+            function addTraceEntry(lineNum, vars, output = '') {
+                trace.push({
+                    lineNumber: lineNum,
+                    variables: { ...vars },
+                    output: output
+                });
+            }
+
+            // ... (Keep the existing interpreter logic here for now)
+    </div>
+
+    <!-- Load the modular application -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -28,25 +28,21 @@
                 </div>
                 
                 <div class="control-group">
-                    <button id="generateRandomBtn" class="btn">Generate Random Program</button>
+                    <label for="mode">Mode:</label>
+                    <select id="mode">
+                        <option value="random">Random Program</option>
+                        <option value="select">Select Program</option>
+                    </select>
                 </div>
-            </div>
-            
-            <div class="program-selection">
-                <h3>Select a Program</h3>
-                <div class="program-table-container">
-                    <table id="programTable" class="program-table">
-                        <thead>
-                            <tr>
-                                <th>Program</th>
-                                <th>Last Score</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Program rows populated by JavaScript -->
-                        </tbody>
-                    </table>
+                
+                <div class="control-group">
+                    <select id="programChoice" style="display: none;">
+                        <!-- Options populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <button id="generateBtn" class="btn">Generate Program</button>
                 </div>
             </div>
             
