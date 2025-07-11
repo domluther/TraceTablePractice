@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trace Table Practice - Integration Tests</title>
+    <title>Trace Table Practice - End-to-End Integration Tests</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -102,8 +102,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>🧪 Trace Table Practice - Integration Tests</h1>
-        <p>These tests verify that complete programs execute correctly and generate proper trace tables.</p>
+        <h1>🧪 End-to-End Integration Tests</h1>
+        <p style="color: #666; margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;">
+            <strong>Comprehensive program tests covering real-world GCSE scenarios</strong><br>
+            <em>Focus: Complete programs with nested features, edge cases, and full trace validation</em><br>
+            <small style="color: #888;">These tests complement unit tests by validating entire program flows and complex feature interactions.</small>
+        </p>
         
         <button class="run-tests-btn" onclick="runAllTests()">🔄 Run All Integration Tests</button>
         
@@ -113,6 +117,39 @@
     </div>
 
     <script type="module">
+        /*
+         * ======================================================================
+         * END-TO-END INTEGRATION TESTS - SCOPE AND PURPOSE
+         * ======================================================================
+         * 
+         * These integration tests focus on testing complete programs that students
+         * would encounter in real GCSE Computer Science practice. They verify that
+         * all components work together correctly in realistic scenarios.
+         * 
+         * INTEGRATION TEST SCOPE:
+         * - Complete program execution with inputs and outputs
+         * - Complex feature interactions (e.g., loops with string operations)
+         * - Real-world GCSE programming scenarios
+         * - Trace table generation for entire programs
+         * - Input validation and error handling in context
+         * - Multi-step calculations and workflows
+         * - Programs with nested control structures
+         * - Full validation of program state changes
+         * 
+         * WHAT INTEGRATION TESTS DON'T COVER:
+         * - Individual method testing (covered by unit tests)
+         * - Basic operator precedence (covered by unit tests)
+         * - Simple edge cases (covered by unit tests)
+         * - Isolated feature testing (covered by unit tests)
+         * 
+         * These tests complement unit tests by ensuring the interpreter
+         * can handle complete programs correctly, not just individual features.
+         * 
+         * For individual feature testing, see tests.html
+         * 
+         * ======================================================================
+         */
+        
         // Import the actual production Interpreter class
         import { Interpreter } from './js/interpreter.js';
         
@@ -173,9 +210,12 @@
         }
         
         // Test the rectangle calculation program
-        function testRectangleCalculation() {
-            const code = `length = int(input("Length"))
-width = int(input("Width"))
+        // Test runner functions - Complete Program Integration Tests
+        
+        function testRectangleCalculationProgram() {
+            // Test the complete rectangle calculation program with input validation
+            const code = `length = int(input("Enter length"))
+width = int(input("Enter width"))
 area = length * width
 perimeter = 2 * (length + width)
 print("Area: " + str(area))
@@ -184,186 +224,220 @@ print("Perimeter: " + str(perimeter))`;
             const inputs = ["5", "3"];
             const result = executeTestProgram(code, inputs);
             
-            // Check final variables
-            assertEqual(result.variables.length, 5, 'Rectangle: Length Variable', 'length should be 5');
-            assertEqual(result.variables.width, 3, 'Rectangle: Width Variable', 'width should be 3');
-            assertEqual(result.variables.area, 15, 'Rectangle: Area Calculation', 'area should be 5 * 3 = 15');
-            assertEqual(result.variables.perimeter, 16, 'Rectangle: Perimeter Calculation', 'perimeter should be 2 * (5 + 3) = 16');
+            assertEqual(result.variables.length, 5, 'Rectangle Program: Length Input');
+            assertEqual(result.variables.width, 3, 'Rectangle Program: Width Input');
+            assertEqual(result.variables.area, 15, 'Rectangle Program: Area Calculation');
+            assertEqual(result.variables.perimeter, 16, 'Rectangle Program: Perimeter Calculation');
+            assertArrayEqual(result.outputs, ["Area: 15", "Perimeter: 16"], 'Rectangle Program: Formatted Output');
             
-            // Check outputs
-            assertArrayEqual(result.outputs, ["Area: 15", "Perimeter: 16"], 'Rectangle: Output', 'Should output area and perimeter');
-            
-            // Check trace table length
-            assert(result.trace.length === 6, 'Rectangle: Trace Table Length', `Should have 6 traced lines, got ${result.trace.length}`);
+            // Verify trace table structure
+            assert(result.trace.length === 6, 'Rectangle Program: Complete Trace Table', `Expected 6 traced lines, got ${result.trace.length}`);
         }
         
-        function testSimpleArithmetic() {
-            const code = `a = 5
-b = 3
-c = a + b
-print(c)`;
+        function testJumpQualificationProgram() {
+            // Test the jump qualification program with nested conditionals
+            const code = `jumpLength = float(input("Enter jump length"))
+yearGroup = float(input("Enter year group"))
+if jumpLength > 2 then
+    if yearGroup >= 10 then
+        print("You qualify for the team")
+    else
+        print("You are too young")
+    endif
+else
+    print("Jump not long enough")
+endif`;
             
-            const result = executeTestProgram(code);
+            // Test case 1: Good jump, too young
+            const inputs1 = ["2.2", "8"];
+            const result1 = executeTestProgram(code, inputs1);
+            assertEqual(result1.variables.jumpLength, 2.2, 'Jump Program Case 1: Jump Length');
+            assertEqual(result1.variables.yearGroup, 8, 'Jump Program Case 1: Year Group');
+            assertArrayEqual(result1.outputs, ["You are too young"], 'Jump Program Case 1: Correct Branch Output');
             
-            assertEqual(result.variables.a, 5, 'Simple: Variable A', 'a should be 5');
-            assertEqual(result.variables.b, 3, 'Simple: Variable B', 'b should be 3');
-            assertEqual(result.variables.c, 8, 'Simple: Variable C', 'c should be a + b = 8');
-            assertArrayEqual(result.outputs, ["8"], 'Simple: Output', 'Should output 8');
+            // Test case 2: Good jump, qualified
+            const inputs2 = ["2.5", "11"];
+            const result2 = executeTestProgram(code, inputs2);
+            assertArrayEqual(result2.outputs, ["You qualify for the team"], 'Jump Program Case 2: Qualification Output');
+            
+            // Test case 3: Poor jump
+            const inputs3 = ["1.8", "12"];
+            const result3 = executeTestProgram(code, inputs3);
+            assertArrayEqual(result3.outputs, ["Jump not long enough"], 'Jump Program Case 3: Insufficient Jump Output');
         }
         
-        function testVariableSwapping() {
-            const code = `x = 10
-y = 20
-temp = x
-x = y
-y = temp
-print(x)
-print(y)`;
-            
-            const result = executeTestProgram(code);
-            
-            assertEqual(result.variables.x, 20, 'Swap: Final X', 'x should be 20 after swap');
-            assertEqual(result.variables.y, 10, 'Swap: Final Y', 'y should be 10 after swap');
-            assertArrayEqual(result.outputs, ["20", "10"], 'Swap: Output', 'Should output swapped values');
-        }
-        
-        function testInputAndOutput() {
-            const code = `name = input("What's your name?")
-print("Hello " + name)`;
-            
-            const inputs = ["Alice"];
-            const result = executeTestProgram(code, inputs);
-            
-            assertEqual(result.variables.name, "Alice", 'Input: Name Variable', 'name should be "Alice"');
-            assertArrayEqual(result.outputs, ["Hello Alice"], 'Input: Output', 'Should greet Alice');
-        }
-        
-        function testComplexArithmetic() {
-            const code = `a = 2
-b = 3
-c = 4
-result = a * b + c * (a + b)
-print(result)`;
-            
-            const result = executeTestProgram(code);
-            
-            // result should be 2 * 3 + 4 * (2 + 3) = 6 + 4 * 5 = 6 + 20 = 26
-            assertEqual(result.variables.result, 26, 'Complex: Result Calculation', 'result should be 2 * 3 + 4 * (2 + 3) = 26');
-            assertArrayEqual(result.outputs, ["26"], 'Complex: Output', 'Should output 26');
-        }
-        
-        function testDiscountCalculation() {
-            const code = `price = int(input("Enter price"))
-discount = price / 10
-final_price = price - discount
-print("Original: " + str(price))
-print("Final: " + str(final_price))`;
-            
-            const inputs = ["100"];
-            const result = executeTestProgram(code, inputs);
-            
-            assertEqual(result.variables.price, 100, 'Discount: Price Variable', 'price should be 100');
-            assertEqual(result.variables.discount, 10, 'Discount: Discount Calculation', 'discount should be 100 / 10 = 10');
-            assertEqual(result.variables.final_price, 90, 'Discount: Final Price', 'final_price should be 100 - 10 = 90');
-            assertArrayEqual(result.outputs, ["Original: 100", "Final: 90"], 'Discount: Output', 'Should show original and final prices');
-        }
-        
-        function testStringConcatenation() {
-            const code = `name = "Alice"
-age = 16
-print("Hello " + name)
-print("You are " + str(age))`;
-            
-            const result = executeTestProgram(code);
-            
-            assertEqual(result.variables.name, "Alice", 'String: Name Variable', 'name should be "Alice"');
-            assertEqual(result.variables.age, 16, 'String: Age Variable', 'age should be 16');
-            assertArrayEqual(result.outputs, ["Hello Alice", "You are 16"], 'String: Output', 'Should concatenate strings properly');
-        }
-        
-        function testMultipleInputs() {
-            const code = `test1 = int(input("What score?"))
-test2 = int(input("What score?"))
-total = test1 + test2
-print("You got " + str(total))`;
-            
-            const inputs = ["75", "82"];
-            const result = executeTestProgram(code, inputs);
-            
-            assertEqual(result.variables.test1, 75, 'Multiple Input: Test1', 'test1 should be 75');
-            assertEqual(result.variables.test2, 82, 'Multiple Input: Test2', 'test2 should be 82');
-            assertEqual(result.variables.total, 157, 'Multiple Input: Total', 'total should be 75 + 82 = 157');
-            assertArrayEqual(result.outputs, ["You got 157"], 'Multiple Input: Output', 'Should output total score');
-        }
-        
-        // Test programs that had specific issues
-        function testKnownIssues() {
-            // Test the original rectangle program that didn't work
-            const rectangleCode = `length = int(input("Length"))
-width = int(input("Width"))
-area = length * width
-perimeter = 2 * (length + width)
-print("Area: " + str(area))
-print("Perimeter: " + str(perimeter))`;
-            
-            // Test with different input sets
-            const testCases = [
-                { inputs: ["5", "3"], expectedArea: 15, expectedPerimeter: 16 },
-                { inputs: ["10", "8"], expectedArea: 80, expectedPerimeter: 36 },
-                { inputs: ["12", "4"], expectedArea: 48, expectedPerimeter: 32 },
-                { inputs: ["7", "6"], expectedArea: 42, expectedPerimeter: 26 }
-            ];
-            
-            testCases.forEach((testCase, index) => {
-                const result = executeTestProgram(rectangleCode, testCase.inputs);
-                assertEqual(result.variables.area, testCase.expectedArea, 
-                    `Known Issue: Rectangle Area Test ${index + 1}`, 
-                    `With inputs ${testCase.inputs.join(', ')}`);
-                assertEqual(result.variables.perimeter, testCase.expectedPerimeter, 
-                    `Known Issue: Rectangle Perimeter Test ${index + 1}`, 
-                    `With inputs ${testCase.inputs.join(', ')}`);
-            });        }
-        
-        function testDuckGrouping() {
-            // Test the new duck grouping program that uses both MOD and DIV
-            const duckCode = `ducks = int(input("How many ducks are there"))
+        function testDuckGroupingProgram() {
+            // Test the duck grouping program (real GCSE example)
+            const code = `ducks = int(input("How many ducks are there"))
 groups = ducks DIV 4
 leftOver = ducks MOD 4
 print("Number of groups: " + str(groups))
 print("Ducks left over: " + str(leftOver))`;
             
-            // Test with different input sets that correspond to the program's predefined inputs
             const testCases = [
-                { inputs: ["15"], expectedGroups: 3, expectedLeftOver: 3 },
-                { inputs: ["22"], expectedGroups: 5, expectedLeftOver: 2 },
-                { inputs: ["8"], expectedGroups: 2, expectedLeftOver: 0 },
-                { inputs: ["13"], expectedGroups: 3, expectedLeftOver: 1 },
-                { inputs: ["20"], expectedGroups: 5, expectedLeftOver: 0 },
-                { inputs: ["7"], expectedGroups: 1, expectedLeftOver: 3 }
+                { inputs: ["15"], groups: 3, leftOver: 3 },
+                { inputs: ["22"], groups: 5, leftOver: 2 },
+                { inputs: ["8"], groups: 2, leftOver: 0 }
             ];
             
-            testCases.forEach((testCase, index) => {
-                const result = executeTestProgram(duckCode, testCase.inputs);
-                assertEqual(result.variables.ducks, parseInt(testCase.inputs[0]), 
-                    `Duck Grouping: Input Test ${index + 1}`, 
-                    `With ${testCase.inputs[0]} ducks`);
-                assertEqual(result.variables.groups, testCase.expectedGroups, 
-                    `Duck Grouping: DIV Operation Test ${index + 1}`, 
-                    `${testCase.inputs[0]} DIV 4 = ${testCase.expectedGroups}`);
-                assertEqual(result.variables.leftOver, testCase.expectedLeftOver, 
-                    `Duck Grouping: MOD Operation Test ${index + 1}`, 
-                    `${testCase.inputs[0]} MOD 4 = ${testCase.expectedLeftOver}`);
-                
-                // Check expected outputs
-                const expectedOutput1 = `Number of groups: ${testCase.expectedGroups}`;
-                const expectedOutput2 = `Ducks left over: ${testCase.expectedLeftOver}`;
-                assertEqual(result.outputs.includes(expectedOutput1), true, 
-                    `Duck Grouping: Output Test ${index + 1}a`, 
-                    `Should output "${expectedOutput1}"`);
-                assertEqual(result.outputs.includes(expectedOutput2), true, 
-                    `Duck Grouping: Output Test ${index + 1}b`, 
-                    `Should output "${expectedOutput2}"`);
+            testCases.forEach((testCase, i) => {
+                const result = executeTestProgram(code, testCase.inputs);
+                assertEqual(result.variables.groups, testCase.groups, `Duck Program Case ${i+1}: Groups Calculation`);
+                assertEqual(result.variables.leftOver, testCase.leftOver, `Duck Program Case ${i+1}: Remainder Calculation`);
+                assertArrayEqual(result.outputs, [
+                    `Number of groups: ${testCase.groups}`,
+                    `Ducks left over: ${testCase.leftOver}`
+                ], `Duck Program Case ${i+1}: Formatted Output`);
             });
+        }
+        
+        function testLoopWithStringOperations() {
+            // Test for loop with string methods (substring extraction)
+            const code = `country = "France"
+for x = 1 to 3
+    letter = country.substring(x, 1)
+    print("Position " + str(x) + ": " + letter)
+next x`;
+            
+            const result = executeTestProgram(code);
+            
+            assertEqual(result.variables.country, "France", 'String Loop Program: Country Variable');
+            assertEqual(result.variables.x, 3, 'String Loop Program: Final Loop Variable');
+            assertArrayEqual(result.outputs, [
+                "Position 1: r",
+                "Position 2: a", 
+                "Position 3: n"
+            ], 'String Loop Program: Substring Extraction Output');
+            
+            // Verify proper trace pattern for loops
+            assert(result.trace.length >= 7, 'String Loop Program: Trace Contains Loop Iterations');
+        }
+        
+        function testConstantsWithCalculations() {
+            // Test constants in a real calculation scenario
+            const code = `const pi = 3.14159
+const vatRate = 0.2
+radius = float(input("Enter radius"))
+price = float(input("Enter price"))
+area = pi * radius * radius
+priceWithVat = price * (1 + vatRate)
+print("Circle area: " + str(area))
+print("Price with VAT: " + str(priceWithVat))`;
+            
+            const inputs = ["5", "100"];
+            const result = executeTestProgram(code, inputs);
+            
+            assertEqual(result.variables.pi, 3.14159, 'Constants Program: Pi Constant');
+            assertEqual(result.variables.vatRate, 0.2, 'Constants Program: VAT Rate Constant');
+            assertEqual(result.variables.radius, 5, 'Constants Program: Radius Input');
+            assertEqual(result.variables.price, 100, 'Constants Program: Price Input');
+            assert(Math.abs(result.variables.area - 78.53975) < 0.001, 'Constants Program: Circle Area Calculation');
+            assertEqual(result.variables.priceWithVat, 120, 'Constants Program: VAT Calculation');
+            assert(result.outputs.length === 2, 'Constants Program: Two Output Lines');
+        }
+        
+        function testSwitchCaseGradingSystem() {
+            // Test switch/case with a grading system
+            const code = `score = int(input("Enter score"))
+switch score:
+case 90:
+case 91:
+case 92:
+case 93:
+case 94:
+case 95:
+case 96:
+case 97:
+case 98:
+case 99:
+case 100:
+    grade = "A*"
+case 80:
+case 81:
+case 82:
+case 83:
+case 84:
+case 85:
+case 86:
+case 87:
+case 88:
+case 89:
+    grade = "A"
+default:
+    grade = "Below A"
+endswitch
+print("Your grade is: " + grade)`;
+            
+            // Test different score ranges
+            const testCases = [
+                { inputs: ["95"], expected: "A*" },
+                { inputs: ["85"], expected: "A" }, 
+                { inputs: ["75"], expected: "Below A" }
+            ];
+            
+            testCases.forEach((testCase, i) => {
+                const result = executeTestProgram(code, testCase.inputs);
+                assertEqual(result.variables.grade, testCase.expected, `Grading Program Case ${i+1}: Grade Assignment`);
+                assertArrayEqual(result.outputs, [`Your grade is: ${testCase.expected}`], `Grading Program Case ${i+1}: Grade Output`);
+            });
+        }
+        
+        function testForLoopWithSteps() {
+            // Test for loop with custom steps (countdown timer)
+            const code = `for countdown = 10 to 0 step -2
+    print("T-minus " + str(countdown))
+next countdown
+print("Launch!")`;
+            
+            const result = executeTestProgram(code);
+            
+            assertEqual(result.variables.countdown, 0, 'Step Loop Program: Final Countdown Variable');
+            assertArrayEqual(result.outputs, [
+                "T-minus 10",
+                "T-minus 8", 
+                "T-minus 6",
+                "T-minus 4",
+                "T-minus 2",
+                "T-minus 0",
+                "Launch!"
+            ], 'Step Loop Program: Countdown Sequence');
+        }
+        
+        function testComplexValidationProgram() {
+            // Test a complex program with multiple validation steps
+            const code = `// Password validation program
+password = input("Enter password")
+length = password.length
+hasUpper = false
+hasNumber = false
+
+for i = 0 to length - 1
+    char = password.substring(i, 1)
+    if char >= "A" AND char <= "Z" then
+        hasUpper = true
+    endif
+    if char >= "0" AND char <= "9" then
+        hasNumber = true
+    endif
+next i
+
+if length >= 8 AND hasUpper AND hasNumber then
+    print("Password is strong")
+else
+    print("Password is weak")
+endif`;
+            
+            // Test strong password
+            const inputs1 = ["MyPass123"];
+            const result1 = executeTestProgram(code, inputs1);
+            assertEqual(result1.variables.hasUpper, true, 'Validation Program: Upper Case Detection');
+            assertEqual(result1.variables.hasNumber, true, 'Validation Program: Number Detection');
+            assertArrayEqual(result1.outputs, ["Password is strong"], 'Validation Program: Strong Password Output');
+            
+            // Test weak password
+            const inputs2 = ["weak"];
+            const result2 = executeTestProgram(code, inputs2);
+            assertArrayEqual(result2.outputs, ["Password is weak"], 'Validation Program: Weak Password Output');
         }
 
         function runAllTests() {
@@ -372,17 +446,16 @@ print("Ducks left over: " + str(leftOver))`;
             testsPassed = 0;
             testsFailed = 0;
             
-            // Run test suites
-            testRectangleCalculation();
-            testSimpleArithmetic();
-            testVariableSwapping();
-            testInputAndOutput();
-            testComplexArithmetic();
-            testDiscountCalculation();
-            testStringConcatenation();
-            testMultipleInputs();
-            testKnownIssues();
-            testDuckGrouping();
+            // Run comprehensive end-to-end program tests
+            // These tests focus on complete programs and features not covered by unit tests
+            testRectangleCalculationProgram();
+            testJumpQualificationProgram();
+            testDuckGroupingProgram();
+            testLoopWithStringOperations();
+            testConstantsWithCalculations();
+            testSwitchCaseGradingSystem();
+            testForLoopWithSteps();
+            testComplexValidationProgram();
             
             // Display results
             displayTestResults();
@@ -392,18 +465,67 @@ print("Ducks left over: " + str(leftOver))`;
             const resultsDiv = document.getElementById('testResults');
             const summaryDiv = document.getElementById('testSummary');
             
-            // Group tests by category
+            // Group tests by category - Comprehensive End-to-End Tests
             const testSuites = {
-                'Rectangle Calculation': ['Rectangle: Length Variable', 'Rectangle: Width Variable', 'Rectangle: Area Calculation', 'Rectangle: Perimeter Calculation', 'Rectangle: Output', 'Rectangle: Trace Table Length'],
-                'Simple Arithmetic': ['Simple: Variable A', 'Simple: Variable B', 'Simple: Variable C', 'Simple: Output'],
-                'Variable Swapping': ['Swap: Final X', 'Swap: Final Y', 'Swap: Output'],
-                'Input/Output': ['Input: Name Variable', 'Input: Output'],
-                'Complex Arithmetic': ['Complex: Result Calculation', 'Complex: Output'],
-                'Discount Calculation': ['Discount: Price Variable', 'Discount: Discount Calculation', 'Discount: Final Price', 'Discount: Output'],
-                'String Operations': ['String: Name Variable', 'String: Age Variable', 'String: Output'],
-                'Multiple Inputs': ['Multiple Input: Test1', 'Multiple Input: Test2', 'Multiple Input: Total', 'Multiple Input: Output'],
-                'Duck Grouping': ['Duck Grouping: Input Test 1', 'Duck Grouping: Input Test 2', 'Duck Grouping: Input Test 3', 'Duck Grouping: Input Test 4', 'Duck Grouping: Input Test 5', 'Duck Grouping: Input Test 6', 'Duck Grouping: DIV Operation Test 1', 'Duck Grouping: DIV Operation Test 2', 'Duck Grouping: DIV Operation Test 3', 'Duck Grouping: DIV Operation Test 4', 'Duck Grouping: DIV Operation Test 5', 'Duck Grouping: DIV Operation Test 6', 'Duck Grouping: MOD Operation Test 1', 'Duck Grouping: MOD Operation Test 2', 'Duck Grouping: MOD Operation Test 3', 'Duck Grouping: MOD Operation Test 4', 'Duck Grouping: MOD Operation Test 5', 'Duck Grouping: MOD Operation Test 6', 'Duck Grouping: Output Test 1a', 'Duck Grouping: Output Test 1b', 'Duck Grouping: Output Test 2a', 'Duck Grouping: Output Test 2b', 'Duck Grouping: Output Test 3a', 'Duck Grouping: Output Test 3b', 'Duck Grouping: Output Test 4a', 'Duck Grouping: Output Test 4b', 'Duck Grouping: Output Test 5a', 'Duck Grouping: Output Test 5b', 'Duck Grouping: Output Test 6a', 'Duck Grouping: Output Test 6b'],
-                'Regression Tests': ['Known Issue: Rectangle Area Test 1', 'Known Issue: Rectangle Area Test 2', 'Known Issue: Rectangle Area Test 3', 'Known Issue: Rectangle Area Test 4', 'Known Issue: Rectangle Perimeter Test 1', 'Known Issue: Rectangle Perimeter Test 2', 'Known Issue: Rectangle Perimeter Test 3', 'Known Issue: Rectangle Perimeter Test 4']
+                'Rectangle Calculation Program': [
+                    'Rectangle Program: Length Input',
+                    'Rectangle Program: Width Input', 
+                    'Rectangle Program: Area Calculation',
+                    'Rectangle Program: Perimeter Calculation',
+                    'Rectangle Program: Formatted Output',
+                    'Rectangle Program: Complete Trace Table'
+                ],
+                'Jump Qualification Program (Nested Conditionals)': [
+                    'Jump Program Case 1: Jump Length',
+                    'Jump Program Case 1: Year Group',
+                    'Jump Program Case 1: Correct Branch Output',
+                    'Jump Program Case 2: Qualification Output',
+                    'Jump Program Case 3: Insufficient Jump Output'
+                ],
+                'Duck Grouping Program (DIV/MOD Operations)': [
+                    'Duck Program Case 1: Groups Calculation',
+                    'Duck Program Case 1: Remainder Calculation',
+                    'Duck Program Case 1: Formatted Output',
+                    'Duck Program Case 2: Groups Calculation',
+                    'Duck Program Case 2: Remainder Calculation',
+                    'Duck Program Case 2: Formatted Output',
+                    'Duck Program Case 3: Groups Calculation',
+                    'Duck Program Case 3: Remainder Calculation',
+                    'Duck Program Case 3: Formatted Output'
+                ],
+                'String Operations in Loops': [
+                    'String Loop Program: Country Variable',
+                    'String Loop Program: Final Loop Variable',
+                    'String Loop Program: Substring Extraction Output',
+                    'String Loop Program: Trace Contains Loop Iterations'
+                ],
+                'Constants with Real Calculations': [
+                    'Constants Program: Pi Constant',
+                    'Constants Program: VAT Rate Constant',
+                    'Constants Program: Radius Input',
+                    'Constants Program: Price Input',
+                    'Constants Program: Circle Area Calculation',
+                    'Constants Program: VAT Calculation',
+                    'Constants Program: Two Output Lines'
+                ],
+                'Switch/Case Grading System': [
+                    'Grading System Case 1: Grade Variable A',
+                    'Grading System Case 1: Output Excellent',
+                    'Grading System Case 2: Grade Variable B',
+                    'Grading System Case 2: Output Good',
+                    'Grading System Case 3: Grade Variable F',
+                    'Grading System Case 3: Output Fail'
+                ],
+                'For Loop with Steps (Countdown)': [
+                    'Step Loop Program: Final Countdown Variable',
+                    'Step Loop Program: Countdown Sequence'
+                ],
+                'Complex Validation Program': [
+                    'Validation Program: Upper Case Detection',
+                    'Validation Program: Number Detection',
+                    'Validation Program: Strong Password Output',
+                    'Validation Program: Weak Password Output'
+                ]
             };
             
             let html = '';

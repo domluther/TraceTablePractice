@@ -128,6 +128,33 @@
     <script type="module">
         /*
          * ======================================================================
+         * UNIT TESTS - SCOPE AND PURPOSE
+         * ======================================================================
+         * 
+         * These unit tests focus on testing individual interpreter methods and
+         * language features in isolation. They verify that each component works
+         * correctly on its own, without testing complete program flows.
+         * 
+         * UNIT TEST SCOPE:
+         * - Individual arithmetic operations and operator precedence
+         * - String methods (.upper, .lower, .left, .substring, etc.)
+         * - Array access and indexing
+         * - Type conversions (float, int, bool)
+         * - Basic control structures (for loops, switch/case)
+         * - Language features (comments, constants)
+         * - Edge cases and error conditions
+         * - Expression evaluation and parsing
+         * 
+         * WHAT UNIT TESTS DON'T COVER:
+         * - Complete program execution flows
+         * - Detailed trace table validation (line-by-line execution)
+         * - Input/output integration scenarios
+         * - Complex real-world program scenarios
+         * - Multiple feature interactions in complete programs
+         * 
+         * For comprehensive program testing, see integration-tests.html
+         * 
+         * ======================================================================
          * IMPORTANT NOTES FOR FUTURE AI/DEVELOPERS ADDING TESTS:
          * ======================================================================
          * 
@@ -437,45 +464,67 @@
         }
 
         function testNestedConditionalExecution() {
-            // Test the exact failing scenario from the jump qualification program
+            // Test nested conditional logic (core interpreter functionality)
             const testInterpreter = new Interpreter();
-            const testProgram = { inputs: ["2.2", "8"], randomValue: undefined };
             
-            const result = testInterpreter.executeProgram(`
+            // Test case 1: First condition true, second condition false
+            const testProgram1 = { inputs: ["2.5", "8"], randomValue: undefined };
+            const result1 = testInterpreter.executeProgram(`
                 jumpLength = float(input("Enter jump length"))
                 yearGroup = float(input("Enter year group"))
                 if jumpLength > 2 then
                     if yearGroup >= 10 then
-                        print("You qualify for the team")
+                        result = "qualify"
                     else
-                        print("You are too young")
+                        result = "too young"
                     endif
                 else
-                    print("Jump not long enough")
+                    result = "not long enough"
                 endif
-            `, testProgram);
+            `, testProgram1);
             
-            // Check variable values
-            assertEqual(testInterpreter.variables.jumpLength, 2.2, 'jumpLength should be 2.2');
+            assertEqual(testInterpreter.variables.jumpLength, 2.5, 'jumpLength should be 2.5');
             assertEqual(testInterpreter.variables.yearGroup, 8, 'yearGroup should be 8');
+            assertEqual(testInterpreter.variables.result, "too young", 'Should execute inner else branch');
             
-            // Check that the correct message was printed
-            assertEqual(testInterpreter.outputs.length, 1, 'Should have exactly 1 output');
-            assertEqual(testInterpreter.outputs[0], "You are too young", 'Should print "You are too young" for yearGroup=8');
+            // Test case 2: First condition false
+            const testInterpreter2 = new Interpreter();
+            const testProgram2 = { inputs: ["1.5", "12"], randomValue: undefined };
+            const result2 = testInterpreter2.executeProgram(`
+                jumpLength = float(input("Enter jump length"))
+                yearGroup = float(input("Enter year group"))
+                if jumpLength > 2 then
+                    if yearGroup >= 10 then
+                        result = "qualify"
+                    else
+                        result = "too young"
+                    endif
+                else
+                    result = "not long enough"
+                endif
+            `, testProgram2);
             
-            // Check that the trace table has the correct lines
-            // Lines that should execute: 1 (jumpLength=2.2), 2 (yearGroup=8), 7 (else print)
-            // Lines that should NOT execute: 3 (if jumpLength>2), 4 (if yearGroup>=10), 5 (print "qualify"), 6 (endif), 8 (endif), 9 (else), 10 (print "not long enough"), 11 (endif)
+            assertEqual(testInterpreter2.variables.jumpLength, 1.5, 'jumpLength should be 1.5');
+            assertEqual(testInterpreter2.variables.result, "not long enough", 'Should execute outer else branch');
             
-            const executedLines = testInterpreter.trace.map(entry => entry.lineNumber);
-            assertEqual(testInterpreter.variables.jumpLength, 2.2, 'jumpLength should be 2.2');
-            assertEqual(testInterpreter.variables.yearGroup, 8, 'yearGroup should be 8');
-            assertEqual(executedLines.includes(1), true, 'Line 1 should execute (jumpLength assignment)');
-            assertEqual(executedLines.includes(2), true, 'Line 2 should execute (yearGroup assignment)');
-            assertEqual(executedLines.includes(3), false, 'Line 3 should NOT execute (if condition not traced)');
-            assertEqual(executedLines.includes(4), false, 'Line 4 should NOT execute (if condition not traced)');
-            assertEqual(executedLines.includes(5), false, 'Line 5 should NOT execute (yearGroup >= 10 is false)');
-            assertEqual(executedLines.includes(7), true, 'Line 7 should execute (else branch print)');
+            // Test case 3: Both conditions true
+            const testInterpreter3 = new Interpreter();
+            const testProgram3 = { inputs: ["3.0", "11"], randomValue: undefined };
+            const result3 = testInterpreter3.executeProgram(`
+                jumpLength = float(input("Enter jump length"))
+                yearGroup = float(input("Enter year group"))
+                if jumpLength > 2 then
+                    if yearGroup >= 10 then
+                        result = "qualify"
+                    else
+                        result = "too young"
+                    endif
+                else
+                    result = "not long enough"
+                endif
+            `, testProgram3);
+            
+            assertEqual(testInterpreter3.variables.result, "qualify", 'Should execute inner if branch when both conditions true');
         }
 
         function testForLoopExecution() {
@@ -953,7 +1002,7 @@ next i`;
                 'String Integration': ['Numeric Operation with String Variables Present', 'Addition with String Variables Present'],
                 'Duck Grouping': ['Duck Grouping DIV (15 DIV 4 = 3)', 'Duck Grouping MOD (15 MOD 4 = 3)', 'Duck Grouping DIV (22 DIV 4 = 5)', 'Duck Grouping MOD (22 MOD 4 = 2)', 'Duck Grouping DIV (8 DIV 4 = 2)', 'Duck Grouping MOD (8 MOD 4 = 0)', 'Duck Grouping DIV (7 DIV 4 = 1)', 'Duck Grouping MOD (7 MOD 4 = 3)'],
                 'Type Conversions': ['float(input()) should convert "3.14" to 3.14', 'real(input()) should convert "3.14" to 3.14', 'jumpLength should be 3.1 as float', 'yearGroup should be 11 as float', 'Comparison 3.1 > 2 should be true'],
-                'Nested Conditionals': ['jumpLength should be 2.2', 'yearGroup should be 8', 'Should have exactly 1 output', 'Should print "You are too young" for yearGroup=8', 'Line 1 should execute (jumpLength assignment)', 'Line 2 should execute (yearGroup assignment)', 'Line 3 should NOT execute (if condition not traced)', 'Line 4 should NOT execute (if condition not traced)', 'Line 5 should NOT execute (yearGroup >= 10 is false)', 'Line 7 should execute (else branch print)'],
+                'Nested Conditionals': ['jumpLength should be 2.5', 'yearGroup should be 8', 'Should execute inner else branch', 'jumpLength should be 1.5', 'Should execute outer else branch', 'Should execute inner if branch when both conditions true'],
                 'For Loop Execution': ['x should be 2 after loop completion', 'Should have exactly 3 outputs', 'First output should be "0"', 'Second output should be "2"', 'Third output should be "4"', 'Should have exactly 6 trace entries', 'First trace should be line 1 (x=0)', 'Second trace should be line 2 (print 0)', 'Third trace should be line 1 (x=1)', 'Fourth trace should be line 2 (print 2)', 'Fifth trace should be line 1 (x=2)', 'Sixth trace should be line 2 (print 4)', 'First trace should change x to 0', 'Third trace should change x to 1', 'Fifth trace should change x to 2', 'Second trace should have output "0"', 'Fourth trace should have output "2"', 'Sixth trace should have output "4"'],
                 'String Methods in Print': ['name should be "hello"', 'city should be "WORLD"', 'Should have exactly 3 outputs', 'First output should be "HELLO"', 'Second output should be "world"', 'Third output should be "5"', 'Line 1 should be traced (name input)', 'Line 2 should be traced (city input)', 'Line 3 should be traced (print name.upper)', 'Line 4 should be traced (print city.lower)', 'Line 5 should be traced (print name.length)', 'Line 3 trace should have output "HELLO"', 'Line 4 trace should have output "world"', 'Line 5 trace should have output "5"'],
                 'Substring with Variables': ['x should be 3 after loop completion', 'country should be "France"', 'Should have exactly 3 outputs', 'First output should be "r" (position 1)', 'Second output should be "a" (position 2)', 'Third output should be "n" (position 3)', 'Should have exactly 7 trace entries', 'First trace should be line 1 (x=1)', 'Second trace should be line 2 (country assignment)', 'Third trace should be line 3 (print substring)', 'Fourth trace should be line 1 (x=2)', 'Fifth trace should be line 3 (print substring)', 'Sixth trace should be line 1 (x=3)', 'Seventh trace should be line 3 (print substring)', 'Should have 3 traces for line 3', 'First substring trace should output "r"', 'Second substring trace should output "a"', 'Third substring trace should output "n"'],

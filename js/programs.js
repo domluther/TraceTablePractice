@@ -429,8 +429,8 @@ print("Grade: " + grade)`,
         },
         {
             code: `for i = 1 to 3
-    color = input("Enter traffic light color")
-    switch color:
+    colour = input("Enter traffic light colour")
+    switch colour:
     case "red":
         print("Stop")
     case "amber":
@@ -438,7 +438,7 @@ print("Grade: " + grade)`,
     case "green":
         print("Go")
     default:
-        print("Invalid color")
+        print("Invalid colour")
     endswitch
 next i`,
             description: "Traffic light system with switch/case in loop",
