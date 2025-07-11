@@ -411,21 +411,29 @@ export class Interpreter {
         while (expression.includes('^')) {
             const pos = expression.lastIndexOf('^');
             
-            // Find left operand
+            // Find left operand (skip spaces)
             let leftStart = pos - 1;
-            while (leftStart >= 0 && /[A-Za-z0-9_\[\]]/.test(expression[leftStart])) {
+            while (leftStart >= 0 && expression[leftStart] === ' ') {
+                leftStart--; // Skip spaces
+            }
+            let leftEnd = leftStart + 1;
+            while (leftStart >= 0 && /[A-Za-z0-9_\[\].]/.test(expression[leftStart])) {
                 leftStart--;
             }
             leftStart++;
             
-            // Find right operand
-            let rightEnd = pos + 1;
-            while (rightEnd < expression.length && /[A-Za-z0-9_\[\]]/.test(expression[rightEnd])) {
+            // Find right operand (skip spaces)
+            let rightStart = pos + 1;
+            while (rightStart < expression.length && expression[rightStart] === ' ') {
+                rightStart++; // Skip spaces
+            }
+            let rightEnd = rightStart;
+            while (rightEnd < expression.length && /[A-Za-z0-9_\[\].]/.test(expression[rightEnd])) {
                 rightEnd++;
             }
             
-            const leftOperand = expression.substring(leftStart, pos).trim();
-            const rightOperand = expression.substring(pos + 1, rightEnd).trim();
+            const leftOperand = expression.substring(leftStart, leftEnd).trim();
+            const rightOperand = expression.substring(rightStart, rightEnd).trim();
             
             const leftVal = this.getExpressionValue(leftOperand, vars);
             const rightVal = this.getExpressionValue(rightOperand, vars);
@@ -559,7 +567,7 @@ export class Interpreter {
                             result = leftVal * rightVal;
                             break;
                         case '/':
-                            result = leftVal / rightVal; // Use floating-point division
+                            result = leftVal / rightVal; // Normal division (floating-point)
                             break;
                         case 'DIV':
                             result = Math.floor(leftVal / rightVal); // Integer division
