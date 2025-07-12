@@ -363,7 +363,8 @@
             const program6 = { inputs: programs.hard[5].inputSets[0], randomValue: programs.hard[5].randomValues[0] }; // ["25"], randomValue: 25
             
             const result6 = testInterpreter6.executeProgram(programs.hard[5].code, program6);
-            
+            console.table(result6)
+            console.table(testInterpreter6)
             // Test game variables for lucky first guess
             assertEqual(testInterpreter6.variables.secret, 25, 'Hard Program 6: Secret number should be 25 (set by randomValue)');
             assertEqual(testInterpreter6.variables.attempts, 1, 'Hard Program 6: Should have 1 attempt (lucky first guess)');

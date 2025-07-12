@@ -182,7 +182,8 @@ export class Interpreter {
         } else if (line.startsWith('print(')) {
             // Print statement - doesn't change variables, only produces output
             const content = line.substring(6, line.length - 1);
-            if (content.startsWith('"') && content.endsWith('"')) {
+            if (content.startsWith('"') && content.endsWith('"') && !content.includes('+')) {
+                // Simple string literal with no concatenation
                 output = content.slice(1, -1);
             } else if (content.includes(',') && !content.includes('.substring(') && !content.includes('.left(') && !content.includes('.right(')) {
                 // Handle comma-separated arguments like print("The score is", score)
@@ -273,12 +274,8 @@ export class Interpreter {
                     output = vars[varName].toString().length.toString();
                 }
             } else if (content.includes('+')) {
-                // For trace table purposes, show the original expression
-                // But still evaluate it for actual program output
-                output = content;
-                const evaluatedOutput = this.evaluateStringConcatenation(content, vars);
-                // Store the evaluated result for actual program output (but trace shows original)
-                if (evaluatedOutput) this.outputs.push(evaluatedOutput);
+                // Use the existing string concatenation method which handles complex expressions
+                output = this.evaluateStringConcatenation(content, vars);
             } else if (this.isArithmeticExpression(content)) {
                 // Handle arithmetic expressions like print(x*2) - AFTER checking for string methods
                 output = this.evaluateArithmeticExpression(content, vars).toString();
@@ -290,8 +287,7 @@ export class Interpreter {
                     output = vars[varName].toString();
                 }
             }
-            // Add output to outputs array for non-concatenation cases
-            if (output && !content.includes('+')) this.outputs.push(output);
+            if (output) this.outputs.push(output);
         } else if (line.includes('=') && !line.includes('==') && !line.includes('!=') && !line.includes('<=') && !line.includes('>=')) {
             // Assignment - check if trying to assign to a constant
             const parts = line.split('=');
