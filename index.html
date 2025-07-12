@@ -82,9 +82,24 @@
             </div>
             
             <div class="mark-btn-container">
-                <button id="clearBtn" class="btn btn-destructive">🗑️ Clear Table</button>
-                <button id="shuffleBtn" class="btn btn-warning">🔄 Shuffle Inputs</button>
-                <button id="markBtn" class="btn btn-success">✅ Mark My Answer</button>
+                <button id="prevBtn" class="btn btn-nav" title="Previous program (P key)">⬅️ Previous</button>
+                <button id="clearBtn" class="btn btn-destructive" title="Clear table (Escape key)">🗑️ Clear Table</button>
+                <button id="shuffleBtn" class="btn btn-warning" title="Shuffle inputs (S key)">🔄 Shuffle Inputs</button>
+                <button id="markBtn" class="btn btn-success" title="Mark answer (Enter key)">✅ Mark My Answer</button>
+                <button id="nextBtn" class="btn btn-nav" title="Next program (N key)">Next ➡️</button>
+            </div>
+            
+            <div class="keyboard-shortcuts">
+                <details>
+                    <summary>⌨️ Keyboard Shortcuts</summary>
+                    <div class="shortcuts-list">
+                        <span><kbd>Enter</kbd> Mark Answer</span>
+                        <span><kbd>N</kbd> Next Program</span>
+                        <span><kbd>P</kbd> Previous Program</span>
+                        <span><kbd>S</kbd> Shuffle Inputs</span>
+                        <span><kbd>Esc</kbd> Clear Table</span>
+                    </div>
+                </details>
             </div>
             
             <div id="feedback" class="feedback" style="display: none;">

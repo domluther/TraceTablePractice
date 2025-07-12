@@ -1051,6 +1051,12 @@ export class Interpreter {
                 } else if (part.startsWith('"') && part.endsWith('"')) {
                     // String literal
                     result += part.slice(1, -1);
+                } else if (part.includes('[') && part.includes(']')) {
+                    // Handle array access like colours[0]
+                    const arrayValue = this.getVariableValue(part, vars);
+                    if (arrayValue !== undefined) {
+                        result += arrayValue.toString();
+                    }
                 } else if (vars[part] !== undefined) {
                     result += vars[part].toString();
                 } else if (this.isArithmeticExpression(part)) {
@@ -1495,6 +1501,14 @@ export class Interpreter {
                 const varName = expression.split('.')[0];
                 if (vars[varName] !== undefined) {
                     return vars[varName].toString().length;
+                }
+            }
+            
+            // Check if it's array access like colours[0]
+            if (expression.includes('[') && expression.includes(']')) {
+                const arrayValue = this.getVariableValue(expression, vars);
+                if (arrayValue !== undefined) {
+                    return arrayValue;
                 }
             }
             

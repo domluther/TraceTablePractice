@@ -20,12 +20,14 @@ export class UI {
     init() {
         this.setupEventListeners();
         this.updateProgramTable();
+        this.updateNavigationButtons(); // Set initial button states
     }
 
     setupEventListeners() {
         // Difficulty change
         document.getElementById('difficulty').addEventListener('change', () => {
             this.updateProgramTable();
+            this.updateNavigationButtons(); // Update navigation when difficulty changes
         });
 
         // Generate random program button
@@ -46,6 +48,20 @@ export class UI {
         // Shuffle inputs button
         document.getElementById('shuffleBtn').addEventListener('click', () => {
             this.shuffleInputs();
+        });
+
+        // Navigation buttons
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            this.navigateProgram(-1);
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            this.navigateProgram(1);
+        });
+
+        // Keyboard navigation (global)
+        document.addEventListener('keydown', (e) => {
+            this.handleKeyboardNavigation(e);
         });
     }
 
@@ -105,6 +121,7 @@ export class UI {
         this.displayCode(this.currentProgram.code);
         this.executeProgram(this.currentProgram.code);
         this.traceTable.createTraceTable(this.expectedTrace, this.programVariables);
+        this.updateNavigationButtons();
         
         // Hide feedback
         document.getElementById('feedback').style.display = 'none';
@@ -213,5 +230,86 @@ export class UI {
         
         // Regenerate the same program with different inputs
         this.generateSpecificProgram(this.currentDifficulty, this.currentProgramIndex);
+    }
+
+    navigateProgram(direction) {
+        if (!this.currentDifficulty || this.currentProgramIndex === null) {
+            return; // No program currently loaded
+        }
+
+        const programList = programs[this.currentDifficulty];
+        const newIndex = this.currentProgramIndex + direction;
+
+        // Check bounds
+        if (newIndex < 0 || newIndex >= programList.length) {
+            return; // Can't navigate beyond bounds
+        }
+
+        // Load the new program
+        this.generateSpecificProgram(this.currentDifficulty, newIndex);
+        this.updateNavigationButtons();
+        this.clearTable(); // Clear the table when navigating
+    }
+
+    updateNavigationButtons() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (!this.currentDifficulty || this.currentProgramIndex === null) {
+            // No program loaded - disable both buttons
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            return;
+        }
+
+        const programList = programs[this.currentDifficulty];
+        
+        // Update previous button
+        prevBtn.disabled = this.currentProgramIndex <= 0;
+        
+        // Update next button
+        nextBtn.disabled = this.currentProgramIndex >= programList.length - 1;
+    }
+
+    handleKeyboardNavigation(event) {
+        // Only handle keyboard shortcuts when not focused on input elements
+        const activeElement = document.activeElement;
+        const isInputFocused = activeElement && (
+            activeElement.tagName === 'INPUT' || 
+            activeElement.tagName === 'TEXTAREA' || 
+            activeElement.isContentEditable
+        );
+
+        if (isInputFocused) {
+            return; // Don't handle shortcuts when typing in inputs
+        }
+
+        // Handle keyboard shortcuts
+        switch(event.key.toLowerCase()) {
+            case 'enter':
+                event.preventDefault();
+                this.markAnswer();
+                break;
+                
+            case 'n':
+                event.preventDefault();
+                this.navigateProgram(1); // Next program
+                break;
+                
+            case 'p':
+                event.preventDefault();
+                this.navigateProgram(-1); // Previous program
+                break;
+                
+            case 's':
+                event.preventDefault();
+                this.shuffleInputs();
+                break;
+                
+            case 'escape':
+                event.preventDefault();
+                this.clearTable();
+                break;
+        }
     }
 }

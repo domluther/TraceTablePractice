@@ -89,8 +89,8 @@ print("Perimeter: " + str(perimeter))`,
             code: `price = int(input("Enter price"))
 discount = price * (10 / 100)
 final_price = price - discount
-print("Original: " + str(price))
-print("Final: " + str(final_price))`,
+print("Original: £" + str(price))
+print("Final: £" + str(final_price))`,
             description: "10% discount calculator",
             inputSets: [
                 ["50"],
@@ -110,7 +110,8 @@ print(y)`,
             description: "Variable swapping technique"
         },
         {
-            code: `letter = "A"
+            code: `// ASCII for A is 65
+letter = "A"
 ascii_value = ASC(letter)
 print("ASCII value of " + letter + " is " + str(ascii_value))
 next_letter = CHR(ascii_value + 1)
@@ -118,8 +119,9 @@ print("Next letter is " + next_letter)`,
             description: "ASCII character conversion demo"
         },
         {
-            code: `start = ASC("A")
-for i = 0 to 4
+            code: `// ASCII for A is 65
+start = ASC("A")
+for i = 1 to 4
     letter = CHR(start + i)
     print(letter)
 next i`,

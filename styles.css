@@ -50,115 +50,6 @@ body {
     border-left: 4px solid #667eea;
 }
 
-/* Duck Level Color Schemes */
-.score-button.level-newcomer {
-    /* Eggshell colors - soft and neutral */
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
-    color: #2d3748;
-    box-shadow: 0 4px 12px rgba(203, 213, 224, 0.3);
-}
-
-.score-button.level-newcomer:hover {
-    box-shadow: 0 6px 16px rgba(203, 213, 224, 0.4);
-}
-
-.score-button.level-duckling {
-    /* Soft yellow - warm and welcoming */
-    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-    color: #7c2d12;
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-}
-
-.score-button.level-duckling:hover {
-    box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
-}
-
-.score-button.level-quack {
-    /* Bright yellow - cheerful and energetic */
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    color: #78350f;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-}
-
-.score-button.level-quack:hover {
-    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
-}
-
-.score-button.level-dynasty {
-    /* Blue like water - confident and flowing */
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.score-button.level-dynasty:hover {
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-}
-
-.score-button.level-mallard {
-    /* Purple elegance - sophisticated and premium */
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-}
-
-.score-button.level-mallard:hover {
-    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
-}
-
-.score-button.level-golden {
-    /* Golden luxury - legendary achievement */
-    background: linear-gradient(135deg, #ffd700 0%, #ffb300 50%, #ff8c00 100%);
-    color: #7c2d12;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-    border: 2px solid rgba(255, 215, 0, 0.6);
-    animation: golden-glow 2s ease-in-out infinite alternate;
-}
-
-.score-button.level-golden:hover {
-    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-    transform: translateY(-3px) scale(1.02);
-}
-
-@keyframes golden-glow {
-    0% {
-        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-    }
-    100% {
-        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.7);
-    }
-}
-
-.header {
-    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-    color: white;
-    padding: 20px 30px;
-    text-align: center;
-}
-
-.header h1 {
-    font-size: 2.2em;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-}
-
-.header p {
-    font-size: 1.1em;
-    opacity: 0.9;
-}
-
-.content {
-    padding: 30px;
-}
-
-.controls {
-    background: #f7fafc;
-    padding: 25px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    border-left: 4px solid #667eea;
-}
-
 .controls h2 {
     color: #2d3748;
     margin-bottom: 20px;
@@ -551,6 +442,29 @@ body {
 .btn-select:hover {
     background: #5a67d8;
     transform: translateY(-1px);
+}
+
+.btn-nav {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-nav:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-nav:disabled {
+    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+    color: #cbd5e0;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-nav:disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(160, 174, 192, 0.2);
 }
 
 @media (max-width: 768px) {
@@ -987,4 +901,72 @@ body {
         margin-top: 10px;
         align-self: flex-end;
     }
+}
+
+/* Keyboard Shortcuts Panel */
+.keyboard-shortcuts {
+    margin: 15px 0;
+    background: #f8f9ff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.keyboard-shortcuts details {
+    padding: 0;
+}
+
+.keyboard-shortcuts summary {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #4a5568;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.keyboard-shortcuts summary::-webkit-details-marker {
+    display: none;
+}
+
+.keyboard-shortcuts summary::before {
+    content: "▶";
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+}
+
+.keyboard-shortcuts details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.shortcuts-list {
+    padding: 15px;
+    padding-top: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.shortcuts-list span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    color: #4a5568;
+}
+
+kbd {
+    background: #2d3748;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    border: 1px solid #4a5568;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
