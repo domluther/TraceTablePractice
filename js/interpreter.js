@@ -294,13 +294,27 @@ export class Interpreter {
                 // For trace tables, we'll ignore the assignment
                 shouldTrace = false;
             } else if (varName.includes('[') && varName.includes(']')) {
-                const arrayMatch = varName.match(/(\w+)\[(\d+)\]/);
+                const arrayMatch = varName.match(/(\w+)\[([^\]]+)\]/);
                 if (arrayMatch) {
                     const arrayName = arrayMatch[1];
-                    const index = parseInt(arrayMatch[2]);
+                    const indexExpression = arrayMatch[2].trim();
+                    
+                    // Evaluate the index expression - could be a number, variable, or expression
+                    let index;
+                    if (!isNaN(indexExpression)) {
+                        // Numeric literal like [0]
+                        index = parseInt(indexExpression);
+                    } else if (vars[indexExpression] !== undefined) {
+                        // Variable like [day]
+                        index = parseInt(vars[indexExpression]);
+                    } else {
+                        // Could be an arithmetic expression like [i + 1]
+                        index = parseInt(this.evaluateArithmeticExpression(indexExpression, vars));
+                    }
+                    
                     const elementName = `${arrayName}[${index}]`;
                     
-                    if (vars[arrayName] && Array.isArray(vars[arrayName])) {
+                    if (vars[arrayName] && Array.isArray(vars[arrayName]) && !isNaN(index)) {
                         const oldValue = vars[arrayName][index];
                         let newValue;
                         if (!isNaN(value)) {
@@ -309,6 +323,9 @@ export class Interpreter {
                             newValue = value.slice(1, -1);
                         } else if (vars[value] !== undefined) {
                             newValue = vars[value];
+                        } else {
+                            // Could be an expression
+                            newValue = this.evaluateExpressionOrVariable(value, vars);
                         }
                         vars[arrayName][index] = newValue;
                         if (oldValue !== newValue) {

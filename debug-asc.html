@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug ASC Function</title>
+</head>
+<body>
+    <h1>Debug ASC Function</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import { Interpreter } from './js/interpreter.js';
+        
+        const testInterpreter = new Interpreter();
+        const program = { inputs: ["A"], randomValue: undefined };
+        
+        const code = `char = input("Enter a character: ")
+code = ASC(char)
+print("Character: " + char)
+print("ASCII code: " + str(code))
+if code >= 65 AND code <= 90 then
+    print("It's an uppercase letter")
+else
+    print("It's not an uppercase letter")
+endif`;
+
+        console.log("Testing ASC function...");
+        
+        const result = testInterpreter.executeProgram(code, program);
+        
+        console.log("Variables:", testInterpreter.variables);
+        console.log("Outputs:", testInterpreter.outputs);
+        console.log("Trace:", testInterpreter.trace);
+        
+        document.getElementById('results').innerHTML = `
+            <h2>Results:</h2>
+            <p><strong>char variable:</strong> "${testInterpreter.variables.char}"</p>
+            <p><strong>code variable:</strong> ${testInterpreter.variables.code}</p>
+            <p><strong>Type of code:</strong> ${typeof testInterpreter.variables.code}</p>
+            <p><strong>Outputs:</strong></p>
+            <ul>
+                ${testInterpreter.outputs.map(output => `<li>"${output}"</li>`).join('')}
+            </ul>
+            <p><strong>Trace entries (last 10):</strong></p>
+            <ul>
+                ${testInterpreter.trace.slice(-10).map(entry => `<li>Line ${entry.line}: ${entry.operation} | Variables: ${JSON.stringify(entry.variables)}</li>`).join('')}
+            </ul>
+        `;
+    </script>
+</body>
+</html>

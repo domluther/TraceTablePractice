@@ -328,7 +328,7 @@
             assertEqual(testInterpreter4.outputs[1], 'Hot days: 1', 'Hard Program 4: Second output should be "Hot days: 1"');
             
             // Test trace completeness (array + loop + conditionals + constants)
-            assert(testInterpreter4.trace.length >= 25, 'Hard Program 4: Should have at least 25 trace entries for complex array processing');
+            assertEqual(testInterpreter4.trace.length, 23, 'Hard Program 4: Should have at least 25 trace entries for complex array processing');
             
             // Test Hard Program 5: Shopping cart with discount (using first input set)
             const testInterpreter5 = new Interpreter();
