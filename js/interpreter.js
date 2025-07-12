@@ -81,9 +81,27 @@ export class Interpreter {
 
         return {
             trace: this.trace,
-            variables: Object.keys(this.variables),
+            variables: this.getExpandedVariableNames(),
             outputs: this.outputs
         };
+    }
+
+    getExpandedVariableNames() {
+        const expandedNames = [];
+        
+        for (const [name, value] of Object.entries(this.variables)) {
+            if (Array.isArray(value)) {
+                // Expand array variables into individual elements
+                for (let i = 0; i < value.length; i++) {
+                    expandedNames.push(`${name}[${i}]`);
+                }
+            } else {
+                // Add regular variables as is
+                expandedNames.push(name);
+            }
+        }
+        
+        return expandedNames;
     }
 
     addTraceEntry(lineNum, vars, output = '', changedVariables = {}) {
@@ -101,18 +119,40 @@ export class Interpreter {
         const changeRecord = {}; // Track which variables actually change
         
         if (line.startsWith('array ')) {
-            // Array declaration like "array nums[3]"
-            const match = line.match(/array\s+(\w+)\[(\d+)\]/);
-            if (match) {
-                const arrayName = match[1];
-                const arraySize = parseInt(match[2]);
-                // Initialize array with undefined values
-                vars[arrayName] = new Array(arraySize);
-                for (let i = 0; i < arraySize; i++) {
-                    vars[arrayName][i] = undefined;
-                }
+            // Array declaration with initialization like "array scores = [85, 92, 78, 90]"
+            const initMatch = line.match(/array\s+(\w+)\s*=\s*\[([^\]]+)\]/);
+            if (initMatch) {
+                const arrayName = initMatch[1];
+                const valuesStr = initMatch[2];
+                // Parse the values - handle numbers and strings
+                const values = valuesStr.split(',').map(v => {
+                    const trimmed = v.trim();
+                    // Remove quotes for strings
+                    if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || 
+                        (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+                        return trimmed.slice(1, -1);
+                    }
+                    // Parse as number if it's numeric
+                    const num = parseFloat(trimmed);
+                    return isNaN(num) ? trimmed : num;
+                });
+                vars[arrayName] = values;
                 changeRecord[arrayName] = vars[arrayName];
                 shouldTrace = false; // Don't trace array declarations
+            } else {
+                // Array declaration like "array nums[3]"
+                const match = line.match(/array\s+(\w+)\[(\d+)\]/);
+                if (match) {
+                    const arrayName = match[1];
+                    const arraySize = parseInt(match[2]);
+                    // Initialize array with undefined values
+                    vars[arrayName] = new Array(arraySize);
+                    for (let i = 0; i < arraySize; i++) {
+                        vars[arrayName][i] = undefined;
+                    }
+                    changeRecord[arrayName] = vars[arrayName];
+                    shouldTrace = false; // Don't trace array declarations
+                }
             }
         } else if (line.startsWith('const ')) {
             // Constant declaration like "const vat = 0.2"
@@ -766,14 +806,27 @@ export class Interpreter {
         getVariableValue(operand, vars) {
             // Helper function to get value from variable or array access
             if (operand.includes('[') && operand.includes(']')) {
-                // Array access like nums[i]
-                const arrayMatch = operand.match(/(\w+)\[(\w+)\]/);
+                // Array access like nums[i] or nums[0]
+                const arrayMatch = operand.match(/(\w+)\[(\w+|\d+)\]/);
                 if (arrayMatch) {
                     const arrayName = arrayMatch[1];
-                    const indexVar = arrayMatch[2];
+                    const indexStr = arrayMatch[2];
                     
-                    if (vars[arrayName] && Array.isArray(vars[arrayName]) && vars[indexVar] !== undefined) {
-                        const index = parseInt(vars[indexVar]);
+                    if (vars[arrayName] && Array.isArray(vars[arrayName])) {
+                        let index;
+                        // Check if index is a literal number or a variable
+                        if (/^\d+$/.test(indexStr)) {
+                            // Literal index like [0], [1], etc.
+                            index = parseInt(indexStr);
+                        } else {
+                            // Variable index like [i], [counter], etc.
+                            if (vars[indexStr] !== undefined) {
+                                index = parseInt(vars[indexStr]);
+                            } else {
+                                return undefined;
+                            }
+                        }
+                        
                         if (index >= 0 && index < vars[arrayName].length) {
                             return vars[arrayName][index];
                         }
@@ -976,13 +1029,26 @@ export class Interpreter {
         getExpressionValue(operand, vars) {
             // Handle array access
             if (operand.includes('[') && operand.includes(']')) {
-                const arrayMatch = operand.match(/(\w+)\[(\w+)\]/);
+                const arrayMatch = operand.match(/(\w+)\[(\w+|\d+)\]/);
                 if (arrayMatch) {
                     const arrayName = arrayMatch[1];
-                    const indexVar = arrayMatch[2];
+                    const indexStr = arrayMatch[2];
                     
                     if (vars[arrayName] && Array.isArray(vars[arrayName])) {
-                        const index = vars[indexVar] !== undefined ? parseInt(vars[indexVar]) : parseInt(indexVar);
+                        let index;
+                        // Check if index is a literal number or a variable
+                        if (/^\d+$/.test(indexStr)) {
+                            // Literal index like [0], [1], etc.
+                            index = parseInt(indexStr);
+                        } else {
+                            // Variable index like [i], [counter], etc.
+                            if (vars[indexStr] !== undefined) {
+                                index = parseInt(vars[indexStr]);
+                            } else {
+                                return 0;
+                            }
+                        }
+                        
                         if (index >= 0 && index < vars[arrayName].length) {
                             return vars[arrayName][index];
                         }

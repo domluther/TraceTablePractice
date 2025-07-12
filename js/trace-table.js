@@ -130,10 +130,16 @@ export class TraceTable {
         this.expectedTrace.forEach((expectedEntry, traceIndex) => {
             const lineNum = expectedEntry.lineNumber;
             
-            // Update variable history
+            // Update variable history - handle both regular variables and arrays
             Object.keys(expectedEntry.variables).forEach(varName => {
                 if (expectedEntry.variables[varName] !== undefined) {
-                    variableHistory[varName] = expectedEntry.variables[varName];
+                    if (Array.isArray(expectedEntry.variables[varName])) {
+                        // Store the array in history for reference
+                        variableHistory[varName] = [...expectedEntry.variables[varName]];
+                    } else {
+                        // Regular variable
+                        variableHistory[varName] = expectedEntry.variables[varName];
+                    }
                 }
             });
             
@@ -146,16 +152,42 @@ export class TraceTable {
                 correct++;
                 userEntry.domElements.lineInput.classList.add('correct');
                 
-                // Check each variable - but only the ones that changed on this line
+                // Check each variable - handle both regular variables and array elements
                 this.programVariables.forEach(varName => {
                     const inputElement = userEntry.domElements.variableInputs[varName];
                     
-                    // Check if this variable changed on this line
-                    const expectedChangedVariables = expectedEntry.changedVariables || {};
-                    if (expectedChangedVariables.hasOwnProperty(varName)) {
+                    // Check if this is an array element (e.g., "colours[0]")
+                    const arrayMatch = varName.match(/^(\w+)\[(\d+)\]$/);
+                    let expectedValue, hasChanged;
+                    
+                    if (arrayMatch) {
+                        // This is an array element
+                        const arrayName = arrayMatch[1];
+                        const index = parseInt(arrayMatch[2]);
+                        
+                        // Check if the array changed on this line
+                        const expectedChangedVariables = expectedEntry.changedVariables || {};
+                        if (expectedChangedVariables.hasOwnProperty(arrayName) && 
+                            Array.isArray(expectedChangedVariables[arrayName])) {
+                            hasChanged = true;
+                            expectedValue = expectedChangedVariables[arrayName][index];
+                        } else {
+                            hasChanged = false;
+                            // Get current value from variable history for comparison
+                            if (variableHistory[arrayName] && Array.isArray(variableHistory[arrayName])) {
+                                expectedValue = variableHistory[arrayName][index];
+                            }
+                        }
+                    } else {
+                        // Regular variable
+                        const expectedChangedVariables = expectedEntry.changedVariables || {};
+                        hasChanged = expectedChangedVariables.hasOwnProperty(varName);
+                        expectedValue = hasChanged ? expectedChangedVariables[varName] : variableHistory[varName];
+                    }
+                    
+                    if (hasChanged) {
                         // This variable should have a value entered
                         total++;
-                        const expectedValue = expectedChangedVariables[varName];
                         const userValue = userEntry.variables[varName];
                         
                         if (expectedValue === undefined || expectedValue === null) {

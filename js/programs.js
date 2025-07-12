@@ -141,6 +141,67 @@ y = temp
 print(x)
 print(y)`,
             description: "Variable swapping technique"
+        },
+        {
+            code: `letter = "A"
+ascii_value = ASC(letter)
+print("ASCII value of " + letter + " is " + str(ascii_value))
+next_letter = CHR(ascii_value + 1)
+print("Next letter is " + next_letter)`,
+            description: "ASCII character conversion demo"
+        },
+        {
+            code: `char = input("Enter a character: ")
+code = ASC(char)
+print("Character: " + char)
+print("ASCII code: " + str(code))
+if code >= 65 AND code <= 90 then
+    print("It's an uppercase letter")
+else
+    print("It's not an uppercase letter")
+endif`,
+            description: "Character type checker using ASCII",
+            inputSets: [
+                ["A"],
+                ["a"],
+                ["E"],
+                ["b"]
+            ]
+        },
+        {
+            code: `start = ASC("A")
+for i = 0 to 4
+    letter = CHR(start + i)
+    print(letter)
+next i`,
+            description: "Alphabet sequence generator"
+        },
+        {
+            code: `array colours[3]
+colours[0] = "Red"
+colours[1] = "Blue" 
+colours[2] = "Green"
+print("First colour: " + colours[0])
+print("Last colour: " + colours[2])`,
+            description: "Basic array creation and access"
+        },
+        {
+            code: `array scores = [85, 92, 78, 90]
+highest = scores[1]
+print("Score 1: " + str(scores[0]))
+print("Score 2: " + str(scores[1]))
+print("Highest so far: " + str(highest))`,
+            description: "Array initialization with values"
+        },
+        {
+            code: `array names = ["Alice", "Bob", "Charlie"]
+index = 1
+current_name = names[index]
+print("Student " + str(index) + ": " + current_name)
+index = index + 1
+current_name = names[index]
+print("Student " + str(index) + ": " + current_name)`,
+            description: "Array access with variables"
         }
     ],
     medium: [

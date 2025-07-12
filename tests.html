@@ -211,6 +211,84 @@
         }
         
         /**
+         * Test ASCII conversion functions ASC() and CHR()
+         * Covers: character to ASCII value conversion, ASCII to character conversion,
+         * edge cases, error handling, usage in assignments and conditions
+         */
+        function testASCAndCHRFunctions() {
+            const interpreter = new Interpreter();
+            
+            // Test ASC() function - character to ASCII value
+            let vars = { letter: 'A', message: 'Hello' };
+            
+            // Basic ASC() tests (as used in programs.js)
+            assertEqual(interpreter.evaluateStringConcatenation('ASC("A")', vars), 65, 'ASC("A") should return 65');
+            assertEqual(interpreter.evaluateStringConcatenation('ASC("Z")', vars), 90, 'ASC("Z") should return 90');
+            assertEqual(interpreter.evaluateStringConcatenation('ASC("a")', vars), 97, 'ASC("a") should return 97');
+            assertEqual(interpreter.evaluateStringConcatenation('ASC("0")', vars), 48, 'ASC("0") should return 48');
+            assertEqual(interpreter.evaluateStringConcatenation('ASC(" ")', vars), 32, 'ASC(" ") should return 32');
+            
+            // ASC() with variables (as used in programs.js)
+            assertEqual(interpreter.evaluateStringConcatenation('ASC(letter)', vars), 65, 'ASC(letter) with A should return 65');
+            
+            // Basic CHR() tests (as used in programs.js)
+            assertEqual(interpreter.evaluateStringConcatenation('CHR(65)', vars), 'A', 'CHR(65) should return "A"');
+            assertEqual(interpreter.evaluateStringConcatenation('CHR(90)', vars), 'Z', 'CHR(90) should return "Z"');
+            assertEqual(interpreter.evaluateStringConcatenation('CHR(97)', vars), 'a', 'CHR(97) should return "a"');
+            assertEqual(interpreter.evaluateStringConcatenation('CHR(48)', vars), '0', 'CHR(48) should return "0"');
+            assertEqual(interpreter.evaluateStringConcatenation('CHR(32)', vars), ' ', 'CHR(32) should return space');
+            
+            // CHR() with variables (as used in programs.js)
+            vars.ascii_val = 65;
+            assertEqual(interpreter.evaluateStringConcatenation('CHR(ascii_val)', vars), 'A', 'CHR(ascii_val) with 65 should return "A"');
+            
+            // Test in conditions using evaluateExpressionOrVariable
+            assertEqual(interpreter.evaluateExpressionOrVariable('ASC("B")', vars), 66, 'ASC("B") in condition should return 66');
+            assertEqual(interpreter.evaluateExpressionOrVariable('CHR(66)', vars), 'B', 'CHR(66) in condition should return "B"');
+            
+            // Test CHR with simple arithmetic (exactly as used in programs.js)
+            vars.ascii_value = 65;
+            const result = interpreter.executeProgram('result = CHR(ascii_value + 1)', { inputs: [] });
+            assertEqual(result.variables.result, 'B', 'CHR(ascii_value + 1) should return "B"');
+            
+            // Test the actual pattern from programs.js: start = ASC("A") + i
+            vars.start = 65;
+            vars.i = 1;
+            const result2 = interpreter.executeProgram('letter = CHR(start + i)', { inputs: [] });
+            assertEqual(result2.variables.letter, 'B', 'CHR(start + i) should return "B"');
+        }
+        
+        /**
+         * Test boolean operators AND/OR in conditions
+         * Covers: AND operator, OR operator (uppercase only - OCR ERL standard)
+         */
+        function testBooleanOperators() {
+            const interpreter = new Interpreter();
+            const vars = { x: 5, y: 10, z: 15 };
+            
+            // Test AND operator (uppercase only)
+            assertEqual(interpreter.evaluateCondition('x < 10 AND y > 5', vars), true, 'AND: Both conditions true should return true');
+            assertEqual(interpreter.evaluateCondition('x < 3 AND y > 5', vars), false, 'AND: First false should return false');
+            assertEqual(interpreter.evaluateCondition('x < 10 AND y > 15', vars), false, 'AND: Second false should return false');
+            assertEqual(interpreter.evaluateCondition('x > 10 AND y < 5', vars), false, 'AND: Both false should return false');
+            
+            // Test OR operator (uppercase only)
+            assertEqual(interpreter.evaluateCondition('x < 10 OR y > 15', vars), true, 'OR: First true should return true');
+            assertEqual(interpreter.evaluateCondition('x > 10 OR y > 5', vars), true, 'OR: Second true should return true');
+            assertEqual(interpreter.evaluateCondition('x < 10 OR y > 5', vars), true, 'OR: Both true should return true');
+            assertEqual(interpreter.evaluateCondition('x > 10 OR y < 5', vars), false, 'OR: Both false should return false');
+            
+            // Test with ASCII functions
+            vars.char = 'A';
+            assertEqual(interpreter.evaluateCondition('ASC(char) >= 65 AND ASC(char) <= 90', vars), true, 'ASCII range check with AND should work');
+            
+            // Test that lowercase operators do NOT work (OCR ERL uses uppercase only)
+            // These should return false because the conditions won't be properly parsed
+            assertEqual(interpreter.evaluateCondition('x < 10 and y > 5', vars), false, 'lowercase "and" should not work in OCR ERL');
+            assertEqual(interpreter.evaluateCondition('x < 10 or y > 15', vars), false, 'lowercase "or" should not work in OCR ERL');
+        }
+        
+        /**
          * Test for loop execution
          * Covers: loop variables, trace entries, output generation
          */
@@ -687,6 +765,46 @@ print("Done")`;
             assertEqual(testInterpreter.outputs[1], 'Done', 'Second output should be "Done"');
         }
         
+        /**
+         * Test array functionality in OCR ERL
+         * Covers: array declaration, initialization, element access, trace table expansion
+         */
+        function testArrayFunctionality() {
+            const interpreter = new Interpreter();
+            
+            // Test array declaration with size
+            const result1 = interpreter.executeProgram(`array colours[3]
+colours[0] = "Red"
+colours[1] = "Blue"
+colours[2] = "Green"`, { inputs: [] });
+            
+            assertEqual(result1.variables.includes('colours[0]'), true, 'Array elements should be expanded in variable list');
+            assertEqual(result1.variables.includes('colours[1]'), true, 'Array elements should be expanded in variable list');
+            assertEqual(result1.variables.includes('colours[2]'), true, 'Array elements should be expanded in variable list');
+            assertEqual(interpreter.variables.colours[0], 'Red', 'colours[0] should be "Red"');
+            assertEqual(interpreter.variables.colours[1], 'Blue', 'colours[1] should be "Blue"');
+            assertEqual(interpreter.variables.colours[2], 'Green', 'colours[2] should be "Green"');
+            
+            // Test array initialization with values
+            const result2 = interpreter.executeProgram(`array scores = [85, 92, 78, 90]
+highest = scores[1]`, { inputs: [] });
+            
+            assertEqual(interpreter.variables.scores[0], 85, 'scores[0] should be 85');
+            assertEqual(interpreter.variables.scores[1], 92, 'scores[1] should be 92');
+            assertEqual(interpreter.variables.scores[2], 78, 'scores[2] should be 78');
+            assertEqual(interpreter.variables.scores[3], 90, 'scores[3] should be 90');
+            assertEqual(interpreter.variables.highest, 92, 'highest should be 92 (scores[1])');
+            
+            // Test array access with variables
+            const result3 = interpreter.executeProgram(`array names = ["Alice", "Bob", "Charlie"]
+index = 1
+current_name = names[index]`, { inputs: [] });
+            
+            assertEqual(interpreter.variables.names[1], 'Bob', 'names[1] should be "Bob"');
+            assertEqual(interpreter.variables.index, 1, 'index should be 1');
+            assertEqual(interpreter.variables.current_name, 'Bob', 'current_name should be "Bob"');
+        }
+        
         // TEST MANAGEMENT AND EXECUTION
         // ============================================================================
         
@@ -729,6 +847,8 @@ print("Done")`;
                 'Parentheses': ['Basic Parentheses', 'Nested Parentheses', 'Rectangle Perimeter', 'Complex Parentheses'],
                 'Array Access': ['Array Access with Variable Index', 'Array Access with Literal Index', 'Arithmetic with Array Access', 'Array Access in Multiplication'],
                 'String Methods': ['First name .left(1)', 'Last name .left(1)', 'Initials concatenation', 'String .upper method', 'String .lower method'],
+                'ASCII Functions': ['ASC("A")', 'ASC("Z")', 'ASC("a")', 'ASC("0")', 'ASC(" ")', 'ASC(letter)', 'ASC(message.left(1))', 'CHR(65)', 'CHR(90)', 'CHR(97)', 'CHR(48)', 'CHR(32)', 'CHR(ascii_val)', 'ASC("B") in condition', 'CHR(66) in condition', 'CHR(ASC("X"))', 'ASC("A") + 1', 'CHR(ASC("A") + 1)'],
+                'Boolean Operators': ['AND: Both conditions true', 'AND: First false', 'AND: Second false', 'AND: Both false', 'OR: First true', 'OR: Second true', 'OR: Both true', 'OR: Both false', 'ASCII range check with AND', 'lowercase "and" should not work', 'lowercase "or" should not work'],
                 'For Loop Execution': ['x should be 2', 'Should have exactly 3 outputs', 'First output should be "0"', 'Second output should be "2"', 'Third output should be "4"'],
                 'Variable Operations': ['Variable Access', 'Numeric Literal'],
                 'Complex Expressions': ['Complex Expression', 'Multiple Operators'],
@@ -836,7 +956,10 @@ print("Done")`;
             testOperatorPrecedence();
             testParentheses();
             testArrayAccess();
+            testArrayFunctionality();
             testStringMethods();
+            testASCAndCHRFunctions();
+            testBooleanOperators();
             testForLoopExecution();
             testVariableOperations();
             testComplexExpressions();
@@ -850,6 +973,7 @@ print("Done")`;
             testForLoopWithPositiveStep();
             testForLoopWithNegativeStep();
             testSwitchCase();
+            testArrayFunctionality();
             
             // Display results
             displayTestResults();

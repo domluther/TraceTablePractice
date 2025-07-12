@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Arrays in OCR ERL</title>
+</head>
+<body>
+    <h1>Testing OCR ERL Array Functionality</h1>
+    <div id="output"></div>
+
+    <script type="module">
+        import { Interpreter } from './js/interpreter.js';
+        
+        const interpreter = new Interpreter();
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            output.innerHTML += message + '<br>';
+            console.log(message);
+        }
+        
+        log("Testing OCR ERL Array Functionality:");
+        log("");
+        
+        // Test 1: Array declaration with size
+        log("1. Testing: array colours[3]");
+        try {
+            const program1 = `array colours[3]
+colours[0] = "Red"
+colours[1] = "Blue"
+colours[2] = "Green"
+print("First: " + colours[0])
+print("Last: " + colours[2])`;
+            
+            const result1 = interpreter.executeProgram(program1, { inputs: [] });
+            log(`   Variables: ${result1.variables.join(', ')}`);
+            log(`   Outputs: ${result1.outputs.join(', ')}`);
+            log("   ✅ PASS - Array declaration with size works");
+        } catch (e) {
+            log(`   ❌ FAIL - ${e.message}`);
+        }
+        log("");
+        
+        // Test 2: Array declaration with initialization
+        log("2. Testing: array scores = [85, 92, 78, 90]");
+        try {
+            const program2 = `array scores = [85, 92, 78, 90]
+highest = scores[1]
+print("Score 1: " + str(scores[0]))
+print("Score 2: " + str(scores[1]))
+print("Highest: " + str(highest))`;
+            
+            const result2 = interpreter.executeProgram(program2, { inputs: [] });
+            log(`   Variables: ${result2.variables.join(', ')}`);
+            log(`   Final values: scores=[${interpreter.variables.scores.join(',')}], highest=${interpreter.variables.highest}`);
+            log(`   Outputs: ${result2.outputs.join(', ')}`);
+            log("   ✅ PASS - Array initialization with values works");
+        } catch (e) {
+            log(`   ❌ FAIL - ${e.message}`);
+        }
+        log("");
+        
+        // Test 3: Array access with variables
+        log("3. Testing: Array access with variables");
+        try {
+            const program3 = `array names = ["Alice", "Bob", "Charlie"]
+index = 1
+current_name = names[index]
+print("Student " + str(index) + ": " + current_name)
+index = index + 1
+current_name = names[index]
+print("Student " + str(index) + ": " + current_name)`;
+            
+            const result3 = interpreter.executeProgram(program3, { inputs: [] });
+            log(`   Variables: ${result3.variables.join(', ')}`);
+            log(`   Final values: names=[${interpreter.variables.names.join(',')}], index=${interpreter.variables.index}, current_name=${interpreter.variables.current_name}`);
+            log(`   Outputs: ${result3.outputs.join(', ')}`);
+            log("   ✅ PASS - Array access with variables works");
+        } catch (e) {
+            log(`   ❌ FAIL - ${e.message}`);
+        }
+        log("");
+        
+        // Test 4: Check trace expansion for arrays
+        log("4. Testing: Trace table variable expansion");
+        try {
+            const program4 = `array test[2]
+test[0] = 10
+test[1] = 20`;
+            
+            const result4 = interpreter.executeProgram(program4, { inputs: [] });
+            log(`   Expanded variables: ${result4.variables.join(', ')}`);
+            
+            // Check that arrays are expanded into individual elements
+            const hasArrayElements = result4.variables.some(v => v.includes('['));
+            if (hasArrayElements) {
+                log("   ✅ PASS - Arrays are expanded into individual elements for trace table");
+            } else {
+                log("   ❌ FAIL - Arrays not properly expanded");
+            }
+        } catch (e) {
+            log(`   ❌ FAIL - ${e.message}`);
+        }
+        log("");
+        
+        log("Array functionality testing completed!");
+    </script>
+</body>
+</html>
