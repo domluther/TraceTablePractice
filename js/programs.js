@@ -688,12 +688,12 @@ endif`,
             // Input values may not be realistic for game based on random secret number
             // but are used to demonstrate the program logic
             inputSets: [
-                ["25", "12", "6"]
+                ["25", "12", "6"],
                 ["40", "30", "25"],
                 ["10", "20", "30"],
                 ["25", "37", "43"],
                 ["50", "30", "10"],
-                ["1", "2", "3"],
+                ["1", "2", "3"]
             ],
             randomValues: [6, 25, 30, 40, 45, 50]
         },
