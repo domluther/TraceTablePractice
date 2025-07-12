@@ -684,14 +684,14 @@ else
 endif`,
             description: "Number guessing game with attempt limit",
             inputSets: [
-                ["25"],                    // Lucky first guess (secret = 25)
-                ["10", "20", "30"],        // Three attempts to find 25
-                ["40", "30", "25"],        // Three attempts, different strategy
-                ["1", "2", "3"],           // Fail after 3 attempts (secret = 45)
-                ["25", "37", "43"],        // Binary search for 43: start middle, go high, close in
-                ["25", "12", "6"]          // Binary search for 6: start middle, go low, close in
+                ["25", "12", "6"]
+                ["40", "30", "25"],
+                ["10", "20", "30"],
+                ["25", "37", "43"],
+                ["50", "30", "10"],
+                ["1", "2", "3"],
             ],
-            randomValues: [25, 30, 50, 45, 43, 6]
+            randomValues: [6, 25, 30, 40, 45, 50]
         },
     ]
 };
