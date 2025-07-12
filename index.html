@@ -12,6 +12,7 @@
         <div class="header">
             <h1>🦆 Mr Luther's OCR J277 Trace Table Practice 🦆</h1>
             <p>Master GCSE Computer Science algorithms with interactive trace tables</p>
+            <button id="scoreButton" class="score-button" onclick="window.scoreManager.showScoreModal()">📊 Scores (0%)</button>
         </div>
         
         <div class="content">
@@ -94,5 +95,11 @@
 
     <!-- Load the modular application -->
     <script type="module" src="js/app.js"></script>
+    <script type="module">
+        import { ScoreManager } from './js/score-manager.js';
+        
+        // Initialize the score manager globally
+        window.scoreManager = new ScoreManager();
+    </script>
 </body>
 </html>
