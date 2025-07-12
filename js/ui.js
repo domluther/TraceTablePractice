@@ -129,6 +129,35 @@ export class UI {
         }
         
         document.getElementById('codeDisplay').innerHTML = numberedCode;
+        
+        // Update ERL link
+        this.updateERLLink(code);
+    }
+
+    updateERLLink(code) {
+        const erlLink = document.getElementById('erlLink');
+        
+        if (code && code.trim()) {
+            // Format the code for ERL URL with proper encoding:
+            let formattedCode = code
+                .replace(/\\/g, '%5C')  // Convert backslashes to %5C
+                .replace(/"/g, '%5C%22') // Convert double quotes to \\" -> %5C%22
+                .replace(/'/g, '%27')   // Convert single quotes to %27
+                .replace(/\?/g, '%3F')  // Convert question marks to %3F
+                .replace(/=/g, '%3D')   // Convert equals signs to %3D
+                .replace(/\+/g, '%2B')  // Convert + operators to %2B
+                .replace(/\n/g, '%5Cn') // Convert newlines to %5Cn
+                .replace(/ /g, '+')     // Convert spaces to +
+                .replace(/\(/g, '%28') // Convert ( to %28
+                .replace(/\)/g, '%29'); // Convert ) to %29
+            
+            const erlURL = `https://www.examreferencelanguage.co.uk/index.php?code=%5B%7B%22name%22%3A%22code%22%2C%22content%22%3A%22${formattedCode}%22%7D%5D`;
+            
+            erlLink.href = erlURL;
+            erlLink.style.display = 'inline-block';
+        } else {
+            erlLink.style.display = 'none';
+        }
     }
 
     executeProgram(code) {

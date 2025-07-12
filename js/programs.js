@@ -299,8 +299,8 @@ endif`,
             ]
         },
         {
-            code: `longJump = input("Enter distance")
-yearGroup = input("Enter year group")
+            code: `longJump = float(input("Enter distance"))
+yearGroup = int(input("Enter year group"))
 if longJump >= 5.0 then
     score = 3
 elseif longJump >= 3.0 then

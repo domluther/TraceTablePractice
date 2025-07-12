@@ -157,6 +157,39 @@ body {
     margin-bottom: 20px;
 }
 
+.code-header {
+    background: #1a202c;
+    color: white;
+    padding: 15px 20px;
+    margin: 0;
+    border-bottom: 1px solid #4a5568;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.code-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.erl-link {
+    color: #90cdf4;
+    text-decoration: none;
+    font-size: 0.9em;
+    padding: 6px 12px;
+    border: 1px solid #4a5568;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.erl-link:hover {
+    background: #4a5568;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
 .code-display h3, .trace-section h3 {
     background: #1a202c;
     color: white;
