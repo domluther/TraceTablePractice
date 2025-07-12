@@ -137,8 +137,13 @@ export class Interpreter {
                     return isNaN(num) ? trimmed : num;
                 });
                 vars[arrayName] = values;
+                // For initialized arrays, we want to trace individual element assignments
+                // This helps students see how the array gets populated
+                for (let i = 0; i < values.length; i++) {
+                    changeRecord[`${arrayName}[${i}]`] = values[i];
+                }
+                // Also record the full array for completeness
                 changeRecord[arrayName] = vars[arrayName];
-                shouldTrace = false; // Don't trace array declarations
             } else {
                 // Array declaration like "array nums[3]"
                 const match = line.match(/array\s+(\w+)\[(\d+)\]/);
@@ -151,7 +156,7 @@ export class Interpreter {
                         vars[arrayName][i] = undefined;
                     }
                     changeRecord[arrayName] = vars[arrayName];
-                    shouldTrace = false; // Don't trace array declarations
+                    shouldTrace = false; // Don't trace empty array declarations (less useful)
                 }
             }
         } else if (line.startsWith('const ')) {

@@ -329,32 +329,30 @@
             
             // Test trace completeness (array + loop + conditionals + constants)
             assertEqual(testInterpreter4.trace.length, 23, 'Hard Program 4: Should have at least 25 trace entries for complex array processing');
-            
             // Test Hard Program 5: Shopping cart with discount (using first input set)
             const testInterpreter5 = new Interpreter();
-            const program5 = { inputs: programs.hard[4].inputSets[0], randomValue: undefined }; // ["2", "3", "1"]
+            const program5 = { inputs: programs.hard[4].inputSets[0], randomValue: undefined }; // ["1", "5", "1"]
             
             const result5 = testInterpreter5.executeProgram(programs.hard[4].code, program5);
-            
             // Test arrays and calculations
             assert(testInterpreter5.variables.products, 'Hard Program 5: Should have products array');
             assert(testInterpreter5.variables.prices, 'Hard Program 5: Should have prices array');
             assertArrayEqual(testInterpreter5.variables.products, ['apples', 'bananas', 'cherries'], 'Hard Program 5: Products array should be correct');
             assertArrayEqual(testInterpreter5.variables.prices, [3, 5, 2], 'Hard Program 5: Prices array should be correct');
             
-            // Calculate expected total: (2*3) + (3*5) + (1*2) = 6 + 15 + 2 = 23
-            assertEqual(testInterpreter5.variables.total_cost, 23, 'Hard Program 5: Total cost should be 23 (2*3 + 3*5 + 1*2)');
+            // Calculate expected total: (1*3) + (5*5) + (1*2) = 3 + 25 + 2 = 30
+            assertEqual(testInterpreter5.variables.total_cost, 30, 'Hard Program 5: Total cost should be 30 (1*3 + 5*5 + 1*2)');
             
             // Since total > 20, should have discount calculations
-            assertEqual(testInterpreter5.variables.discount, 2.3, 'Hard Program 5: Discount should be 2.3 (23 * 0.1)');
-            assertEqual(testInterpreter5.variables.final_cost, 20.7, 'Hard Program 5: Final cost should be 20.7 (23 - 2.3)');
+            assertEqual(testInterpreter5.variables.discount, 3, 'Hard Program 5: Discount should be 3 (30 * 0.1)');
+            assertEqual(testInterpreter5.variables.final_cost, 27, 'Hard Program 5: Final cost should be 27 (30 - 3)');
             
             // Test outputs (total + discount message + discount amount + final cost = 4 outputs)
             assertEqual(testInterpreter5.outputs.length, 4, 'Hard Program 5: Should have 4 outputs (total + discount info)');
-            assertEqual(testInterpreter5.outputs[0], 'Total cost: £23', 'Hard Program 5: First output should be "Total cost: £23"');
-            assertEqual(testInterpreter5.outputs[1], 'You get a 10% discount!', 'Hard Program 5: Second output should be discount message');
-            assertEqual(testInterpreter5.outputs[2], '10% discount: 2.3', 'Hard Program 5: Third output should be discount amount');
-            assertEqual(testInterpreter5.outputs[3], 'Final cost: 20.7', 'Hard Program 5: Fourth output should be final cost');
+            assertEqual(testInterpreter5.outputs[0], 'Total: £30', 'Hard Program 5: First output should be "Total: £30"');
+            assertEqual(testInterpreter5.outputs[1], 'You get a discount', 'Hard Program 5: Second output should be discount message');
+            assertEqual(testInterpreter5.outputs[2], '10% off: £3', 'Hard Program 5: Third output should be discount amount');
+            assertEqual(testInterpreter5.outputs[3], 'Final: £27', 'Hard Program 5: Fourth output should be final cost');
             
             // Test trace completeness (arrays + loop + conditionals + calculations)
             assert(testInterpreter5.trace.length >= 20, 'Hard Program 5: Should have at least 20 trace entries for shopping cart logic');

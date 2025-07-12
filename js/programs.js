@@ -645,17 +645,17 @@ for i = 0 to 2
     cost = quantity * prices[i]
     total_cost = total_cost + cost
 next i
-print("Total cost: £" + str(total_cost))
+print("Total: £" + str(total_cost))
 if total_cost > 20 then
-    print("You get a 10% discount!")
+    print("You get a discount")
     discount = total_cost * 0.1
     final_cost = total_cost - discount
-    print("10% discount: " + str(discount))
-    print("Final cost: " + str(final_cost))
+    print("10% off: £" + str(discount))
+    print("Final: £" + str(final_cost))
 endif`,
             description: "Shopping cart with discount calculation",
             inputSets: [
-                ["2", "3", "1"],
+                ["1", "5", "1"],
                 ["5", "2", "0"],
                 ["1", "4", "2"],
                 ["3", "1", "3"]
