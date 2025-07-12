@@ -8,47 +8,60 @@ export class ScoreManager {
     }
 
     init() {
-        // Initialize overall stats if they don't exist
-        if (!localStorage.getItem(this.overallKey)) {
-            this.resetOverallStats();
-        }
+        // Overall stats are now calculated from individual program scores
         this.updateScoreDisplay();
     }
 
-    // Get overall statistics
+    // Get overall statistics - now calculated from best scores
     getOverallStats() {
-        try {
-            const stats = localStorage.getItem(this.overallKey);
-            return stats ? JSON.parse(stats) : { totalCorrect: 0, totalQuestions: 0, totalAttempts: 0 };
-        } catch (error) {
-            console.error('Error reading overall stats:', error);
-            return { totalCorrect: 0, totalQuestions: 0, totalAttempts: 0 };
-        }
+        return this.calculateOverallStats();
     }
 
-    // Update overall statistics
+    // Update overall statistics - calculate from best scores of each program
     updateOverallStats(correct, total) {
         try {
-            const stats = this.getOverallStats();
-            stats.totalCorrect += correct;
-            stats.totalQuestions += total;
-            stats.totalAttempts += 1;
-            localStorage.setItem(this.overallKey, JSON.stringify(stats));
+            // Don't update cumulative stats anymore - we'll calculate from best scores
             this.updateScoreDisplay();
         } catch (error) {
             console.error('Error updating overall stats:', error);
         }
     }
 
-    // Reset overall statistics
-    resetOverallStats() {
+    // Calculate overall statistics from best scores of each program
+    calculateOverallStats() {
         try {
-            const stats = { totalCorrect: 0, totalQuestions: 0, totalAttempts: 0 };
-            localStorage.setItem(this.overallKey, JSON.stringify(stats));
-            this.updateScoreDisplay();
+            const allScores = this.getAllScores();
+            let totalBestPoints = 0;
+            let totalPossiblePoints = 0;
+            let programsAttempted = 0;
+
+            for (const [key, attempts] of Object.entries(allScores)) {
+                if (attempts.length > 0) {
+                    programsAttempted++;
+                    // Find the best attempt for this program
+                    const bestAttempt = attempts.reduce((best, current) => 
+                        current.correct > best.correct ? current : best
+                    );
+                    totalBestPoints += bestAttempt.correct;
+                    totalPossiblePoints += bestAttempt.total;
+                }
+            }
+
+            return {
+                totalCorrect: totalBestPoints,
+                totalQuestions: totalPossiblePoints,
+                totalAttempts: programsAttempted
+            };
         } catch (error) {
-            console.error('Error resetting overall stats:', error);
+            console.error('Error calculating overall stats:', error);
+            return { totalCorrect: 0, totalQuestions: 0, totalAttempts: 0 };
         }
+    }
+
+    // Reset overall statistics (no longer needed since we calculate from best scores)
+    resetOverallStats() {
+        // No longer needed - overall stats are calculated from individual program scores
+        this.updateScoreDisplay();
     }
 
     // Get all scores from localStorage (persists across browser sessions)
@@ -137,7 +150,7 @@ export class ScoreManager {
         if (confirm('Are you sure you want to reset ALL scores? This cannot be undone.')) {
             try {
                 localStorage.removeItem(this.storageKey);
-                this.resetOverallStats();
+                // No need to reset overall stats since they're calculated from individual scores
                 alert('All scores have been reset!');
                 this.updateScoreDisplay();
                 
@@ -228,8 +241,8 @@ export class ScoreManager {
     // Generate HTML for the score modal
     generateScoreHTML() {
         const overall = this.getOverallStats();
-        const averagePerAttempt = overall.totalAttempts > 0 ? 
-            Math.round((overall.totalCorrect / overall.totalAttempts) * 10) / 10 : 0;
+        const percentage = overall.totalQuestions > 0 ? 
+            Math.round((overall.totalCorrect / overall.totalQuestions) * 100) : 0;
         
         let html = `
             <div class="overall-stats">
@@ -237,15 +250,15 @@ export class ScoreManager {
                 <div class="stat-grid">
                     <div class="stat-item">
                         <div class="stat-value">${overall.totalCorrect}</div>
-                        <div class="stat-label">Total Points</div>
+                        <div class="stat-label">Best Points Total</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value">${overall.totalAttempts}</div>
-                        <div class="stat-label">Programs Completed</div>
+                        <div class="stat-label">Programs Attempted</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">${averagePerAttempt}</div>
-                        <div class="stat-label">Avg Points/Program</div>
+                        <div class="stat-value">${percentage}%</div>
+                        <div class="stat-label">Overall Accuracy</div>
                     </div>
                 </div>
             </div>
@@ -258,22 +271,30 @@ export class ScoreManager {
         for (const [key, attempts] of Object.entries(allScores)) {
             if (attempts.length > 0) {
                 const [difficulty, programIndex] = key.split('-');
-                const bestScore = Math.max(...attempts.map(a => a.percentage));
+                // Find the best attempt for this program
+                const bestAttempt = attempts.reduce((best, current) => 
+                    current.correct > best.correct ? current : best
+                );
                 const lastAttempt = attempts[attempts.length - 1];
+                const firstAttempt = attempts[0]; // Get first attempt for sorting
                 
                 programStats.push({
                     key,
                     difficulty,
                     programIndex: parseInt(programIndex),
-                    bestScore,
+                    bestCorrect: bestAttempt.correct,
+                    bestTotal: bestAttempt.total,
+                    bestPercentage: bestAttempt.percentage,
                     attempts: attempts.length,
-                    lastAttempt: new Date(lastAttempt.timestamp).toLocaleDateString()
+                    lastAttempt: new Date(lastAttempt.timestamp).toLocaleDateString(),
+                    firstAttemptTime: new Date(firstAttempt.timestamp).getTime() // For sorting
                 });
             }
         }
 
         if (programStats.length > 0) {
-            programStats.sort((a, b) => b.bestScore - a.bestScore);
+            // Sort by attempt order - first attempted at the top
+            programStats.sort((a, b) => a.firstAttemptTime - b.firstAttemptTime);
             
             html += `
                 <div class="program-stats">
@@ -282,7 +303,7 @@ export class ScoreManager {
             `;
 
             programStats.forEach(program => {
-                const scoreClass = this.getScoreClass(program.bestScore);
+                const scoreClass = this.getScoreClass(program.bestPercentage);
                 html += `
                     <div class="program-item">
                         <div class="program-info">
@@ -291,7 +312,7 @@ export class ScoreManager {
                                 Attempts: ${program.attempts} • Last: ${program.lastAttempt}
                             </div>
                         </div>
-                        <div class="program-score ${scoreClass}">${program.bestScore}%</div>
+                        <div class="program-score ${scoreClass}">${program.bestCorrect}/${program.bestTotal}</div>
                     </div>
                 `;
             });
