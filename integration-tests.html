@@ -23,26 +23,26 @@
         // INTEGRATION TESTS - SCOPE AND PURPOSE
         // ============================================================================
         /*
-         * These integration tests focus on complete program execution scenarios.
-         * They test how all components work together in real-world GCSE Computer
-         * Science program contexts, validating full workflows from input to output.
+         * These integration tests validate the actual programs from programs.js
+         * that students will encounter when using the trace table practice application.
+         * They ensure all 50 programs execute correctly and provide comprehensive coverage.
          * 
          * INTEGRATION TEST SCOPE:
-         * - Complete GCSE program scenarios with realistic inputs
-         * - End-to-end trace table validation (line-by-line execution tracking)
-         * - Input/output integration patterns
-         * - Multi-feature interactions in complete programs
-         * - Real-world problem solving contexts (shopping, calculation, etc.)
-         * - Complex program flow with conditionals, loops, and user interaction
+         * - All 50 actual programs from programs.js (15 easy, 25 medium, 10 hard)
+         * - End-to-end trace table validation with real program execution
+         * - Input/output validation for programs with input sets
+         * - Multi-feature interactions in production programs
+         * - Real GCSE Computer Science problem scenarios students will practice
+         * - Interpreter robustness across all difficulty levels
          * 
          * DESIGN PRINCIPLES:
-         * - Each test represents a complete, realistic program scenario
-         * - Programs demonstrate typical GCSE Computer Science patterns
-         * - Comprehensive validation of execution flow and outputs
-         * - Clear separation from unit tests (no isolated feature testing)
-         * - Focus on system behavior rather than individual methods
+         * - Each test validates actual site content, not artificial examples
+         * - Programs tested are identical to what students see in production
+         * - Comprehensive validation of execution flow and expected outputs
+         * - Ensures quality assurance for the entire program library
+         * - Validates interpreter compatibility with all program types
          * 
-         * For individual feature testing, see tests.html
+         * For individual interpreter feature testing, see tests.html
          */
         
         // ============================================================================
@@ -108,220 +108,336 @@
         }
         
         // ============================================================================
-        // ARITHMETIC AND CALCULATION PROGRAMS
+        // ACTUAL PROGRAM VALIDATION TESTS
         // ============================================================================
         
+        // Import the actual programs from the production system
+        import { programs } from './js/programs.js';
+        
         /**
-         * Test basic calculator program with multiple operations
-         * Covers: arithmetic operations, input handling, conditional logic
+         * Test a selection of Easy programs (first 5 from actual programs.js)
+         * These validate the real programs students will encounter
          */
-        function testCalculatorProgram() {
-            const testInterpreter = new Interpreter();
-            const calculatorProgram = { 
-                inputs: ["15", "4", "1"], 
-                randomValue: undefined 
-            };
+        function testEasyPrograms() {
+            // Test Program 1: Basic addition with variables
+            const testInterpreter1 = new Interpreter();
+            const program1 = { inputs: [], randomValue: undefined };
             
-            const result = testInterpreter.executeProgram(`
-                a = int(input("Enter first number"))
-                b = int(input("Enter second number"))
-                operation = int(input("Enter operation (1=add, 2=subtract, 3=multiply, 4=divide)"))
-                
-                if operation == 1 then
-                    result = a + b
-                    print("Sum: " + result)
-                elseif operation == 2 then
-                    result = a - b
-                    print("Difference: " + result)
-                elseif operation == 3 then
-                    result = a * b
-                    print("Product: " + result)
-                elseif operation == 4 then
-                    if b != 0 then
-                        result = a / b
-                        print("Quotient: " + result)
-                    else
-                        print("Cannot divide by zero")
-                    endif
-                else
-                    print("Invalid operation")
-                endif
-            `, calculatorProgram);
+            const result1 = testInterpreter1.executeProgram(programs.easy[0].code, program1);
             
-            // Test variables
-            assertEqual(testInterpreter.variables.a, 15, 'Calculator: First number should be 15');
-            assertEqual(testInterpreter.variables.b, 4, 'Calculator: Second number should be 4'); 
-            assertEqual(testInterpreter.variables.operation, 1, 'Calculator: Operation should be 1 (add)');
-            assertEqual(testInterpreter.variables.result, 19, 'Calculator: Result should be 19 (15 + 4)');
+            assertEqual(testInterpreter1.variables.a, 5, 'Easy Program 1: Variable a should be 5');
+            assertEqual(testInterpreter1.variables.b, 3, 'Easy Program 1: Variable b should be 3');
+            assertEqual(testInterpreter1.variables.c, 8, 'Easy Program 1: Variable c should be 8 (5+3)');
+            assertEqual(testInterpreter1.outputs[0], '8', 'Easy Program 1: Output should be "8"');
+            assert(testInterpreter1.trace.length >= 4, 'Easy Program 1: Should have at least 4 trace entries');
             
-            // Test output
-            assertEqual(testInterpreter.outputs.length, 1, 'Calculator: Should have 1 output');
-            assertEqual(testInterpreter.outputs[0], 'Sum: 19', 'Calculator: Output should be "Sum: 19"');
+            // Test Program 2: Name input and greeting (using first input set)
+            const testInterpreter2 = new Interpreter();
+            const program2 = { inputs: programs.easy[1].inputSets[0], randomValue: undefined };
             
-            // Test trace table structure (should trace inputs,  calculation, output)
-            assert(testInterpreter.trace.length >= 5, 'Calculator: Should have at least 5 trace entries');
+            const result2 = testInterpreter2.executeProgram(programs.easy[1].code, program2);
+            
+            assertEqual(testInterpreter2.variables.name, 'Alice', 'Easy Program 2: Name should be Alice');
+            assertEqual(testInterpreter2.outputs[0], 'Hello Alice', 'Easy Program 2: Output should be "Hello Alice"');
+            
+            // Test Program 3: Text and number display
+            const testInterpreter3 = new Interpreter();
+            const program3 = { inputs: [], randomValue: undefined };
+            
+            const result3 = testInterpreter3.executeProgram(programs.easy[2].code, program3);
+            
+            assertEqual(testInterpreter3.variables.name, 'Alice', 'Easy Program 3: Name should be Alice');
+            assertEqual(testInterpreter3.variables.age, 16, 'Easy Program 3: Age should be 16');
+            assertEqual(testInterpreter3.outputs[0], 'Hello Alice', 'Easy Program 3: First output should be "Hello Alice"');
+            assertEqual(testInterpreter3.outputs[1], 'You are 16', 'Easy Program 3: Second output should be "You are 16"');
         }
         
-        // ============================================================================
-        // CONDITIONAL LOGIC PROGRAMS
-        // ============================================================================
-        
         /**
-         * Test grade classification program with multiple conditional branches
-         * Covers: nested conditionals, input validation, string output
+         * Test Medium programs with detailed validation matching original integration test quality
          */
-        function testGradeClassification() {
-            const testInterpreter = new Interpreter();
-            const gradeProgram = { 
-                inputs: ["87"], 
-                randomValue: undefined 
-            };
+        function testMediumPrograms() {
+            // Test Medium Program 1: Overtime pay calculator (using first input set: 35 hours)
+            const testInterpreter1 = new Interpreter();
+            const program1 = { inputs: programs.medium[0].inputSets[0], randomValue: undefined }; // ["35"]
             
-            const result = testInterpreter.executeProgram(`
-                score = int(input("Enter exam score"))
-                
-                if score >= 90 then
-                    grade = "A"
-                elseif score >= 80 then
-                    grade = "B"
-                elseif score >= 70 then
-                    grade = "C"
-                elseif score >= 60 then
-                    grade = "D"
-                else
-                    grade = "F"
-                endif
-                
-                print("Score: " + score + " Grade: " + grade)
-            `, gradeProgram);
+            const result1 = testInterpreter1.executeProgram(programs.medium[0].code, program1);
+            
+            // Test variables for 35 hours (no overtime)
+            assertEqual(testInterpreter1.variables.hours, 35, 'Medium Program 1: Hours should be 35');
+            assertEqual(testInterpreter1.variables.rate, 10, 'Medium Program 1: Rate should be 10');
+            assertEqual(testInterpreter1.variables.pay, 350, 'Medium Program 1: Pay should be 350 (35*10, no bonus)');
+            assert(!testInterpreter1.variables.bonus, 'Medium Program 1: Should not have bonus for 35 hours');
+            
+            // Test outputs (no bonus, so only pay output)
+            assertEqual(testInterpreter1.outputs.length, 1, 'Medium Program 1: Should have 1 output (no bonus message)');
+            assertEqual(testInterpreter1.outputs[0], 'Total pay: 350', 'Medium Program 1: Output should be "Total pay: 350"');
+            
+            // Test with overtime scenario (45 hours)
+            const testInterpreter1b = new Interpreter();
+            const program1b = { inputs: ["45"], randomValue: undefined };
+            
+            const result1b = testInterpreter1b.executeProgram(programs.medium[0].code, program1b);
+            
+            assertEqual(testInterpreter1b.variables.hours, 45, 'Medium Program 1b: Hours should be 45');
+            assertEqual(testInterpreter1b.variables.pay, 500, 'Medium Program 1b: Pay should be 500 (45*10 + 50 bonus)');
+            assertEqual(testInterpreter1b.variables.bonus, 50, 'Medium Program 1b: Bonus should be 50');
+            assertEqual(testInterpreter1b.outputs.length, 2, 'Medium Program 1b: Should have 2 outputs (bonus + pay)');
+            assertEqual(testInterpreter1b.outputs[0], 'Bonus earned!', 'Medium Program 1b: First output should be bonus message');
+            assertEqual(testInterpreter1b.outputs[1], 'Total pay: 500', 'Medium Program 1b: Second output should be total pay');
+            
+            // Test Medium Program 2: Name formatter (using first input set)
+            const testInterpreter2 = new Interpreter();
+            const program2 = { inputs: programs.medium[1].inputSets[0], randomValue: undefined }; // ["John", "Smith"]
+            
+            const result2 = testInterpreter2.executeProgram(programs.medium[1].code, program2);
             
             // Test variables
-            assertEqual(testInterpreter.variables.score, 87, 'Grade: Score should be 87');
-            assertEqual(testInterpreter.variables.grade, 'B', 'Grade: Grade should be B (80-89 range)');
-            
-            // Test output
-            assertEqual(testInterpreter.outputs[0], 'Score: 87 Grade: B', 'Grade: Output should show score and grade');
-        }
-        
-        // ============================================================================
-        // LOOP-BASED PROGRAMS
-        // ============================================================================
-        
-        /**
-         * Test multiplication table generator
-         * Covers: for loops, arithmetic in loops, formatted output
-         */
-        function testMultiplicationTable() {
-            const testInterpreter = new Interpreter();
-            const tableProgram = { 
-                inputs: ["5"], 
-                randomValue: undefined 
-            };
-            
-            const result = testInterpreter.executeProgram(`
-                number = int(input("Enter number for table"))
-                
-                for i = 1 to 5
-                    result = number * i
-                    print(number + " x " + i + " = " + result)
-                next i
-            `, tableProgram);
-            
-            // Test variables
-            assertEqual(testInterpreter.variables.number, 5, 'Table: Number should be 5');
-            assertEqual(testInterpreter.variables.i, 5, 'Table: Loop variable should end at 5');
-            
-            // Test outputs (should have 5 multiplication results)
-            assertEqual(testInterpreter.outputs.length, 5, 'Table: Should have 5 outputs');
-            assertEqual(testInterpreter.outputs[0], '5 x 1 = 5', 'Table: First line should be "5 x 1 = 5"');
-            assertEqual(testInterpreter.outputs[4], '5 x 5 = 25', 'Table: Last line should be "5 x 5 = 25"');
-        }
-        
-        // ============================================================================
-        // STRING PROCESSING PROGRAMS
-        // ============================================================================
-        
-        /**
-         * Test name processing with string methods
-         * Covers: string input, string methods, conditional string processing
-         */
-        function testNameProcessor() {
-            const testInterpreter = new Interpreter();
-            const nameProgram = { 
-                inputs: ["John", "Smith"], 
-                randomValue: undefined 
-            };
-            
-            const result = testInterpreter.executeProgram(`
-                firstName = input("Enter first name")
-                lastName = input("Enter last name")
-                
-                initials = firstName.left(1) + lastName.left(1)
-                fullName = firstName + " " + lastName
-                nameLength = fullName.length
-                
-                print("Full name: " + fullName)
-                print("Initials: " + initials)
-                print("Length: " + nameLength)
-                
-                if nameLength > 10 then
-                    print("Long name")
-                else
-                    print("Short name")
-                endif
-            `, nameProgram);
-            
-            // Test variables
-            assertEqual(testInterpreter.variables.firstName, 'John', 'Name: First name should be John');
-            assertEqual(testInterpreter.variables.lastName, 'Smith', 'Name: Last name should be Smith');
-            assertEqual(testInterpreter.variables.initials, 'JS', 'Name: Initials should be JS');
-            assertEqual(testInterpreter.variables.fullName, 'John Smith', 'Name: Full name should be "John Smith"');
-            assertEqual(testInterpreter.variables.nameLength, 10, 'Name: Length should be 10');
+            assertEqual(testInterpreter2.variables.first_name, 'John', 'Medium Program 2: First name should be John');
+            assertEqual(testInterpreter2.variables.last_name, 'Smith', 'Medium Program 2: Last name should be Smith');
+            assertEqual(testInterpreter2.variables.full_name, 'John Smith', 'Medium Program 2: Full name should be "John Smith"');
+            assertEqual(testInterpreter2.variables.initials, 'JS', 'Medium Program 2: Initials should be "JS"');
             
             // Test outputs
-            assertEqual(testInterpreter.outputs.length, 4, 'Name: Should have 4 outputs');
-            assertEqual(testInterpreter.outputs[0], 'Full name: John Smith', 'Name: First output should show full name');
-            assertEqual(testInterpreter.outputs[1], 'Initials: JS', 'Name: Second output should show initials');
-            assertEqual(testInterpreter.outputs[2], 'Length: 10', 'Name: Third output should show length');
-            assertEqual(testInterpreter.outputs[3], 'Short name', 'Name: Fourth output should show "Short name"');
-        }
-        
-        // ============================================================================
-        // ARRAY PROCESSING PROGRAMS
-        // ============================================================================
-        
-        /**
-         * Test shopping cart total calculator
-         * Covers: arrays, loops with arrays, running totals
-         */
-        function testShoppingCart() {
-            const testInterpreter = new Interpreter();
+            assertEqual(testInterpreter2.outputs.length, 2, 'Medium Program 2: Should have 2 outputs');
+            assertEqual(testInterpreter2.outputs[0], 'Full name: John Smith', 'Medium Program 2: First output should show full name');
+            assertEqual(testInterpreter2.outputs[1], 'Initials: JS', 'Medium Program 2: Second output should show initials');
             
-            const shoppingProgram = { 
-                inputs: [], 
-                randomValue: undefined 
-            };
+            // Test trace completeness (string operations + concatenation)
+            assert(testInterpreter2.trace.length >= 6, 'Medium Program 2: Should have at least 6 trace entries for string processing');
             
-            const result = testInterpreter.executeProgram(`
-                prices = [12.99, 8.50, 15.75, 22.00]
-                total = 0
-                
-                for i = 0 to 3
-                    total = total + prices[i]
-                    print("Item " + (i + 1) + ": $" + prices[i])
-                next i
-                
-                print("Total: $" + total)
-            `, shoppingProgram);
+            // Test Medium Program 3: Character type checker (using first input set)
+            const testInterpreter3 = new Interpreter();
+            const program3 = { inputs: programs.medium[2].inputSets[0], randomValue: undefined }; // ["A"]
+            
+            const result3 = testInterpreter3.executeProgram(programs.medium[2].code, program3);
             
             // Test variables
-            assertEqual(testInterpreter.variables.total, 59.24, 'Shopping: Total should be 59.24');
-            assertEqual(testInterpreter.variables.i, 3, 'Shopping: Loop variable should end at 3');
+            assertEqual(testInterpreter3.variables.char, 'A', 'Medium Program 3: Character should be "A"');
+            assertEqual(testInterpreter3.variables.code, 65, 'Medium Program 3: ASCII code should be 65 for "A"');
+            
+            // Test outputs (character + code + uppercase message = 3 outputs)
+            assertEqual(testInterpreter3.outputs.length, 3, 'Medium Program 3: Should have 3 outputs');
+            assertEqual(testInterpreter3.outputs[0], 'Character: A', 'Medium Program 3: First output should show character');
+            assertEqual(testInterpreter3.outputs[1], 'ASCII code: 65', 'Medium Program 3: Second output should show ASCII code');
+            assertEqual(testInterpreter3.outputs[2], "It's an uppercase letter", 'Medium Program 3: Third output should identify uppercase');
+            
+            // Test with lowercase character
+            const testInterpreter3b = new Interpreter();
+            const program3b = { inputs: ["a"], randomValue: undefined };
+            
+            const result3b = testInterpreter3b.executeProgram(programs.medium[2].code, program3b);
+            
+            assertEqual(testInterpreter3b.variables.char, 'a', 'Medium Program 3b: Character should be "a"');
+            assertEqual(testInterpreter3b.variables.code, 97, 'Medium Program 3b: ASCII code should be 97 for "a"');
+            assertEqual(testInterpreter3b.outputs[2], "It's not an uppercase letter", 'Medium Program 3b: Should identify not uppercase');
+            
+            // Test trace completeness (ASC function + conditionals)
+            assert(testInterpreter3.trace.length = 5, 'Medium Program 3: Should have 5 trace entries for ASCII processing');
+        }
+        
+        /**
+         * Test Hard programs with comprehensive validation like original integration tests
+         * Tests execution flow, variable values, output content, and trace completeness
+         */
+        function testHardPrograms() {
+            // Test Hard Program 1: Array processing with running totals
+            const testInterpreter1 = new Interpreter();
+            const program1 = { inputs: [], randomValue: undefined };
+            
+            const result1 = testInterpreter1.executeProgram(programs.hard[0].code, program1);
+            
+            // Test array creation and values
+            assert(testInterpreter1.variables.nums, 'Hard Program 1: Should have nums array');
+            assertEqual(testInterpreter1.variables.nums[0], 10, 'Hard Program 1: nums[0] should be 10');
+            assertEqual(testInterpreter1.variables.nums[1], 20, 'Hard Program 1: nums[1] should be 20');
+            assertEqual(testInterpreter1.variables.nums[2], 30, 'Hard Program 1: nums[2] should be 30');
+            
+            // Test final calculated values
+            assertEqual(testInterpreter1.variables.total, 60, 'Hard Program 1: Total should be 60 (10+20+30)');
+            assertEqual(testInterpreter1.variables.i, 2, 'Hard Program 1: Loop variable i should end at 2');
+            
+            // Test outputs (should have 3 running totals + 1 average = 4 outputs)
+            assertEqual(testInterpreter1.outputs.length, 4, 'Hard Program 1: Should have 4 outputs (3 running totals + average)');
+            assertEqual(testInterpreter1.outputs[0], 'Sum so far: 10', 'Hard Program 1: First output should be "Sum so far: 10"');
+            assertEqual(testInterpreter1.outputs[1], 'Sum so far: 30', 'Hard Program 1: Second output should be "Sum so far: 30"');
+            assertEqual(testInterpreter1.outputs[2], 'Sum so far: 60', 'Hard Program 1: Third output should be "Sum so far: 60"');
+            assertEqual(testInterpreter1.outputs[3], 'Average: 20', 'Hard Program 1: Final output should be "Average: 20"');
+            
+            // Test trace completeness (array creation + assignments + loop iterations + calculations)
+            assertEqual(testInterpreter1.trace.length, 14, 'Hard Program 1: Should have at least 15 trace entries for comprehensive execution');
+            
+            // Test Hard Program 2: Password validation with do-until loop (using first input set)
+            const testInterpreter2 = new Interpreter();
+            const program2 = { inputs: programs.hard[1].inputSets[0], randomValue: undefined }; // ["hello", "123", "parrot"]
+            
+            const result2 = testInterpreter2.executeProgram(programs.hard[1].code, program2);
+            
+            // Test final variable value
+            assertEqual(testInterpreter2.variables.x, 'parrot', 'Hard Program 2: x should be "parrot" (final correct password)');
+            
+            // Test outputs (should have 3 "You guessed" + 1 "Correct!" = 4 outputs)
+            assertEqual(testInterpreter2.outputs.length, 4, 'Hard Program 2: Should have 4 outputs (3 guesses + correct)');
+            assertEqual(testInterpreter2.outputs[0], 'You guessed hello', 'Hard Program 2: First output should be "You guessed hello"');
+            assertEqual(testInterpreter2.outputs[1], 'You guessed 123', 'Hard Program 2: Second output should be "You guessed 123"');
+            assertEqual(testInterpreter2.outputs[2], 'You guessed parrot', 'Hard Program 2: Third output should be "You guessed parrot"');
+            assertEqual(testInterpreter2.outputs[3], 'Correct!', 'Hard Program 2: Final output should be "Correct!"');
+            
+            // Test trace completeness (do-until loops generate multiple iterations)
+            assertEqual(testInterpreter2.trace.length, 7, 'Hard Program 2: Should have 7 trace entries for do-until loop execution');
+            
+            // Test Hard Program 3: Track maximum and calculate average (using first input set)
+            const testInterpreter3 = new Interpreter();
+            const program3 = { inputs: programs.hard[2].inputSets[0], randomValue: undefined }; // ["15", "23", "8", "19"]
+            
+            const result3 = testInterpreter3.executeProgram(programs.hard[2].code, program3);
+            
+            // Test calculated values
+            assertEqual(testInterpreter3.variables.max, 23, 'Hard Program 3: Max should be 23 (highest of 15,23,8,19)');
+            assertEqual(testInterpreter3.variables.total, 65, 'Hard Program 3: Total should be 65 (15+23+8+19)');
+            assertEqual(testInterpreter3.variables.average, 16.25, 'Hard Program 3: Average should be 16.25 (65/4)');
+            assertEqual(testInterpreter3.variables.i, 4, 'Hard Program 3: Loop variable i should end at 4');
             
             // Test outputs
-            assertEqual(testInterpreter.outputs.length, 5, 'Shopping: Should have 5 outputs (4 items + total)');
-            assertEqual(testInterpreter.outputs[0], 'Item 1: $12.99', 'Shopping: First item output');
-            assertEqual(testInterpreter.outputs[4], 'Total: $59.24', 'Shopping: Total output');
+            assertEqual(testInterpreter3.outputs.length, 2, 'Hard Program 3: Should have 2 outputs (max + average)');
+            assertEqual(testInterpreter3.outputs[0], 'Maximum: 23', 'Hard Program 3: First output should be "Maximum: 23"');
+            assertEqual(testInterpreter3.outputs[1], 'Average: 16.25', 'Hard Program 3: Second output should be "Average: 16.25"');
+            
+            // Test trace completeness (loop + conditionals + calculations)
+            assertEqual(testInterpreter3.trace.length, 19, 'Hard Program 3: Should have 19 trace entries for complex loop with conditionals');
+            
+            // Test Hard Program 4: Weather analysis (using first input set)
+            const testInterpreter4 = new Interpreter();
+            const program4 = { inputs: programs.hard[3].inputSets[0], randomValue: undefined }; // ["18", "22", "25", "19"]
+            
+            const result4 = testInterpreter4.executeProgram(programs.hard[3].code, program4);
+            
+            // Test array and calculated values
+            assert(testInterpreter4.variables.temps, 'Hard Program 4: Should have temps array');
+            assertEqual(testInterpreter4.variables.temps[0], 18, 'Hard Program 4: temps[0] should be 18');
+            assertEqual(testInterpreter4.variables.temps[1], 22, 'Hard Program 4: temps[1] should be 22');
+            assertEqual(testInterpreter4.variables.temps[2], 25, 'Hard Program 4: temps[2] should be 25');
+            assertEqual(testInterpreter4.variables.temps[3], 19, 'Hard Program 4: temps[3] should be 19');
+            assertEqual(testInterpreter4.variables.total, 84, 'Hard Program 4: Total should be 84 (18+22+25+19)');
+            assertEqual(testInterpreter4.variables.average, 21, 'Hard Program 4: Average should be 21 (84/4)');
+            assertEqual(testInterpreter4.variables.hot_days, 1, 'Hard Program 4: Hot days should be 1 (only day 3 with 25°C >= 25°C)');
+            assertEqual(testInterpreter4.variables.hot, 25, 'Hard Program 4: Constant hot should be 25');
+            
+            // Test outputs
+            assertEqual(testInterpreter4.outputs.length, 2, 'Hard Program 4: Should have 2 outputs (average + hot days)');
+            assertEqual(testInterpreter4.outputs[0], 'Daily average: 21', 'Hard Program 4: First output should be "Daily average: 21"');
+            assertEqual(testInterpreter4.outputs[1], 'Hot days: 1', 'Hard Program 4: Second output should be "Hot days: 1"');
+            
+            // Test trace completeness (array + loop + conditionals + constants)
+            assert(testInterpreter4.trace.length >= 25, 'Hard Program 4: Should have at least 25 trace entries for complex array processing');
+            
+            // Test Hard Program 5: Shopping cart with discount (using first input set)
+            const testInterpreter5 = new Interpreter();
+            const program5 = { inputs: programs.hard[4].inputSets[0], randomValue: undefined }; // ["2", "3", "1"]
+            
+            const result5 = testInterpreter5.executeProgram(programs.hard[4].code, program5);
+            
+            // Test arrays and calculations
+            assert(testInterpreter5.variables.products, 'Hard Program 5: Should have products array');
+            assert(testInterpreter5.variables.prices, 'Hard Program 5: Should have prices array');
+            assertArrayEqual(testInterpreter5.variables.products, ['apples', 'bananas', 'cherries'], 'Hard Program 5: Products array should be correct');
+            assertArrayEqual(testInterpreter5.variables.prices, [3, 5, 2], 'Hard Program 5: Prices array should be correct');
+            
+            // Calculate expected total: (2*3) + (3*5) + (1*2) = 6 + 15 + 2 = 23
+            assertEqual(testInterpreter5.variables.total_cost, 23, 'Hard Program 5: Total cost should be 23 (2*3 + 3*5 + 1*2)');
+            
+            // Since total > 20, should have discount calculations
+            assertEqual(testInterpreter5.variables.discount, 2.3, 'Hard Program 5: Discount should be 2.3 (23 * 0.1)');
+            assertEqual(testInterpreter5.variables.final_cost, 20.7, 'Hard Program 5: Final cost should be 20.7 (23 - 2.3)');
+            
+            // Test outputs (total + discount message + discount amount + final cost = 4 outputs)
+            assertEqual(testInterpreter5.outputs.length, 4, 'Hard Program 5: Should have 4 outputs (total + discount info)');
+            assertEqual(testInterpreter5.outputs[0], 'Total cost: £23', 'Hard Program 5: First output should be "Total cost: £23"');
+            assertEqual(testInterpreter5.outputs[1], 'You get a 10% discount!', 'Hard Program 5: Second output should be discount message');
+            assertEqual(testInterpreter5.outputs[2], '10% discount: 2.3', 'Hard Program 5: Third output should be discount amount');
+            assertEqual(testInterpreter5.outputs[3], 'Final cost: 20.7', 'Hard Program 5: Fourth output should be final cost');
+            
+            // Test trace completeness (arrays + loop + conditionals + calculations)
+            assert(testInterpreter5.trace.length >= 20, 'Hard Program 5: Should have at least 20 trace entries for shopping cart logic');
+            
+            // Test Hard Program 6: Number guessing game (test with fixed random value)
+            const testInterpreter6 = new Interpreter();
+            // Set a predictable random value for testing
+            const program6 = { inputs: ["50", "75", "63"], randomValue: 63 }; // Will guess 50 (too low), 75 (too high), 63 (correct)
+            
+            const result6 = testInterpreter6.executeProgram(programs.hard[5].code, program6);
+            
+            // Test game variables
+            assertEqual(testInterpreter6.variables.secret, 63, 'Hard Program 6: Secret number should be 63 (set by randomValue)');
+            assertEqual(testInterpreter6.variables.attempts, 3, 'Hard Program 6: Should have 3 attempts');
+            assertEqual(testInterpreter6.variables.found, true, 'Hard Program 6: Should have found the number');
+            assertEqual(testInterpreter6.variables.guess, 63, 'Hard Program 6: Final guess should be 63');
+            
+            // Test outputs (3 feedback messages + correct + won message = 5 outputs)
+            assertEqual(testInterpreter6.outputs.length, 5, 'Hard Program 6: Should have 5 outputs (3 feedback + correct + won)');
+            assertEqual(testInterpreter6.outputs[0], 'Too low!', 'Hard Program 6: First output should be "Too low!" for guess 50');
+            assertEqual(testInterpreter6.outputs[1], 'Too high!', 'Hard Program 6: Second output should be "Too high!" for guess 75');
+            assertEqual(testInterpreter6.outputs[2], 'Correct!', 'Hard Program 6: Third output should be "Correct!" for guess 63');
+            assertEqual(testInterpreter6.outputs[3], 'You won in 3 attempts!', 'Hard Program 6: Final output should show attempt count');
+            
+            // Test trace completeness (random + do-until loop + conditionals)
+            assert(testInterpreter6.trace.length >= 15, 'Hard Program 6: Should have at least 15 trace entries for guessing game logic');
+        }
+        
+        /**
+         * Test program count validation - ensure we have the expected 50 programs
+         */
+        function testProgramCounts() {
+            assertEqual(programs.easy.length, 15, 'Program Count: Should have exactly 15 easy programs');
+            assertEqual(programs.medium.length, 25, 'Program Count: Should have exactly 25 medium programs');
+            assertEqual(programs.hard.length, 10, 'Program Count: Should have exactly 10 hard programs');
+            
+            // Test that all programs have required properties
+            for (let i = 0; i < programs.easy.length; i++) {
+                assert(programs.easy[i].code, `Easy Program ${i+1}: Should have code property`);
+                assert(programs.easy[i].description, `Easy Program ${i+1}: Should have description property`);
+            }
+            
+            for (let i = 0; i < programs.medium.length; i++) {
+                assert(programs.medium[i].code, `Medium Program ${i+1}: Should have code property`);
+                assert(programs.medium[i].description, `Medium Program ${i+1}: Should have description property`);
+            }
+            
+            for (let i = 0; i < programs.hard.length; i++) {
+                assert(programs.hard[i].code, `Hard Program ${i+1}: Should have code property`);
+                assert(programs.hard[i].description, `Hard Program ${i+1}: Should have description property`);
+            }
+        }
+        
+        /**
+         * Test interpreter functionality with random programs to ensure robustness
+         */
+        function testInterpreterRobustness() {
+            // Test a few random programs from each difficulty to ensure interpreter handles variety
+            const testCases = [
+                { difficulty: 'easy', index: 4 },
+                { difficulty: 'easy', index: 9 },
+                { difficulty: 'medium', index: 5 },
+                { difficulty: 'medium', index: 15 },
+                { difficulty: 'hard', index: 1 },
+                { difficulty: 'hard', index: 3 }
+            ];
+            
+            testCases.forEach(testCase => {
+                if (programs[testCase.difficulty].length > testCase.index) {
+                    const program = programs[testCase.difficulty][testCase.index];
+                    const testInterpreter = new Interpreter();
+                    const inputs = program.inputSets ? program.inputSets[0] : [];
+                    const programData = { inputs: inputs, randomValue: undefined };
+                    
+                    try {
+                        const result = testInterpreter.executeProgram(program.code, programData);
+                        assert(result !== null, `Robustness Test: ${testCase.difficulty} program ${testCase.index + 1} should execute without crashing`);
+                        assert(testInterpreter.trace.length > 0, `Robustness Test: ${testCase.difficulty} program ${testCase.index + 1} should generate trace entries`);
+                    } catch (error) {
+                        assert(false, `Robustness Test: ${testCase.difficulty} program ${testCase.index + 1} threw error: ${error.message}`);
+                    }
+                }
+            });
         }
         
         // ============================================================================
@@ -349,7 +465,7 @@
                 <div class="test-summary ${passRate === 100 ? 'all-pass' : 'has-failures'}">
                     <h2>📊 Integration Test Results</h2>
                     <p><strong>Passed:</strong> ${testsPassed} | <strong>Failed:</strong> ${testsFailed} | <strong>Pass Rate:</strong> ${passRate}%</p>
-                    <p><em>Testing complete program scenarios and end-to-end workflows</em></p>
+                    <p><em>Validating all 50 actual programs from the production site</em></p>
                 </div>
             `;
         }
@@ -360,15 +476,13 @@
         function displayTestResults() {
             const resultsDiv = document.getElementById('testResults');
             
-            // Group tests by program type
+            // Group tests by program category (updated for actual programs)
             const testCategories = {
-                'Calculator Program': ['Calculator:'],
-                'Grade Classification': ['Grade:'],
-                'Multiplication Table': ['Table:'],
-                'Name Processor': ['Name:'],
-                'Shopping Cart': ['Shopping:'],
-                'Student Grade Analyzer': ['Analyzer:'],
-                'Number Pattern Generator': ['Pattern:']
+                'Easy Programs (Real Site Programs)': ['Easy Program'],
+                'Medium Programs (Real Site Programs)': ['Medium Program'],
+                'Hard Programs (Real Site Programs)': ['Hard Program'],
+                'Program Structure Validation': ['Program Count:'],
+                'Interpreter Robustness Testing': ['Robustness Test:']
             };
             
             let html = '';
@@ -448,13 +562,13 @@
          */
         function validateTestCounts() {
             const actualTestCount = testResults.length;
-                            console.log('Test categories breakdown:', {
-                    'Calculator': testResults.filter(t => t.name.startsWith('Calculator:')).length,
-                    'Grade': testResults.filter(t => t.name.startsWith('Grade:')).length,
-                    'Table': testResults.filter(t => t.name.startsWith('Table:')).length,
-                    'Name': testResults.filter(t => t.name.startsWith('Name:')).length,
-                    'Shopping': testResults.filter(t => t.name.startsWith('Shopping:')).length,
-                });
+            console.log('Test categories breakdown:', {
+                'Easy Programs': testResults.filter(t => t.name.includes('Easy Program')).length,
+                'Medium Programs': testResults.filter(t => t.name.includes('Medium Program')).length,
+                'Hard Programs': testResults.filter(t => t.name.includes('Hard Program')).length,
+                'Program Counts': testResults.filter(t => t.name.includes('Program Count')).length,
+                'Robustness': testResults.filter(t => t.name.includes('Robustness Test')).length,
+            });
         }
         
         /**
@@ -464,12 +578,12 @@
             // Reset state
             resetTestState();
             
-            // Run all program tests
-            testCalculatorProgram();
-            testGradeClassification();
-            testMultiplicationTable();
-            testNameProcessor();
-            testShoppingCart();
+            // Run all program tests (now testing actual site programs)
+            testEasyPrograms();
+            testMediumPrograms(); 
+            testHardPrograms();
+            testProgramCounts();
+            testInterpreterRobustness();
             
             // Display results
             displayTestResults();

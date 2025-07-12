@@ -588,6 +588,7 @@ print("Correct!")`,
                 ["password", "parrot"],
                 ["wrong", "guess", "test", "parrot"],
                 ["abc", "parrot"]
+                ["parrot"]
             ]
         },
         {

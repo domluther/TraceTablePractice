@@ -566,6 +566,52 @@ export class Interpreter {
                 if (oldValue !== vars[varName]) {
                     changeRecord[varName] = vars[varName];
                 }
+            } else if (value.startsWith('ASC(') && value.endsWith(')')) {
+                // ASC() function - character to ASCII value
+                const inner = value.substring(4, value.length - 1).trim();
+                const oldValue = vars[varName];
+                let charValue;
+                if (inner.startsWith('"') && inner.endsWith('"')) {
+                    // String literal like ASC("A")
+                    charValue = inner.slice(1, -1);
+                } else if (vars[inner] !== undefined) {
+                    // Variable like ASC(char)
+                    charValue = vars[inner].toString();
+                } else {
+                    // Could be an expression
+                    charValue = this.evaluateExpressionOrVariable(inner, vars);
+                    if (typeof charValue !== 'string') {
+                        charValue = charValue.toString();
+                    }
+                }
+                if (charValue && charValue.length > 0) {
+                    vars[varName] = charValue.charCodeAt(0);
+                } else {
+                    vars[varName] = 0;
+                }
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
+            } else if (value.startsWith('CHR(') && value.endsWith(')')) {
+                // CHR() function - ASCII value to character
+                const inner = value.substring(4, value.length - 1).trim();
+                const oldValue = vars[varName];
+                let asciiValue;
+                if (!isNaN(inner)) {
+                    asciiValue = parseInt(inner);
+                } else if (vars[inner] !== undefined) {
+                    asciiValue = parseInt(vars[inner]);
+                } else {
+                    asciiValue = this.evaluateArithmeticExpression(inner, vars);
+                }
+                if (!isNaN(asciiValue)) {
+                    vars[varName] = String.fromCharCode(asciiValue);
+                } else {
+                    vars[varName] = "";
+                }
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
             } else if (value.startsWith('int(') && value.endsWith(')')) {
                 // int() function - convert to integer
                 const inner = value.substring(4, value.length - 1).trim();
@@ -795,7 +841,8 @@ export class Interpreter {
                 value.includes('.lower') || value.includes('.length') ||
                 value.startsWith('str(') || value.startsWith('int(') ||
                 value.startsWith('float(') || value.startsWith('real(') ||
-                value.startsWith('bool(')) {
+                value.startsWith('bool(') || value.startsWith('ASC(') ||
+                value.startsWith('CHR(')) {
                 return false;
             }
             
