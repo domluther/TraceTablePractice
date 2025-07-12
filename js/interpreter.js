@@ -1111,118 +1111,84 @@ export class Interpreter {
         }
 
         evaluateCondition(condition, vars) {
-            // Simple condition evaluation for basic comparisons
+            // Enhanced condition evaluation that handles arithmetic expressions
             if (condition.includes('>=')) {
                 const [left, right] = condition.split('>=').map(s => s.trim());
-                let leftVal = vars[left] !== undefined ? vars[left] : left;
-                let rightVal = vars[right] !== undefined ? vars[right] : right;
-                
-                // Handle string methods like .length
-                if (left.includes('.length')) {
-                    const varName = left.split('.')[0];
-                    if (vars[varName] !== undefined) {
-                        leftVal = vars[varName].toString().length;
-                    }
-                } else {
-                    // Convert to numbers if both values are numeric
-                    if (!isNaN(leftVal) && !isNaN(rightVal)) {
-                        leftVal = parseFloat(leftVal);
-                        rightVal = parseFloat(rightVal);
-                    }
-                }
+                let leftVal = this.evaluateExpressionOrVariable(left, vars);
+                let rightVal = this.evaluateExpressionOrVariable(right, vars);
                 
                 return leftVal >= rightVal;
             } else if (condition.includes('<=')) {
                 const [left, right] = condition.split('<=').map(s => s.trim());
-                let leftVal = vars[left] !== undefined ? vars[left] : left;
-                let rightVal = vars[right] !== undefined ? vars[right] : right;
-                
-                // Handle string methods like .length
-                if (left.includes('.length')) {
-                    const varName = left.split('.')[0];
-                    if (vars[varName] !== undefined) {
-                        leftVal = vars[varName].toString().length;
-                    }
-                } else {
-                    // Convert to numbers if both values are numeric
-                    if (!isNaN(leftVal) && !isNaN(rightVal)) {
-                        leftVal = parseFloat(leftVal);
-                        rightVal = parseFloat(rightVal);
-                    }
-                }
+                let leftVal = this.evaluateExpressionOrVariable(left, vars);
+                let rightVal = this.evaluateExpressionOrVariable(right, vars);
                 
                 return leftVal <= rightVal;
             } else if (condition.includes('==')) {
                 const [left, right] = condition.split('==').map(s => s.trim());
-                let leftVal = vars[left] !== undefined ? vars[left] : left;
-                let rightVal = vars[right] !== undefined ? vars[right] : right;
-                
-                // Handle string literals
-                if (leftVal.startsWith && leftVal.startsWith('"') && leftVal.endsWith('"')) {
-                    leftVal = leftVal.slice(1, -1);
-                }
-                if (rightVal.startsWith && rightVal.startsWith('"') && rightVal.endsWith('"')) {
-                    rightVal = rightVal.slice(1, -1);
-                }
+                let leftVal = this.evaluateExpressionOrVariable(left, vars);
+                let rightVal = this.evaluateExpressionOrVariable(right, vars);
                 
                 return leftVal == rightVal;
             } else if (condition.includes('!=')) {
                 const [left, right] = condition.split('!=').map(s => s.trim());
-                let leftVal = vars[left] !== undefined ? vars[left] : left;
-                let rightVal = vars[right] !== undefined ? vars[right] : right;
-                
-                // Handle string literals
-                if (leftVal.startsWith && leftVal.startsWith('"') && leftVal.endsWith('"')) {
-                    leftVal = leftVal.slice(1, -1);
-                }
-                if (rightVal.startsWith && rightVal.startsWith('"') && rightVal.endsWith('"')) {
-                    rightVal = rightVal.slice(1, -1);
-                }
+                let leftVal = this.evaluateExpressionOrVariable(left, vars);
+                let rightVal = this.evaluateExpressionOrVariable(right, vars);
                 
                 return leftVal != rightVal;
             } else if (condition.includes('>')) {
                 const [left, right] = condition.split('>').map(s => s.trim());
-                let leftVal = vars[left] !== undefined ? vars[left] : left;
-                let rightVal = vars[right] !== undefined ? vars[right] : right;
-                
-                // Handle string methods like .length
-                if (left.includes('.length')) {
-                    const varName = left.split('.')[0];
-                    if (vars[varName] !== undefined) {
-                        leftVal = vars[varName].toString().length;
-                    }
-                } else {
-                    // Convert to numbers if both values are numeric
-                    if (!isNaN(leftVal) && !isNaN(rightVal)) {
-                        leftVal = parseFloat(leftVal);
-                        rightVal = parseFloat(rightVal);
-                    }
-                }
+                let leftVal = this.evaluateExpressionOrVariable(left, vars);
+                let rightVal = this.evaluateExpressionOrVariable(right, vars);
                 
                 return leftVal > rightVal;
             } else if (condition.includes('<')) {
                 const [left, right] = condition.split('<').map(s => s.trim());
-                let leftVal = vars[left] !== undefined ? vars[left] : left;
-                let rightVal = vars[right] !== undefined ? vars[right] : right;
-                
-                // Handle string methods like .length
-                if (left.includes('.length')) {
-                    const varName = left.split('.')[0];
-                    if (vars[varName] !== undefined) {
-                        leftVal = vars[varName].toString().length;
-                    }
-                } else {
-                    // Convert to numbers if both values are numeric
-                    if (!isNaN(leftVal) && !isNaN(rightVal)) {
-                        leftVal = parseFloat(leftVal);
-                        rightVal = parseFloat(rightVal);
-                    }
-                }
+                let leftVal = this.evaluateExpressionOrVariable(left, vars);
+                let rightVal = this.evaluateExpressionOrVariable(right, vars);
                 
                 return leftVal < rightVal;
             }
             
             return false;
+        }
+
+        evaluateExpressionOrVariable(expression, vars) {
+            // Helper function to evaluate expressions or variables in conditions
+            expression = expression.trim();
+            
+            // Check if it's a string literal
+            if (expression.startsWith('"') && expression.endsWith('"')) {
+                return expression.slice(1, -1);
+            }
+            
+            // Check if it contains operators (arithmetic expression)
+            if (expression.includes('+') || expression.includes('-') || 
+                expression.includes('*') || expression.includes('/') || 
+                expression.includes('MOD') || expression.includes('DIV')) {
+                return this.evaluateArithmeticExpression(expression, vars);
+            }
+            
+            // Check if it's a string method like .length
+            if (expression.includes('.length')) {
+                const varName = expression.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    return vars[varName].toString().length;
+                }
+            }
+            
+            // Check if it's a variable
+            if (vars[expression] !== undefined) {
+                return vars[expression];
+            }
+            
+            // Check if it's a number
+            if (!isNaN(expression)) {
+                return parseFloat(expression);
+            }
+            
+            // Return as string literal
+            return expression;
         }
 
         handleIfStatement(lines, i) {
@@ -1337,12 +1303,38 @@ export class Interpreter {
             // Execute the while loop (only trace executing statements, not condition evaluations)
             while (this.evaluateCondition(condition, this.variables)) {
                 // Execute loop body
-                for (let bodyLine = i + 1; bodyLine < endwhileIndex; bodyLine++) {
+                let bodyLine = i + 1;
+                while (bodyLine < endwhileIndex) {
                     const bodyLineCode = lines[bodyLine];
                     const bodyLineNum = bodyLine + 1;
-                    const result = this.executeStatement(bodyLineCode, bodyLineNum, this.variables);
-                    if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
-                        this.addTraceEntry(bodyLineNum, this.variables, result.output, result.changedVariables);
+                    
+                    if (bodyLineCode.startsWith('if ')) {
+                        // Handle if statement
+                        bodyLine = this.handleIfStatement(lines, bodyLine);
+                    } else if (bodyLineCode.startsWith('switch ')) {
+                        // Handle switch statement
+                        bodyLine = this.handleSwitchStatement(lines, bodyLine);
+                    } else if (bodyLineCode.startsWith('while ')) {
+                        // Handle nested while loop
+                        bodyLine = this.handleWhileLoop(lines, bodyLine);
+                    } else if (bodyLineCode === 'do') {
+                        // Handle do-until loop
+                        bodyLine = this.handleDoUntilLoop(lines, bodyLine);
+                    } else if (bodyLineCode.startsWith('for ') && bodyLineCode.includes(' to ')) {
+                        // Handle for loop
+                        bodyLine = this.handleForLoop(lines, bodyLine);
+                    } else if (bodyLineCode.startsWith('next ') || bodyLineCode === 'endif' || bodyLineCode === 'else' || 
+                               bodyLineCode.startsWith('elseif ') || bodyLineCode === 'endwhile' || bodyLineCode.startsWith('until ') ||
+                               bodyLineCode.startsWith('case ') || bodyLineCode === 'default' || bodyLineCode === 'endswitch') {
+                        // Skip control flow statements as they're handled by their parent structures
+                        bodyLine++;
+                    } else {
+                        // Regular statement
+                        const result = this.executeStatement(bodyLineCode, bodyLineNum, this.variables);
+                        if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
+                            this.addTraceEntry(bodyLineNum, this.variables, result.output, result.changedVariables);
+                        }
+                        bodyLine++;
                     }
                 }
             }
