@@ -167,13 +167,13 @@ export class ScoreManager {
             scoreButton.innerHTML = `📊 Points: ${stats.totalCorrect}`;
             
             // Add color coding based on total points achieved
-            // Assuming roughly 30 programs with average 15-20 points each (~450-600 total possible)
+            // Assuming roughly 50 programs with average 15 points each (~750 total possible)
             scoreButton.className = 'score-button';
-            if (stats.totalCorrect >= 300) {
+            if (stats.totalCorrect >= 375) {
                 scoreButton.classList.add('excellent');  // 50%+ of estimated total
-            } else if (stats.totalCorrect >= 150) {
+            } else if (stats.totalCorrect >= 190) {
                 scoreButton.classList.add('good');       // 25%+ of estimated total
-            } else if (stats.totalCorrect >= 75) {
+            } else if (stats.totalCorrect >= 95) {
                 scoreButton.classList.add('fair');       // 12%+ of estimated total
             } else if (stats.totalAttempts > 0) {
                 scoreButton.classList.add('needs-work'); // Less than 12%
