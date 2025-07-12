@@ -1288,6 +1288,33 @@ export class Interpreter {
 
         evaluateCondition(condition, vars) {
             // Enhanced condition evaluation that handles arithmetic expressions
+            
+            // Handle AND operator
+            if (condition.includes(' AND ')) {
+                const parts = condition.split(' AND ');
+                let result = true;
+                for (const part of parts) {
+                    if (!this.evaluateCondition(part.trim(), vars)) {
+                        result = false;
+                        break;
+                    }
+                }
+                return result;
+            }
+            
+            // Handle OR operator
+            if (condition.includes(' OR ')) {
+                const parts = condition.split(' OR ');
+                let result = false;
+                for (const part of parts) {
+                    if (this.evaluateCondition(part.trim(), vars)) {
+                        result = true;
+                        break;
+                    }
+                }
+                return result;
+            }
+            
             if (condition.includes('>=')) {
                 const [left, right] = condition.split('>=').map(s => s.trim());
                 let leftVal = this.evaluateExpressionOrVariable(left, vars);
