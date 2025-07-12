@@ -848,7 +848,19 @@ export class Interpreter {
             let result = '';
             
             parts.forEach(part => {
-                if (part.startsWith('ASC(') && part.endsWith(')')) {
+                if (part.startsWith('str(') && part.endsWith(')')) {
+                    // Handle str() function - convert to string
+                    const argument = part.slice(4, -1).trim();
+                    if (vars[argument] !== undefined) {
+                        result += vars[argument].toString();
+                    } else if (!isNaN(argument)) {
+                        result += argument.toString();
+                    } else {
+                        // Could be an expression
+                        const value = this.evaluateArithmeticExpression(argument, vars);
+                        result += value.toString();
+                    }
+                } else if (part.startsWith('ASC(') && part.endsWith(')')) {
                     // Handle ASC() function - character to ASCII value
                     const argument = part.slice(4, -1).trim();
                     let charValue;
