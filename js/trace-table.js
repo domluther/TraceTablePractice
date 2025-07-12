@@ -164,11 +164,16 @@ export class TraceTable {
                         // This is an array element
                         const arrayName = arrayMatch[1];
                         const index = parseInt(arrayMatch[2]);
+                        const elementName = `${arrayName}[${index}]`;
                         
-                        // Check if the array changed on this line
+                        // Check if this specific array element changed on this line
                         const expectedChangedVariables = expectedEntry.changedVariables || {};
-                        if (expectedChangedVariables.hasOwnProperty(arrayName) && 
-                            Array.isArray(expectedChangedVariables[arrayName])) {
+                        if (expectedChangedVariables.hasOwnProperty(elementName)) {
+                            hasChanged = true;
+                            expectedValue = expectedChangedVariables[elementName];
+                        } else if (expectedChangedVariables.hasOwnProperty(arrayName) && 
+                                   Array.isArray(expectedChangedVariables[arrayName])) {
+                            // Fallback: check if the entire array was marked as changed (old format)
                             hasChanged = true;
                             expectedValue = expectedChangedVariables[arrayName][index];
                         } else {

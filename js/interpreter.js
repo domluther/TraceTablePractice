@@ -298,6 +298,7 @@ export class Interpreter {
                 if (arrayMatch) {
                     const arrayName = arrayMatch[1];
                     const index = parseInt(arrayMatch[2]);
+                    const elementName = `${arrayName}[${index}]`;
                     
                     if (vars[arrayName] && Array.isArray(vars[arrayName])) {
                         const oldValue = vars[arrayName][index];
@@ -311,7 +312,8 @@ export class Interpreter {
                         }
                         vars[arrayName][index] = newValue;
                         if (oldValue !== newValue) {
-                            changeRecord[arrayName] = vars[arrayName];
+                            // Track the change for the specific array element, not the whole array
+                            changeRecord[elementName] = newValue;
                         }
                     }
                 }
