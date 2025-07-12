@@ -840,6 +840,12 @@ export class Interpreter {
 
         isStringConcatenation(value, vars) {
             // Check if the expression is a string concatenation
+            
+            // Check for CHR function calls (which return strings)
+            if (value.startsWith('CHR(') && value.endsWith(')')) {
+                return true;
+            }
+            
             const result = value.includes('+') && 
                    value.split('+').some(part => {
                         const trimmed = part.trim();
@@ -847,7 +853,8 @@ export class Interpreter {
                                (vars[trimmed] !== undefined && typeof vars[trimmed] === 'string') ||
                                trimmed.includes('.left(') || trimmed.includes('.right(') ||
                                trimmed.includes('.substring(') || trimmed.includes('.upper') ||
-                               trimmed.includes('.lower') || trimmed.startsWith('str(');
+                               trimmed.includes('.lower') || trimmed.startsWith('str(') ||
+                               trimmed.startsWith('CHR(') || trimmed.startsWith('ASC(');
                    });
             return result;
         }
@@ -870,10 +877,84 @@ export class Interpreter {
         }
 
         evaluateStringConcatenation(value, vars) {
+            // Handle single function calls that aren't part of concatenation
+            if ((value.startsWith('ASC(') && value.endsWith(')')) || 
+                (value.startsWith('CHR(') && value.endsWith(')'))) {
+                if (value.startsWith('ASC(')) {
+                    const argument = value.slice(4, -1).trim();
+                    let charValue;
+                    if (argument.startsWith('"') && argument.endsWith('"')) {
+                        charValue = argument.slice(1, -1);
+                    } else if (vars[argument] !== undefined) {
+                        charValue = vars[argument].toString();
+                    } else {
+                        charValue = this.evaluateExpressionOrVariable(argument, vars);
+                        if (typeof charValue !== 'string') {
+                            charValue = charValue.toString();
+                        }
+                    }
+                    if (charValue && charValue.length > 0) {
+                        return charValue.charCodeAt(0); // Return number, not string
+                    }
+                    return 0;
+                } else if (value.startsWith('CHR(')) {
+                    const argument = value.slice(4, -1).trim();
+                    let asciiValue;
+                    if (!isNaN(argument)) {
+                        asciiValue = parseInt(argument);
+                    } else if (vars[argument] !== undefined) {
+                        asciiValue = parseInt(vars[argument]);
+                    } else {
+                        asciiValue = this.evaluateArithmeticExpression(argument, vars);
+                    }
+                    if (!isNaN(asciiValue)) {
+                        return String.fromCharCode(asciiValue);
+                    }
+                    return '';
+                }
+            }
+            
             const parts = value.split('+').map(p => p.trim());
             let result = '';
             parts.forEach(part => {
-                if (part.startsWith('"') && part.endsWith('"')) {
+                if (part.startsWith('ASC(') && part.endsWith(')')) {
+                    // Handle ASC() function - character to ASCII value
+                    const argument = part.slice(4, -1).trim();
+                    let charValue;
+                    if (argument.startsWith('"') && argument.endsWith('"')) {
+                        // String literal like ASC("A")
+                        charValue = argument.slice(1, -1);
+                    } else if (vars[argument] !== undefined) {
+                        // Variable like ASC(letter)
+                        charValue = vars[argument].toString();
+                    } else {
+                        // Could be an expression or method call
+                        charValue = this.evaluateExpressionOrVariable(argument, vars);
+                        if (typeof charValue !== 'string') {
+                            charValue = charValue.toString();
+                        }
+                    }
+                    if (charValue && charValue.length > 0) {
+                        result += charValue.charCodeAt(0).toString();
+                    }
+                } else if (part.startsWith('CHR(') && part.endsWith(')')) {
+                    // Handle CHR() function - ASCII value to character
+                    const argument = part.slice(4, -1).trim();
+                    let asciiValue;
+                    if (!isNaN(argument)) {
+                        // Numeric literal like CHR(65)
+                        asciiValue = parseInt(argument);
+                    } else if (vars[argument] !== undefined) {
+                        // Variable like CHR(ascii_val)
+                        asciiValue = parseInt(vars[argument]);
+                    } else {
+                        // Could be an expression like CHR(ascii_value + 1)
+                        asciiValue = this.evaluateArithmeticExpression(argument, vars);
+                    }
+                    if (!isNaN(asciiValue)) {
+                        result += String.fromCharCode(asciiValue);
+                    }
+                } else if (part.startsWith('"') && part.endsWith('"')) {
                     result += part.slice(1, -1);
                 } else if (part.includes('.left(')) {
                     // Handle string left method
@@ -1027,6 +1108,35 @@ export class Interpreter {
         }
 
         getExpressionValue(operand, vars) {
+            // Handle ASC() function
+            if (operand.startsWith('ASC(') && operand.endsWith(')')) {
+                const argument = operand.slice(4, -1).trim();
+                let charValue;
+                if (argument.startsWith('"') && argument.endsWith('"')) {
+                    // String literal like ASC("A")
+                    charValue = argument.slice(1, -1);
+                } else if (vars[argument] !== undefined) {
+                    // Variable like ASC(letter)
+                    charValue = vars[argument].toString();
+                } else {
+                    // Could be an expression or method call
+                    charValue = this.evaluateExpressionOrVariable(argument, vars);
+                    if (typeof charValue !== 'string') {
+                        charValue = charValue.toString();
+                    }
+                }
+                if (charValue && charValue.length > 0) {
+                    return charValue.charCodeAt(0);
+                }
+                return 0;
+            }
+            
+            // Handle CHR() function - CHR returns a string, but in arithmetic context it should be 0
+            if (operand.startsWith('CHR(') && operand.endsWith(')')) {
+                // CHR in arithmetic context is unusual, but return 0 for safety
+                return 0;
+            }
+            
             // Handle array access
             if (operand.includes('[') && operand.includes(']')) {
                 const arrayMatch = operand.match(/(\w+)\[(\w+|\d+)\]/);
@@ -1222,6 +1332,49 @@ export class Interpreter {
         evaluateExpressionOrVariable(expression, vars) {
             // Helper function to evaluate expressions or variables in conditions
             expression = expression.trim();
+            
+            // Handle ASC() function
+            if (expression.startsWith('ASC(') && expression.endsWith(')')) {
+                const argument = expression.slice(4, -1).trim();
+                let charValue;
+                if (argument.startsWith('"') && argument.endsWith('"')) {
+                    // String literal like ASC("A")
+                    charValue = argument.slice(1, -1);
+                } else if (vars[argument] !== undefined) {
+                    // Variable like ASC(letter)
+                    charValue = vars[argument].toString();
+                } else {
+                    // Could be an expression or method call
+                    charValue = this.evaluateExpressionOrVariable(argument, vars);
+                    if (typeof charValue !== 'string') {
+                        charValue = charValue.toString();
+                    }
+                }
+                if (charValue && charValue.length > 0) {
+                    return charValue.charCodeAt(0);
+                }
+                return 0;
+            }
+            
+            // Handle CHR() function
+            if (expression.startsWith('CHR(') && expression.endsWith(')')) {
+                const argument = expression.slice(4, -1).trim();
+                let asciiValue;
+                if (!isNaN(argument)) {
+                    // Numeric literal like CHR(65)
+                    asciiValue = parseInt(argument);
+                } else if (vars[argument] !== undefined) {
+                    // Variable like CHR(ascii_val)
+                    asciiValue = parseInt(vars[argument]);
+                } else {
+                    // Could be an expression like CHR(ascii_value + 1)
+                    asciiValue = this.evaluateArithmeticExpression(argument, vars);
+                }
+                if (!isNaN(asciiValue)) {
+                    return String.fromCharCode(asciiValue);
+                }
+                return '';
+            }
             
             // Check if it's a string literal
             if (expression.startsWith('"') && expression.endsWith('"')) {
