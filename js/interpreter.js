@@ -273,8 +273,12 @@ export class Interpreter {
                     output = vars[varName].toString().length.toString();
                 }
             } else if (content.includes('+')) {
-                // Use the existing string concatenation method which handles complex expressions
-                output = this.evaluateStringConcatenation(content, vars);
+                // For trace table purposes, show the original expression
+                // But still evaluate it for actual program output
+                output = content;
+                const evaluatedOutput = this.evaluateStringConcatenation(content, vars);
+                // Store the evaluated result for actual program output (but trace shows original)
+                if (evaluatedOutput) this.outputs.push(evaluatedOutput);
             } else if (this.isArithmeticExpression(content)) {
                 // Handle arithmetic expressions like print(x*2) - AFTER checking for string methods
                 output = this.evaluateArithmeticExpression(content, vars).toString();
@@ -286,12 +290,18 @@ export class Interpreter {
                     output = vars[varName].toString();
                 }
             }
-            if (output) this.outputs.push(output);
+            // Add output to outputs array for non-concatenation cases
+            if (output && !content.includes('+')) this.outputs.push(output);
         } else if (line.includes('=') && !line.includes('==') && !line.includes('!=') && !line.includes('<=') && !line.includes('>=')) {
             // Assignment - check if trying to assign to a constant
             const parts = line.split('=');
             const varName = parts[0].trim();
             const value = parts[1].trim();
+            
+            // Check for reserved keywords as variable names
+            if (varName.toLowerCase() === 'true' || varName.toLowerCase() === 'false') {
+                throw new Error(`Cannot use reserved keyword '${varName}' as a variable name`);
+            }
             
             // Check if this is trying to reassign a constant
             if (this.constants[varName]) {
@@ -527,6 +537,13 @@ export class Interpreter {
                 // Numeric literal - use parseFloat to handle both integers and decimals
                 const oldValue = vars[varName];
                 vars[varName] = parseFloat(value);
+                if (oldValue !== vars[varName]) {
+                    changeRecord[varName] = vars[varName];
+                }
+            } else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
+                // Boolean literal
+                const oldValue = vars[varName];
+                vars[varName] = value.toLowerCase() === 'true';
                 if (oldValue !== vars[varName]) {
                     changeRecord[varName] = vars[varName];
                 }
@@ -1490,6 +1507,14 @@ export class Interpreter {
                 return vars[expression];
             }
             
+            // Check if it's a boolean literal
+            if (expression.toLowerCase() === 'true') {
+                return true;
+            }
+            if (expression.toLowerCase() === 'false') {
+                return false;
+            }
+            
             // Check if it's a number
             if (!isNaN(expression)) {
                 return parseFloat(expression);
@@ -1670,12 +1695,33 @@ export class Interpreter {
             // Execute the do-until loop (execute body at least once, then check condition)
             do {
                 // Execute loop body
-                for (let bodyLine = i + 1; bodyLine < untilIndex; bodyLine++) {
+                let bodyLine = i + 1;
+                while (bodyLine < untilIndex) {
                     const bodyLineCode = lines[bodyLine];
                     const bodyLineNum = bodyLine + 1;
-                    const result = this.executeStatement(bodyLineCode, bodyLineNum, this.variables);
-                    if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
-                        this.addTraceEntry(bodyLineNum, this.variables, result.output, result.changedVariables);
+                    
+                    if (bodyLineCode.startsWith('if ')) {
+                        // Handle if statement
+                        bodyLine = this.handleIfStatement(lines, bodyLine);
+                    } else if (bodyLineCode.startsWith('switch ')) {
+                        // Handle switch statement  
+                        bodyLine = this.handleSwitchStatement(lines, bodyLine);
+                    } else if (bodyLineCode.startsWith('while ')) {
+                        // Handle nested while loop
+                        bodyLine = this.handleWhileLoop(lines, bodyLine);
+                    } else if (bodyLineCode === 'do') {
+                        // Handle nested do-until loop
+                        bodyLine = this.handleDoUntilLoop(lines, bodyLine);
+                    } else if (bodyLineCode.startsWith('for ')) {
+                        // Handle nested for loop
+                        bodyLine = this.handleForLoop(lines, bodyLine);
+                    } else {
+                        // Regular statement
+                        const result = this.executeStatement(bodyLineCode, bodyLineNum, this.variables);
+                        if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
+                            this.addTraceEntry(bodyLineNum, this.variables, result.output, result.changedVariables);
+                        }
+                        bodyLine++;
                     }
                 }
                 

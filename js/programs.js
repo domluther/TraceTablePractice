@@ -587,7 +587,7 @@ print("Correct!")`,
                 ["hello", "123", "parrot"],
                 ["password", "parrot"],
                 ["wrong", "guess", "test", "parrot"],
-                ["abc", "parrot"]
+                ["abc", "parrot"],
                 ["parrot"]
             ]
         },
@@ -662,11 +662,11 @@ endif`,
             ]
         },
         {
-            code: `secret = random(1, 100)
+            code: `secret = random(1, 50)
 attempts = 0
 found = false
 do
-    guess = int(input("Guess the number (1-100)"))
+    guess = int(input("Guess the number (1-50)"))
     attempts = attempts + 1
     if guess < secret then
         print("Too low!")
@@ -676,13 +676,22 @@ do
         print("Correct!")
         found = true
     endif
-until found == true OR attempts >= 7
+until found == true OR attempts >= 3
 if found == true then
     print("You won in " + str(attempts) + " attempts!")
 else
     print("Game over! The number was " + str(secret))
 endif`,
-            description: "Number guessing game with attempt limit"
+            description: "Number guessing game with attempt limit",
+            inputSets: [
+                ["25"],                    // Lucky first guess (secret = 25)
+                ["10", "20", "30"],        // Three attempts to find 25
+                ["40", "30", "25"],        // Three attempts, different strategy
+                ["1", "2", "3"],           // Fail after 3 attempts (secret = 45)
+                ["25", "37", "43"],        // Binary search for 43: start middle, go high, close in
+                ["25", "12", "6"]          // Binary search for 6: start middle, go low, close in
+            ],
+            randomValues: [25, 30, 50, 45, 43, 6]
         },
     ]
 };
