@@ -50,6 +50,115 @@ body {
     border-left: 4px solid #667eea;
 }
 
+/* Duck Level Color Schemes */
+.score-button.level-newcomer {
+    /* Eggshell colors - soft and neutral */
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+    color: #2d3748;
+    box-shadow: 0 4px 12px rgba(203, 213, 224, 0.3);
+}
+
+.score-button.level-newcomer:hover {
+    box-shadow: 0 6px 16px rgba(203, 213, 224, 0.4);
+}
+
+.score-button.level-duckling {
+    /* Soft yellow - warm and welcoming */
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+    color: #7c2d12;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.score-button.level-duckling:hover {
+    box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
+}
+
+.score-button.level-quack {
+    /* Bright yellow - cheerful and energetic */
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #78350f;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.score-button.level-quack:hover {
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.score-button.level-dynasty {
+    /* Blue like water - confident and flowing */
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.score-button.level-dynasty:hover {
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.score-button.level-mallard {
+    /* Purple elegance - sophisticated and premium */
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.score-button.level-mallard:hover {
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+.score-button.level-golden {
+    /* Golden luxury - legendary achievement */
+    background: linear-gradient(135deg, #ffd700 0%, #ffb300 50%, #ff8c00 100%);
+    color: #7c2d12;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    border: 2px solid rgba(255, 215, 0, 0.6);
+    animation: golden-glow 2s ease-in-out infinite alternate;
+}
+
+.score-button.level-golden:hover {
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+    transform: translateY(-3px) scale(1.02);
+}
+
+@keyframes golden-glow {
+    0% {
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    }
+    100% {
+        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.7);
+    }
+}
+
+.header {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    color: white;
+    padding: 20px 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+.content {
+    padding: 30px;
+}
+
+.controls {
+    background: #f7fafc;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border-left: 4px solid #667eea;
+}
+
 .controls h2 {
     color: #2d3748;
     margin-bottom: 20px;
@@ -499,14 +608,19 @@ body {
     background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
     color: white;
     border: none;
-    padding: 10px 16px;
+    padding: 12px 18px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
     z-index: 100;
+    max-width: 300px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .score-button:hover {
@@ -743,6 +857,105 @@ body {
 
 .close-modal-btn:hover {
     background: #cbd5e0;
+}
+
+/* Level System Styles */
+.level-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.current-level {
+    margin-bottom: 20px;
+}
+
+.level-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.level-emoji {
+    font-size: 3em;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.level-details {
+    text-align: left;
+}
+
+.level-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.level-description {
+    font-size: 1em;
+    opacity: 0.9;
+    font-style: italic;
+}
+
+.level-progress {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.2);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #4CAF50, #81C784);
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.level-maxed {
+    background: rgba(255, 215, 0, 0.2);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 215, 0, 0.5);
+}
+
+.max-level-message {
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+    color: #FFD700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 @media (max-width: 768px) {

@@ -683,6 +683,8 @@ else
     print("Game over! The number was " + str(secret))
 endif`,
             description: "Number guessing game with attempt limit",
+            // Input values may not be realistic for game based on random secret number
+            // but are used to demonstrate the program logic
             inputSets: [
                 ["25", "12", "6"]
                 ["40", "30", "25"],

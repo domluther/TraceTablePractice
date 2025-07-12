@@ -175,21 +175,32 @@ export class ScoreManager {
         const scoreButton = document.getElementById('scoreButton');
         if (scoreButton) {
             const stats = this.getOverallStats();
+            const levelInfo = this.getLevelInfo(stats.totalCorrect);
             
-            // Show total points instead of percentage since we don't know total possible points
-            scoreButton.innerHTML = `📊 Points: ${stats.totalCorrect}`;
+            // Show level and points
+            scoreButton.innerHTML = `${levelInfo.current.emoji} ${levelInfo.current.title} (${stats.totalCorrect} pts)`;
             
-            // Add color coding based on total points achieved
-            // Assuming roughly 50 programs with average 15 points each (~750 total possible)
+            // Add color coding based on level
             scoreButton.className = 'score-button';
-            if (stats.totalCorrect >= 375) {
-                scoreButton.classList.add('excellent');  // 50%+ of estimated total
-            } else if (stats.totalCorrect >= 190) {
-                scoreButton.classList.add('good');       // 25%+ of estimated total
-            } else if (stats.totalCorrect >= 95) {
-                scoreButton.classList.add('fair');       // 12%+ of estimated total
-            } else if (stats.totalAttempts > 0) {
-                scoreButton.classList.add('needs-work'); // Less than 12%
+            switch(levelInfo.levelNumber) {
+                case 0:
+                    scoreButton.classList.add('level-newcomer');
+                    break;
+                case 1:
+                    scoreButton.classList.add('level-duckling');
+                    break;
+                case 2:
+                    scoreButton.classList.add('level-quack');
+                    break;
+                case 3:
+                    scoreButton.classList.add('level-dynasty');
+                    break;
+                case 4:
+                    scoreButton.classList.add('level-mallard');
+                    break;
+                case 5:
+                    scoreButton.classList.add('level-golden');
+                    break;
             }
         }
     }
@@ -241,10 +252,47 @@ export class ScoreManager {
     // Generate HTML for the score modal
     generateScoreHTML() {
         const overall = this.getOverallStats();
+        const levelInfo = this.getLevelInfo(overall.totalCorrect);
         const percentage = overall.totalQuestions > 0 ? 
             Math.round((overall.totalCorrect / overall.totalQuestions) * 100) : 0;
         
         let html = `
+            <div class="level-info">
+                <div class="current-level">
+                    <div class="level-display">
+                        <div class="level-emoji">${levelInfo.current.emoji}</div>
+                        <div class="level-details">
+                            <div class="level-title">${levelInfo.current.title}</div>
+                            <div class="level-description">${levelInfo.current.description}</div>
+                        </div>
+                    </div>
+                </div>
+        `;
+
+        if (levelInfo.next) {
+            const pointsNeeded = levelInfo.next.threshold - overall.totalCorrect;
+            html += `
+                <div class="level-progress">
+                    <div class="progress-info">
+                        <span>Progress to ${levelInfo.next.emoji} ${levelInfo.next.title}</span>
+                        <span>${pointsNeeded} points needed</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${levelInfo.progress}%"></div>
+                    </div>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="level-maxed">
+                    <div class="max-level-message">🎉 Maximum level achieved! You are the master of the pond! 🎉</div>
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+
+        html += `
             <div class="overall-stats">
                 <h3>📈 Overall Statistics</h3>
                 <div class="stat-grid">
@@ -338,6 +386,40 @@ export class ScoreManager {
         if (percentage >= 60) return 'good';
         if (percentage >= 40) return 'fair';
         return 'needs-work';
+    }
+
+    // Duck-themed level system
+    getLevelInfo(points) {
+        const levels = [
+            { threshold: 0, title: "Newcomer", emoji: "🥚", description: "Just hatched!" },
+            { threshold: 10, title: "Duckling Debugger", emoji: "🐣", description: "Taking your first waddle into coding!" },
+            { threshold: 75, title: "Quack Coder", emoji: "🐤", description: "Your code is starting to make some noise!" },
+            { threshold: 200, title: "Duck Dynasty Developer", emoji: "🦆", description: "Swimming confidently through algorithms!" },
+            { threshold: 500, title: "Mallard Master", emoji: "🦆✨", description: "Soaring above the rest with elegant solutions!" },
+            { threshold: 1000, title: "Golden Goose Guru", emoji: "🪿👑", description: "The legendary coder of the pond!" }
+        ];
+
+        // Find the highest level achieved
+        let currentLevel = levels[0];
+        for (let i = levels.length - 1; i >= 0; i--) {
+            if (points >= levels[i].threshold) {
+                currentLevel = levels[i];
+                break;
+            }
+        }
+
+        // Calculate progress to next level
+        const nextLevelIndex = levels.findIndex(level => level.threshold > points);
+        const nextLevel = nextLevelIndex !== -1 ? levels[nextLevelIndex] : null;
+        const progressPercentage = nextLevel ? 
+            Math.round(((points - currentLevel.threshold) / (nextLevel.threshold - currentLevel.threshold)) * 100) : 100;
+
+        return {
+            current: currentLevel,
+            next: nextLevel,
+            progress: progressPercentage,
+            levelNumber: levels.indexOf(currentLevel)
+        };
     }
 
     // Get statistics for a program
