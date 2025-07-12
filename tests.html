@@ -358,11 +358,12 @@ isText = bool(textStr)`;
         }
         
         /**
-         * Test nested conditional execution
-         * Covers: if/then/else logic, nested conditions, conditionals in loops
+         * Test nested conditional execution with comprehensive scenarios
+         * Covers: nested if/then/else logic, MOD operator in conditions, if statements inside loops, 
+         *         switch statements inside loops, multi-level nesting, conditional logic inside while loops
          */
         function testNestedConditionalExecution() {
-            // Test 1: Basic nested if - inner condition true
+            // Test 1: Basic nested if with both conditions true (jump qualification scenario)
             const testInterpreter1 = new Interpreter();
             const testProgram1 = { inputs: ["3.5", "12"], randomValue: undefined };
             
@@ -380,11 +381,11 @@ isText = bool(textStr)`;
                 endif
             `, testProgram1);
             
-            assertEqual(testInterpreter1.variables.jumpLength, 3.5, 'jumpLength should be 3.5');
-            assertEqual(testInterpreter1.variables.yearGroup, 12, 'yearGroup should be 12');
-            assertEqual(testInterpreter1.variables.result, "qualify", 'Should execute inner if branch when both conditions true');
+            assertEqual(testInterpreter1.variables.jumpLength, 3.5, 'Nested If - Both True: jumpLength should be 3.5');
+            assertEqual(testInterpreter1.variables.yearGroup, 12, 'Nested If - Both True: yearGroup should be 12');
+            assertEqual(testInterpreter1.variables.result, "qualify", 'Nested If - Both True: Should execute inner if branch when both conditions true');
             
-            // Test 2: Nested if - outer true, inner false
+            // Test 2: Nested if with outer true, inner false (age restriction scenario)
             const testInterpreter2 = new Interpreter();
             const testProgram2 = { inputs: ["2.5", "8"], randomValue: undefined };
             
@@ -402,11 +403,11 @@ isText = bool(textStr)`;
                 endif
             `, testProgram2);
             
-            assertEqual(testInterpreter2.variables.jumpLength, 2.5, 'jumpLength should be 2.5');
-            assertEqual(testInterpreter2.variables.yearGroup, 8, 'yearGroup should be 8');
-            assertEqual(testInterpreter2.variables.result, "too young", 'Should execute inner else branch');
+            assertEqual(testInterpreter2.variables.jumpLength, 2.5, 'Nested If - Outer True Inner False: jumpLength should be 2.5');
+            assertEqual(testInterpreter2.variables.yearGroup, 8, 'Nested If - Outer True Inner False: yearGroup should be 8');
+            assertEqual(testInterpreter2.variables.result, "too young", 'Nested If - Outer True Inner False: Should execute inner else branch');
             
-            // Test 3: Nested if - outer false
+            // Test 3: Nested if with outer false (distance failure scenario)
             const testInterpreter3 = new Interpreter();
             const testProgram3 = { inputs: ["1.5", "12"], randomValue: undefined };
             
@@ -424,11 +425,11 @@ isText = bool(textStr)`;
                 endif
             `, testProgram3);
             
-            assertEqual(testInterpreter3.variables.jumpLength, 1.5, 'jumpLength should be 1.5');
-            assertEqual(testInterpreter3.variables.yearGroup, 12, 'yearGroup should be 12');
-            assertEqual(testInterpreter3.variables.result, "not long enough", 'Should execute outer else branch when outer condition false');
+            assertEqual(testInterpreter3.variables.jumpLength, 1.5, 'Nested If - Outer False: jumpLength should be 1.5');
+            assertEqual(testInterpreter3.variables.yearGroup, 12, 'Nested If - Outer False: yearGroup should be 12');
+            assertEqual(testInterpreter3.variables.result, "not long enough", 'Nested If - Outer False: Should execute outer else branch when outer condition false');
             
-            // Test 4: If statements inside for loop
+            // Test 4: MOD operator in conditions within for loop (even/odd number detection)
             const testInterpreter4 = new Interpreter();
             const testProgram4 = { inputs: [], randomValue: undefined };
             
@@ -444,13 +445,13 @@ isText = bool(textStr)`;
                 next i
             `, testProgram4);
             
-            assertEqual(testInterpreter4.variables.total, 6, 'total should be 6 (2 + 4)');
-            assertEqual(testInterpreter4.outputs.length, 5, 'Should have 5 outputs from loop');
-            assertEqual(testInterpreter4.outputs[0], 'odd: 1', 'First output should be "odd: 1"');
-            assertEqual(testInterpreter4.outputs[1], 'even: 2', 'Second output should be "even: 2"');
-            assertEqual(testInterpreter4.outputs[4], 'odd: 5', 'Fifth output should be "odd: 5"');
+            assertEqual(testInterpreter4.variables.total, 6, 'MOD in For Loop: total should be 6 (2 + 4)');
+            assertEqual(testInterpreter4.outputs.length, 5, 'MOD in For Loop: Should have 5 outputs from loop');
+            assertEqual(testInterpreter4.outputs[0], 'odd: 1', 'MOD in For Loop: First output should be "odd: 1"');
+            assertEqual(testInterpreter4.outputs[1], 'even: 2', 'MOD in For Loop: Second output should be "even: 2"');
+            assertEqual(testInterpreter4.outputs[4], 'odd: 5', 'MOD in For Loop: Fifth output should be "odd: 5"');
             
-            // Test 5: Switch statements inside for loop
+            // Test 5: Switch statements inside for loop (day name mapping)
             const testInterpreter5 = new Interpreter();
             const testProgram5 = { inputs: [], randomValue: undefined };
             
@@ -469,13 +470,13 @@ isText = bool(textStr)`;
                 next day
             `, testProgram5);
             
-            assertEqual(testInterpreter5.variables.day, 3, 'day should be 3 after loop completion');
-            assertEqual(testInterpreter5.outputs.length, 3, 'Should have 3 outputs from switch in loop');
-            assertEqual(testInterpreter5.outputs[0], 'Monday', 'First output should be "Monday"');
-            assertEqual(testInterpreter5.outputs[1], 'Tuesday', 'Second output should be "Tuesday"');
-            assertEqual(testInterpreter5.outputs[2], 'Wednesday', 'Third output should be "Wednesday"');
+            assertEqual(testInterpreter5.variables.day, 3, 'Switch in For Loop: day should be 3 after loop completion');
+            assertEqual(testInterpreter5.outputs.length, 3, 'Switch in For Loop: Should have 3 outputs from switch in loop');
+            assertEqual(testInterpreter5.outputs[0], 'Monday', 'Switch in For Loop: First output should be "Monday"');
+            assertEqual(testInterpreter5.outputs[1], 'Tuesday', 'Switch in For Loop: Second output should be "Tuesday"');
+            assertEqual(testInterpreter5.outputs[2], 'Wednesday', 'Switch in For Loop: Third output should be "Wednesday"');
             
-            // Test 6: Nested if with multiple levels
+            // Test 6: Triple-nested if statements (grade evaluation with score and letter grade)
             const testInterpreter6 = new Interpreter();
             const testProgram6 = { inputs: ["85", "A"], randomValue: undefined };
             
@@ -497,11 +498,11 @@ isText = bool(textStr)`;
                 endif
             `, testProgram6);
             
-            assertEqual(testInterpreter6.variables.score, 85, 'score should be 85');
-            assertEqual(testInterpreter6.variables.grade, "A", 'grade should be "A"');
-            assertEqual(testInterpreter6.variables.result, "good", 'Should execute middle nested branch (score >= 80, grade A, but score < 90)');
+            assertEqual(testInterpreter6.variables.score, 85, 'Triple Nested If: score should be 85');
+            assertEqual(testInterpreter6.variables.grade, "A", 'Triple Nested If: grade should be "A"');
+            assertEqual(testInterpreter6.variables.result, "good", 'Triple Nested If: Should execute middle nested branch (score >= 80, grade A, but score < 90)');
             
-            // Test 7: If statements inside while loop
+            // Test 7: If statements inside while loop (conditional execution during iteration)
             const testInterpreter7 = new Interpreter();
             const testProgram7 = { inputs: [], randomValue: undefined };
             
@@ -520,16 +521,17 @@ isText = bool(textStr)`;
                 endwhile
             `, testProgram7);
             
-            assertEqual(testInterpreter7.variables.count, 4, 'count should be 4');
-            assertEqual(testInterpreter7.variables.x, 5, 'x should be 5 after loop');
-            assertEqual(testInterpreter7.outputs.length, 2, 'Should have 2 conditional outputs');
-            assertEqual(testInterpreter7.outputs[0], 'found two', 'Should find "found two" when x=2');
-            assertEqual(testInterpreter7.outputs[1], 'greater than three', 'Should find "greater than three" when x=4');
+            assertEqual(testInterpreter7.variables.count, 4, 'If in While Loop: count should be 4');
+            assertEqual(testInterpreter7.variables.x, 5, 'If in While Loop: x should be 5 after loop');
+            assertEqual(testInterpreter7.outputs.length, 2, 'If in While Loop: Should have 2 conditional outputs');
+            assertEqual(testInterpreter7.outputs[0], 'found two', 'If in While Loop: Should find "found two" when x=2');
+            assertEqual(testInterpreter7.outputs[1], 'greater than three', 'If in While Loop: Should find "greater than three" when x=4');
         }
         
         /**
-         * Test string methods in print statements
-         * Covers: string methods used directly in output
+         * Test string methods in print statements and output generation
+         * Covers: .upper/.lower case conversion in output, .length property in output, 
+         *         string method chaining with print statements
          */
         function testStringMethodsInPrint() {
             const testInterpreter = new Interpreter();
@@ -544,17 +546,18 @@ isText = bool(textStr)`;
             `, testProgram);
             
             // Check variables and outputs
-            assertEqual(testInterpreter.variables.name, 'hello', 'name should be "hello"');
-            assertEqual(testInterpreter.variables.city, 'WORLD', 'city should be "WORLD"');
-            assertEqual(testInterpreter.outputs.length, 3, 'Should have exactly 3 outputs');
-            assertEqual(testInterpreter.outputs[0], 'HELLO', 'First output should be "HELLO"');
-            assertEqual(testInterpreter.outputs[1], 'world', 'Second output should be "world"');
-            assertEqual(testInterpreter.outputs[2], '5', 'Third output should be "5"');
+            assertEqual(testInterpreter.variables.name, 'hello', 'String Methods in Print: name should be "hello"');
+            assertEqual(testInterpreter.variables.city, 'WORLD', 'String Methods in Print: city should be "WORLD"');
+            assertEqual(testInterpreter.outputs.length, 3, 'String Methods in Print: Should have exactly 3 outputs');
+            assertEqual(testInterpreter.outputs[0], 'HELLO', 'String Methods in Print: .upper conversion should output "HELLO"');
+            assertEqual(testInterpreter.outputs[1], 'world', 'String Methods in Print: .lower conversion should output "world"');
+            assertEqual(testInterpreter.outputs[2], '5', 'String Methods in Print: .length property should output "5"');
         }
         
         /**
-         * Test substring with variable parameters
-         * Covers: substring method with dynamic parameters
+         * Test substring method with dynamic loop variables
+         * Covers: substring extraction with variable position parameters, 
+         *         string method execution inside loops, character-by-character extraction
          */
         function testSubstringWithVariable() {
             const testInterpreter = new Interpreter();
@@ -568,11 +571,11 @@ isText = bool(textStr)`;
             `, testProgram);
             
             // Check outputs - should extract characters at positions 1, 2, 3 (r, a, n)
-            assertEqual(testInterpreter.variables.x, 3, 'x should be 3 after loop completion');
-            assertEqual(testInterpreter.outputs.length, 3, 'Should have exactly 3 outputs');
-            assertEqual(testInterpreter.outputs[0], 'r', 'First output should be "r" (position 1)');
-            assertEqual(testInterpreter.outputs[1], 'a', 'Second output should be "a" (position 2)');
-            assertEqual(testInterpreter.outputs[2], 'n', 'Third output should be "n" (position 3)');
+            assertEqual(testInterpreter.variables.x, 3, 'Substring with Variable: x should be 3 after loop completion');
+            assertEqual(testInterpreter.outputs.length, 3, 'Substring with Variable: Should have exactly 3 outputs');
+            assertEqual(testInterpreter.outputs[0], 'r', 'Substring with Variable: Position 1 extraction should be "r"');
+            assertEqual(testInterpreter.outputs[1], 'a', 'Substring with Variable: Position 2 extraction should be "a"');
+            assertEqual(testInterpreter.outputs[2], 'n', 'Substring with Variable: Position 3 extraction should be "n"');
         }
         
         /**
@@ -618,8 +621,9 @@ total = price * (1 + vat)`;
         }
         
         /**
-         * Test for loops with positive step
-         * Covers: step parameter, range iteration
+         * Test for loops with positive step values (counting up)
+         * Covers: step parameter parsing, range iteration with custom increments, 
+         *         even number generation, step-based loop termination
          */
         function testForLoopWithPositiveStep() {
             const testInterpreter = new Interpreter();
@@ -631,15 +635,16 @@ next i`;
             const result = testInterpreter.execute(positiveStepCode);
             
             // Should print even numbers: 2, 4, 6, 8, 10
-            assertEqual(testInterpreter.outputs.length, 5, 'Should have 5 outputs for step 2');
-            assertEqual(testInterpreter.outputs[0], '2', 'First output should be "2"');
-            assertEqual(testInterpreter.outputs[1], '4', 'Second output should be "4"');
-            assertEqual(testInterpreter.outputs[4], '10', 'Fifth output should be "10"');
+            assertEqual(testInterpreter.outputs.length, 5, 'Positive Step For Loop: Should have 5 outputs for step 2');
+            assertEqual(testInterpreter.outputs[0], '2', 'Positive Step For Loop: First even number should be "2"');
+            assertEqual(testInterpreter.outputs[1], '4', 'Positive Step For Loop: Second even number should be "4"');
+            assertEqual(testInterpreter.outputs[4], '10', 'Positive Step For Loop: Final even number should be "10"');
         }
         
         /**
-         * Test for loops with negative step
-         * Covers: countdown loops, negative step values
+         * Test for loops with negative step values (counting down)
+         * Covers: negative step parameter, countdown iteration, reverse range processing,
+         *         negative step termination conditions
          */
         function testForLoopWithNegativeStep() {
             const testInterpreter = new Interpreter();
@@ -651,9 +656,9 @@ next i`;
             const result = testInterpreter.execute(negativeStepCode);
             
             // Should print countdown: 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
-            assertEqual(testInterpreter.outputs.length, 11, 'Should have 11 outputs for countdown');
-            assertEqual(testInterpreter.outputs[0], '10', 'First output should be "10"');
-            assertEqual(testInterpreter.outputs[10], '0', 'Eleventh output should be "0"');
+            assertEqual(testInterpreter.outputs.length, 11, 'Negative Step For Loop: Should have 11 outputs for countdown');
+            assertEqual(testInterpreter.outputs[0], '10', 'Negative Step For Loop: Countdown should start with "10"');
+            assertEqual(testInterpreter.outputs[10], '0', 'Negative Step For Loop: Countdown should end with "0"');
         }
         
         /**
@@ -730,20 +735,20 @@ print("Done")`;
                 'Edge Cases': ['Division by One', 'Multiplication by Zero', 'Power of Zero', 'Empty Array Access', 'Out of Bounds Array Access'],
                 'Type Conversions': ['float(input())', 'float(numValue)', 'int(numValue)', 'int(3.14)', 'int(0)', 'bool("True")', 'bool("False")', 'bool(0)', 'bool(1)', 'bool("")', 'bool("hello")'],
                 'Nested Conditionals': [
-                    'jumpLength should be 3.5', 'yearGroup should be 12', 'Should execute inner if branch when both conditions true',
-                    'jumpLength should be 2.5', 'yearGroup should be 8', 'Should execute inner else branch',
-                    'jumpLength should be 1.5', 'Should execute outer else branch when outer condition false',
-                    'total should be 6', 'Should have 5 outputs from loop', 'First output should be "odd: 1"', 'Second output should be "even: 2"', 'Fifth output should be "odd: 5"',
-                    'day should be 3 after loop completion', 'Should have 3 outputs from switch in loop', 'First output should be "Monday"', 'Second output should be "Tuesday"', 'Third output should be "Wednesday"',
-                    'score should be 85', 'grade should be "A"', 'Should execute middle nested branch',
-                    'count should be 4', 'x should be 5 after loop', 'Should have 2 conditional outputs', 'Should find "found two"', 'Should find "greater than three"'
+                    'Nested If - Both True: jumpLength should be 3.5', 'Nested If - Both True: yearGroup should be 12', 'Nested If - Both True: Should execute inner if branch when both conditions true',
+                    'Nested If - Outer True Inner False: jumpLength should be 2.5', 'Nested If - Outer True Inner False: yearGroup should be 8', 'Nested If - Outer True Inner False: Should execute inner else branch',
+                    'Nested If - Outer False: jumpLength should be 1.5', 'Nested If - Outer False: Should execute outer else branch when outer condition false',
+                    'MOD in For Loop: total should be 6', 'MOD in For Loop: Should have 5 outputs from loop', 'MOD in For Loop: First output should be "odd: 1"', 'MOD in For Loop: Second output should be "even: 2"', 'MOD in For Loop: Fifth output should be "odd: 5"',
+                    'Switch in For Loop: day should be 3 after loop completion', 'Switch in For Loop: Should have 3 outputs from switch in loop', 'Switch in For Loop: First output should be "Monday"', 'Switch in For Loop: Second output should be "Tuesday"', 'Switch in For Loop: Third output should be "Wednesday"',
+                    'Triple Nested If: score should be 85', 'Triple Nested If: grade should be "A"', 'Triple Nested If: Should execute middle nested branch',
+                    'If in While Loop: count should be 4', 'If in While Loop: x should be 5 after loop', 'If in While Loop: Should have 2 conditional outputs', 'If in While Loop: Should find "found two"', 'If in While Loop: Should find "greater than three"'
                 ],
-                'String Methods in Print': ['name should be "hello"', 'city should be "WORLD"', 'Should have exactly 3 outputs'],
-                'Substring with Variable': ['x should be 3 after loop completion', 'Should have exactly 3 outputs'],
+                'String Methods in Print': ['String Methods in Print: name should be "hello"', 'String Methods in Print: city should be "WORLD"', 'String Methods in Print: Should have exactly 3 outputs', 'String Methods in Print: .upper conversion should output "HELLO"', 'String Methods in Print: .lower conversion should output "world"', 'String Methods in Print: .length property should output "5"'],
+                'Substring with Variable': ['Substring with Variable: x should be 3 after loop completion', 'Substring with Variable: Should have exactly 3 outputs', 'Substring with Variable: Position 1 extraction should be "r"', 'Substring with Variable: Position 2 extraction should be "a"', 'Substring with Variable: Position 3 extraction should be "n"'],
                 'Comments': ['x should be 5 despite comments', 'y should be 10 despite comments', 'z should be 15 (x + y)', 'Should have exactly 3 trace entries'],
                 'Constants': ['const pi should be 3.14159', 'const vat should be 0.2', 'total should be 120 (100 * 1.2)'],
-                'For Loops with Positive Step': ['Should have 5 outputs for step 2', 'First output should be "2"', 'Second output should be "4"', 'Fifth output should be "10"'],
-                'For Loops with Negative Step': ['Should have 11 outputs for countdown', 'First output should be "10"', 'Eleventh output should be "0"'],
+                'For Loops with Positive Step': ['Positive Step For Loop: Should have 5 outputs for step 2', 'Positive Step For Loop: First even number should be "2"', 'Positive Step For Loop: Second even number should be "4"', 'Positive Step For Loop: Final even number should be "10"'],
+                'For Loops with Negative Step': ['Negative Step For Loop: Should have 11 outputs for countdown', 'Negative Step For Loop: Countdown should start with "10"', 'Negative Step For Loop: Countdown should end with "0"'],
                 'Switch/Case': ['day should be "Mon"', 'First output should be "Monday"', 'Second output should be "Done"']
             };
             
