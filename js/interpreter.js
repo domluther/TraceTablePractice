@@ -174,6 +174,114 @@ export class Interpreter {
                     changeRecord[constName] = vars[constName];
                 }
             }
+        } else if (line.startsWith('print(')) {
+            // Print statement - doesn't change variables, only produces output
+            const content = line.substring(6, line.length - 1);
+            if (content.startsWith('"') && content.endsWith('"')) {
+                output = content.slice(1, -1);
+            } else if (content.includes(',') && !content.includes('.substring(') && !content.includes('.left(') && !content.includes('.right(')) {
+                // Handle comma-separated arguments like print("The score is", score)
+                // But NOT method calls that contain commas like substring(x, 1)
+                const parts = content.split(',').map(p => p.trim());
+                let result = '';
+                parts.forEach((part, index) => {
+                    if (index > 0) result += ' '; // Add space between parts
+                    
+                    if (part.startsWith('"') && part.endsWith('"')) {
+                        result += part.slice(1, -1);
+                    } else if (vars[part] !== undefined) {
+                        result += vars[part].toString();
+                    } else if (part.startsWith('str(') && part.endsWith(')')) {
+                        const varName = part.substring(4, part.length - 1);
+                        if (vars[varName] !== undefined) {
+                            result += vars[varName].toString();
+                        }
+                    } else if (this.isArithmeticExpression(part)) {
+                        // Handle arithmetic expressions in print arguments
+                        result += this.evaluateArithmeticExpression(part, vars).toString();
+                    }
+                });
+                output = result;
+            } else if (content.includes('.substring(')) {
+                // Handle string .substring() method FIRST before other checks
+                const match = content.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const startParam = match[2].trim();
+                    const lengthParam = match[3].trim();
+                    
+                    // Parse start parameter (could be variable or literal)
+                    let start;
+                    if (vars[startParam] !== undefined) {
+                        start = parseInt(vars[startParam]); // Use 0-based indexing
+                    } else if (!isNaN(startParam)) {
+                        start = parseInt(startParam); // Use 0-based indexing
+                    } else {
+                        start = 0; // fallback
+                    }
+                    
+                    // Parse length parameter (could be variable or literal)
+                    let length;
+                    if (vars[lengthParam] !== undefined) {
+                        length = parseInt(vars[lengthParam]);
+                    } else if (!isNaN(lengthParam)) {
+                        length = parseInt(lengthParam);
+                    } else {
+                        length = 1; // fallback
+                    }
+                    
+                    output = vars[varName].toString().substring(start, start + length);
+                }
+            } else if (content.includes('.left(')) {
+                // Handle string .left() method
+                const match = content.match(/(\w+)\.left\((\d+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const length = parseInt(match[2]);
+                    output = vars[varName].toString().substring(0, length);
+                }
+            } else if (content.includes('.right(')) {
+                // Handle string .right() method
+                const match = content.match(/(\w+)\.right\((\d+)\)/);
+                if (match && vars[match[1]] !== undefined) {
+                    const varName = match[1];
+                    const length = parseInt(match[2]);
+                    const str = vars[varName].toString();
+                    output = str.substring(str.length - length);
+                }
+            } else if (content.includes('.upper')) {
+                // Handle string .upper method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().toUpperCase();
+                }
+            } else if (content.includes('.lower')) {
+                // Handle string .lower method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().toLowerCase();
+                }
+            } else if (content.includes('.length')) {
+                // Handle string .length method
+                const varName = content.split('.')[0];
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString().length.toString();
+                }
+            } else if (content.includes('+')) {
+                // Use the existing string concatenation method which handles complex expressions
+                output = this.evaluateStringConcatenation(content, vars);
+            } else if (this.isArithmeticExpression(content)) {
+                // Handle arithmetic expressions like print(x*2) - AFTER checking for string methods
+                output = this.evaluateArithmeticExpression(content, vars).toString();
+            } else if (vars[content] !== undefined) {
+                output = vars[content].toString();
+            } else if (content.startsWith('str(') && content.endsWith(')')) {
+                const varName = content.substring(4, content.length - 1);
+                if (vars[varName] !== undefined) {
+                    output = vars[varName].toString();
+                }
+            }
+            if (output) this.outputs.push(output);
         } else if (line.includes('=') && !line.includes('==') && !line.includes('!=') && !line.includes('<=') && !line.includes('>=')) {
             // Assignment - check if trying to assign to a constant
             const parts = line.split('=');
@@ -516,188 +624,7 @@ export class Interpreter {
                     }
                 }
             }
-        } else if (line.startsWith('print(')) {
-                // Print statement - doesn't change variables, only produces output
-                const content = line.substring(6, line.length - 1);
-                if (content.startsWith('"') && content.endsWith('"')) {
-                    output = content.slice(1, -1);
-                } else if (content.includes(',') && !content.includes('.substring(') && !content.includes('.left(') && !content.includes('.right(')) {
-                    // Handle comma-separated arguments like print("The score is", score)
-                    // But NOT method calls that contain commas like substring(x, 1)
-                    const parts = content.split(',').map(p => p.trim());
-                    let result = '';
-                    parts.forEach((part, index) => {
-                        if (index > 0) result += ' '; // Add space between parts
-                        
-                        if (part.startsWith('"') && part.endsWith('"')) {
-                            result += part.slice(1, -1);
-                        } else if (vars[part] !== undefined) {
-                            result += vars[part].toString();
-                        } else if (part.startsWith('str(') && part.endsWith(')')) {
-                            const varName = part.substring(4, part.length - 1);
-                            if (vars[varName] !== undefined) {
-                                result += vars[varName].toString();
-                            }
-                        } else if (this.isArithmeticExpression(part)) {
-                            // Handle arithmetic expressions in print arguments
-                            result += this.evaluateArithmeticExpression(part, vars).toString();
-                        }
-                    });
-                    output = result;
-                } else if (content.includes('.substring(')) {
-                    // Handle string .substring() method FIRST before other checks
-                    const match = content.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
-                    if (match && vars[match[1]] !== undefined) {
-                        const varName = match[1];
-                        const startParam = match[2].trim();
-                        const lengthParam = match[3].trim();
-                        
-                        // Parse start parameter (could be variable or literal)
-                        let start;
-                        if (vars[startParam] !== undefined) {
-                            start = parseInt(vars[startParam]); // Use 0-based indexing
-                        } else if (!isNaN(startParam)) {
-                            start = parseInt(startParam); // Use 0-based indexing
-                        } else {
-                            start = 0; // fallback
-                        }
-                        
-                        // Parse length parameter (could be variable or literal)
-                        let length;
-                        if (vars[lengthParam] !== undefined) {
-                            length = parseInt(vars[lengthParam]);
-                        } else if (!isNaN(lengthParam)) {
-                            length = parseInt(lengthParam);
-                        } else {
-                            length = 1; // fallback
-                        }
-                        
-                        output = vars[varName].toString().substring(start, start + length);
-                    }
-                } else if (content.includes('.left(')) {
-                    // Handle string .left() method
-                    const match = content.match(/(\w+)\.left\((\d+)\)/);
-                    if (match && vars[match[1]] !== undefined) {
-                        const varName = match[1];
-                        const length = parseInt(match[2]);
-                        output = vars[varName].toString().substring(0, length);
-                    }
-                } else if (content.includes('.right(')) {
-                    // Handle string .right() method
-                    const match = content.match(/(\w+)\.right\((\d+)\)/);
-                    if (match && vars[match[1]] !== undefined) {
-                        const varName = match[1];
-                        const length = parseInt(match[2]);
-                        const str = vars[varName].toString();
-                        output = str.substring(str.length - length);
-                    }
-                } else if (content.includes('.upper')) {
-                    // Handle string .upper method
-                    const varName = content.split('.')[0];
-                    if (vars[varName] !== undefined) {
-                        output = vars[varName].toString().toUpperCase();
-                    }
-                } else if (content.includes('.lower')) {
-                    // Handle string .lower method
-                    const varName = content.split('.')[0];
-                    if (vars[varName] !== undefined) {
-                        output = vars[varName].toString().toLowerCase();
-                    }
-                } else if (content.includes('.length')) {
-                    // Handle string .length method
-                    const varName = content.split('.')[0];
-                    if (vars[varName] !== undefined) {
-                        output = vars[varName].toString().length.toString();
-                    }
-                } else if (content.includes('+')) {
-                    // String concatenation or complex expression
-                    const parts = content.split('+').map(p => p.trim());
-                    let result = '';
-                    parts.forEach(part => {
-                        if (part.startsWith('"') && part.endsWith('"')) {
-                            result += part.slice(1, -1);
-                        } else if (part.includes('.upper')) {
-                            const varName = part.split('.')[0];
-                            if (vars[varName] !== undefined) {
-                                result += vars[varName].toString().toUpperCase();
-                            }
-                        } else if (part.includes('.lower')) {
-                            const varName = part.split('.')[0];
-                            if (vars[varName] !== undefined) {
-                                result += vars[varName].toString().toLowerCase();
-                            }
-                        } else if (part.includes('.length')) {
-                            const varName = part.split('.')[0];
-                            if (vars[varName] !== undefined) {
-                                result += vars[varName].toString().length.toString();
-                            }
-                        } else if (part.includes('.left(')) {
-                            const match = part.match(/(\w+)\.left\((\d+)\)/);
-                            if (match && vars[match[1]] !== undefined) {
-                                const varName = match[1];
-                                const length = parseInt(match[2]);
-                                result += vars[varName].toString().substring(0, length);
-                            }
-                        } else if (part.includes('.right(')) {
-                            const match = part.match(/(\w+)\.right\((\d+)\)/);
-                            if (match && vars[match[1]] !== undefined) {
-                                const varName = match[1];
-                                const length = parseInt(match[2]);
-                                const str = vars[varName].toString();
-                                result += str.substring(str.length - length);
-                            }
-                        } else if (part.includes('.substring(')) {
-                            const match = part.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
-                            if (match && vars[match[1]] !== undefined) {
-                                const varName = match[1];
-                                const startParam = match[2].trim();
-                                const lengthParam = match[3].trim();
-                                
-                                // Parse start parameter (could be variable or literal)
-                                let start;
-                                if (vars[startParam] !== undefined) {
-                                    start = parseInt(vars[startParam]); // Use 0-based indexing
-                                } else if (!isNaN(startParam)) {
-                                    start = parseInt(startParam); // Use 0-based indexing
-                                } else {
-                                    start = 0; // fallback
-                                }
-                                
-                                // Parse length parameter (could be variable or literal)
-                                let length;
-                                if (vars[lengthParam] !== undefined) {
-                                    length = parseInt(vars[lengthParam]);
-                                } else if (!isNaN(lengthParam)) {
-                                    length = parseInt(lengthParam);
-                                } else {
-                                    length = 1; // fallback
-                                }
-                                
-                                result += vars[varName].toString().substring(start, start + length);
-                            }
-                        } else if (vars[part] !== undefined) {
-                            result += vars[part].toString();
-                        } else if (part.startsWith('str(') && part.endsWith(')')) {
-                            const varName = part.substring(4, part.length - 1);
-                            if (vars[varName] !== undefined) {
-                                result += vars[varName].toString();
-                            }
-                        }
-                    });
-                    output = result;
-                } else if (this.isArithmeticExpression(content)) {
-                    // Handle arithmetic expressions like print(x*2) - AFTER checking for string methods
-                    output = this.evaluateArithmeticExpression(content, vars).toString();
-                } else if (vars[content] !== undefined) {
-                    output = vars[content].toString();
-                } else if (content.startsWith('str(') && content.endsWith(')')) {
-                    const varName = content.substring(4, content.length - 1);
-                    if (vars[varName] !== undefined) {
-                        output = vars[varName].toString();
-                    }
-                }
-                if (output) this.outputs.push(output);
-            }
+        }
             
             return { output, shouldTrace, changedVariables: changeRecord };
     }
@@ -914,8 +841,10 @@ export class Interpreter {
                 }
             }
             
-            const parts = value.split('+').map(p => p.trim());
+            // Smart parsing for string concatenation that handles quotes and parentheses
+            const parts = this.parseStringConcatenation(value);
             let result = '';
+            
             parts.forEach(part => {
                 if (part.startsWith('ASC(') && part.endsWith(')')) {
                     // Handle ASC() function - character to ASCII value
@@ -1028,9 +957,59 @@ export class Interpreter {
                     result += part.slice(1, -1);
                 } else if (vars[part] !== undefined) {
                     result += vars[part].toString();
+                } else if (this.isArithmeticExpression(part)) {
+                    // Handle arithmetic expressions like (i + 1)
+                    result += this.evaluateArithmeticExpression(part, vars).toString();
+                } else if (part.startsWith('(') && part.endsWith(')')) {
+                    // Handle parenthesized expressions
+                    const innerExpression = part.slice(1, -1);
+                    if (this.isArithmeticExpression(innerExpression)) {
+                        result += this.evaluateArithmeticExpression(innerExpression, vars).toString();
+                    } else if (vars[innerExpression] !== undefined) {
+                        result += vars[innerExpression].toString();
+                    }
                 }
             });
             return result;
+        }
+
+        parseStringConcatenation(value) {
+            // Smart parser that handles quotes, parentheses, and function calls
+            const parts = [];
+            let current = '';
+            let inQuotes = false;
+            let parenDepth = 0;
+            let i = 0;
+            
+            while (i < value.length) {
+                const char = value[i];
+                
+                if (char === '"' && (i === 0 || value[i-1] !== '\\')) {
+                    inQuotes = !inQuotes;
+                    current += char;
+                } else if (!inQuotes && char === '(') {
+                    parenDepth++;
+                    current += char;
+                } else if (!inQuotes && char === ')') {
+                    parenDepth--;
+                    current += char;
+                } else if (!inQuotes && parenDepth === 0 && char === '+') {
+                    // This is a concatenation operator
+                    if (current.trim()) {
+                        parts.push(current.trim());
+                    }
+                    current = '';
+                } else {
+                    current += char;
+                }
+                i++;
+            }
+            
+            if (current.trim()) {
+                parts.push(current.trim());
+            }
+            
+            return parts;
         }
 
         evaluateArithmeticExpression(expression, vars) {

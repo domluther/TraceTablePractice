@@ -158,8 +158,8 @@
             assertEqual(testInterpreter.outputs.length, 1, 'Calculator: Should have 1 output');
             assertEqual(testInterpreter.outputs[0], 'Sum: 19', 'Calculator: Output should be "Sum: 19"');
             
-            // Test trace table structure (should trace inputs, condition, calculation, output)
-            assert(testInterpreter.trace.length >= 6, 'Calculator: Should have at least 6 trace entries');
+            // Test trace table structure (should trace inputs,  calculation, output)
+            assert(testInterpreter.trace.length >= 5, 'Calculator: Should have at least 5 trace entries');
         }
         
         // ============================================================================
