@@ -214,15 +214,16 @@ export class TraceTable {
                         }
                     } else {
                         // This variable didn't change, so user should leave it blank
+                        total++; // Always count this field in the total
                         const userValue = userEntry.variables[varName];
                         if (userValue === '') {
                             // Correct - user left it blank as expected
+                            correct++;
                             inputElement.classList.add('correct');
                         } else {
                             // Incorrect - user entered a value when they shouldn't have
                             feedback.push(`Line ${lineNum}, ${varName}: Variable didn't change on this line, should be blank`);
                             inputElement.classList.add('incorrect');
-                            total++;
                         }
                     }
                 });
