@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITE_TITLE</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <nav class="site-nav">
+                <div class="nav-dropdown" id="siteNavDropdown">
+                    <button class="nav-toggle" id="navToggle">
+                        🎓 GCSE CS Tools
+                    </button>
+                    <div class="nav-menu" id="navMenu">
+                        <div class="nav-menu-header">Computer Science Practice</div>
+                        <a href="https://trace-table-practice.netlify.app/" class="nav-item">
+                            <span class="nav-item-title">Trace Tables</span>
+                            <span class="nav-item-desc">Practice OCR ERL algorithm tracing</span>
+                        </a>
+                        <a href="https://input-output-practice.netlify.app/" class="nav-item">
+                            <span class="nav-item-title">Programming Practice</span>
+                            <span class="nav-item-desc">Input/output and basic programming concepts</span>
+                        </a>
+                        <a href="https://convertdataunits.netlify.app/" class="nav-item">
+                            <span class="nav-item-title">Data Units</span>
+                            <span class="nav-item-desc">Convert units and calculate file sizes</span>
+                        </a>
+                        <a href="https://ipormac.netlify.app/" class="nav-item">
+                            <span class="nav-item-title">Network Addresses</span>
+                            <span class="nav-item-desc">Identify IP addresses and MAC addresses</span>
+                        </a>
+                        <a href="https://ocrsortvisualiser.netlify.app/" class="nav-item">
+                            <span class="nav-item-title">Sort Algorithms</span>
+                            <span class="nav-item-desc">Visualize bubble, merge & insertion sorts</span>
+                        </a>
+                        <!-- CURRENT_SITE_MARKER: Add class="nav-item current" to the appropriate site above -->
+                    </div>
+                </div>
+            </nav>
+            
+            <h1>SITE_HEADING</h1>
+            <p>SITE_TAGLINE</p>
+            <!-- SCORE_SYSTEM: Uncomment the line below to enable the score button -->
+            <!-- <button id="scoreButton" class="score-button" onclick="window.scoreManager.showScoreModal()">📊 Scores (0%)</button> -->
+        </div>
+        
+        <div class="content">
+            <!-- MAIN_CONTENT_GOES_HERE -->
+            <div class="feature-section">
+                <h3>Welcome to SITE_NAME</h3>
+                <p>This is where your site-specific content will go.</p>
+                
+                <div class="sub-section">
+                    <h4>Getting Started</h4>
+                    <ul>
+                        <li>Feature 1</li>
+                        <li>Feature 2</li>
+                        <li>Feature 3</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- EXAMPLE: Dark Content Section (like code display) -->
+            <div class="dark-section">
+                <div class="dark-header">
+                    <div class="dark-title">
+                        <h3>Example Code Display</h3>
+                        <span class="dark-subtitle">Sample content for dark sections</span>
+                    </div>
+                    <div class="dark-header-actions">
+                        <button class="dark-action-btn">Action Button</button>
+                    </div>
+                </div>
+                <div class="dark-content">
+                    <div class="line-content">
+                        <span class="line-number">1</span>algorithm Example
+                    </div>
+                    <div class="line-content">
+                        <span class="line-number">2</span>    input x
+                    </div>
+                    <div class="line-content">
+                        <span class="line-number">3</span>    y = x * 2
+                    </div>
+                    <div class="line-content">
+                        <span class="line-number">4</span>    output y
+                    </div>
+                    <div class="line-content">
+                        <span class="line-number">5</span>endAlgorithm
+                    </div>
+                </div>
+            </div>
+            
+            <!-- EXAMPLE: Data Table Section -->
+            <div class="table-section">
+                <h3>Example Data Table</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Example 1</td>
+                                <td>100</td>
+                                <td><span class="status-badge status-success">Complete</span></td>
+                                <td><button class="btn-small">Select</button></td>
+                            </tr>
+                            <tr>
+                                <td>Example 2</td>
+                                <td>75</td>
+                                <td><span class="status-badge status-warning">In Progress</span></td>
+                                <td><button class="btn-small">Select</button></td>
+                            </tr>
+                            <tr>
+                                <td>Example 3</td>
+                                <td>0</td>
+                                <td><span class="status-badge status-na">Not Started</span></td>
+                                <td><button class="btn-small">Select</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="feature-section">
+                <h3>Additional Section</h3>
+                <p>Add more content sections as needed for your site.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Copyright <a href="https://mrluthercodes.netlify.app/" target="_blank">Mr Luther</a> 2025
+        </div>
+    </div>
+
+    <!-- SCORE_SYSTEM: Score Modal (Hidden by default, automatically shown when score system is enabled) -->
+    <div id="scoreModal" class="score-modal-overlay" style="display: none;">
+        <div class="score-modal">
+            <div class="score-modal-header">
+                <h2>📊 Your Progress</h2>
+                <button class="close-modal" onclick="window.scoreManager.hideScoreModal()">×</button>
+            </div>
+            <div class="score-modal-content">
+                <div class="overall-stats">
+                    <h3>Overall Statistics</h3>
+                    <div class="stat-grid" id="statGrid">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="program-stats" id="programStats">
+                    <h3>Individual Scores</h3>
+                    <div id="programList">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="no-scores" id="noScores" style="display: none;">
+                    <p>No scores recorded yet. Start practicing to see your progress!</p>
+                </div>
+            </div>
+            <div class="score-modal-footer">
+                <button class="reset-scores-btn" onclick="window.scoreManager.resetAllScores()">Reset All Scores</button>
+                <button class="close-modal-btn" onclick="window.scoreManager.hideScoreModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add your site-specific JavaScript here -->
+    <script src="js/navigation.js"></script>
+    <!-- SCORE_SYSTEM: Uncomment the lines below to enable the score system -->
+    <!-- <script src="js/score-manager.js"></script> -->
+    <!-- <script>
+        // Initialize the score manager globally
+        window.scoreManager = new ScoreManager();
+        // Enable score button display
+        document.querySelector('.score-button').style.display = 'block';
+    </script> -->
+    <!-- <script src="js/your-site-script.js"></script> -->
+</body>
+</html>
