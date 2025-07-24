@@ -21,6 +21,8 @@ export class UI {
         this.setupEventListeners();
         this.updateProgramTable();
         this.updateNavigationButtons(); // Set initial button states
+        this.loadFromURL(); // Load program from URL if specified
+        this.setupURLNavigation(); // Setup browser back/forward handling
     }
 
     setupEventListeners() {
@@ -62,6 +64,11 @@ export class UI {
         // Keyboard navigation (global)
         document.addEventListener('keydown', (e) => {
             this.handleKeyboardNavigation(e);
+        });
+
+        // Share button
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            this.shareCurrentProgram();
         });
     }
 
@@ -122,6 +129,7 @@ export class UI {
         this.executeProgram(this.currentProgram.code);
         this.traceTable.createTraceTable(this.expectedTrace, this.programVariables);
         this.updateNavigationButtons();
+        this.updateURL(); // Update URL with current selection
         
         // Hide feedback
         document.getElementById('feedback').style.display = 'none';
@@ -147,12 +155,27 @@ export class UI {
         
         document.getElementById('codeDisplay').innerHTML = numberedCode;
         
+        // Update program name in header
+        this.updateProgramName();
+        
         // Update ERL link
         this.updateERLLink(code);
     }
 
+    updateProgramName() {
+        const programNameElement = document.getElementById('programName');
+        if (this.currentProgram && this.currentDifficulty !== null && this.currentProgramIndex !== null) {
+            const difficultyName = this.currentDifficulty.charAt(0).toUpperCase() + this.currentDifficulty.slice(1);
+            const programNumber = this.currentProgramIndex; // Use 0-based index to match URL
+            programNameElement.textContent = `${difficultyName} #${programNumber}: ${this.currentProgram.description}`;
+        } else {
+            programNameElement.textContent = '';
+        }
+    }
+
     updateERLLink(code) {
         const erlLink = document.getElementById('erlLink');
+        const shareBtn = document.getElementById('shareBtn');
         
         if (code && code.trim()) {
             // Format the code for ERL URL with proper encoding:
@@ -172,8 +195,10 @@ export class UI {
             
             erlLink.href = erlURL;
             erlLink.style.display = 'inline-block';
+            shareBtn.style.display = 'inline-block';
         } else {
             erlLink.style.display = 'none';
+            shareBtn.style.display = 'none';
         }
     }
 
@@ -311,5 +336,118 @@ export class UI {
                 this.clearTable();
                 break;
         }
+    }
+
+    shareCurrentProgram() {
+        // Copy the shareable URL to clipboard
+        const shareableURL = this.getShareableURL();
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareableURL).then(() => {
+                // Show temporary feedback
+                const shareBtn = document.getElementById('shareBtn');
+                const originalText = shareBtn.textContent;
+                shareBtn.textContent = '✅ Copied!';
+                shareBtn.style.background = '#48bb78';
+                
+                setTimeout(() => {
+                    shareBtn.textContent = originalText;
+                    shareBtn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                // Fallback for older browsers
+                this.fallbackCopyToClipboard(shareableURL);
+            });
+        } else {
+            // Fallback for older browsers
+            this.fallbackCopyToClipboard(shareableURL);
+        }
+    }
+
+    fallbackCopyToClipboard(text) {
+        // Fallback method for copying to clipboard
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            // Show temporary feedback
+            const shareBtn = document.getElementById('shareBtn');
+            const originalText = shareBtn.textContent;
+            shareBtn.textContent = '✅ Copied!';
+            shareBtn.style.background = '#48bb78';
+            
+            setTimeout(() => {
+                shareBtn.textContent = originalText;
+                shareBtn.style.background = '';
+            }, 2000);
+        } catch (err) {
+            console.error('Could not copy text: ', err);
+            // Show URL in an alert as final fallback
+            alert(`Copy this URL to share:\n${text}`);
+        }
+        
+        document.body.removeChild(textArea);
+    }
+
+    // URL Management Methods
+    setupURLNavigation() {
+        // Listen for browser back/forward navigation
+        window.addEventListener('popstate', () => {
+            this.loadFromURL();
+        });
+    }
+
+    updateURL() {
+        // Update URL with current program selection
+        if (this.currentDifficulty && this.currentProgramIndex !== null) {
+            const params = new URLSearchParams();
+            params.set('difficulty', this.currentDifficulty);
+            params.set('program', this.currentProgramIndex.toString());
+            
+            const newURL = `${window.location.pathname}#${params.toString()}`;
+            window.history.pushState(null, '', newURL);
+        }
+    }
+
+    loadFromURL() {
+        // Parse URL hash and load the specified program
+        const hash = window.location.hash.substring(1); // Remove the #
+        if (!hash) return;
+
+        const params = new URLSearchParams(hash);
+        const difficulty = params.get('difficulty');
+        const programIndex = params.get('program');
+
+        if (difficulty && programIndex !== null) {
+            // Validate the parameters
+            if (programs[difficulty] && parseInt(programIndex) < programs[difficulty].length) {
+                // Update the difficulty selector
+                document.getElementById('difficulty').value = difficulty;
+                this.updateProgramTable();
+                
+                // Load the specific program
+                const index = parseInt(programIndex);
+                this.generateSpecificProgram(difficulty, index);
+            }
+        }
+    }
+
+    getShareableURL() {
+        // Generate a shareable URL for the current program
+        if (this.currentDifficulty && this.currentProgramIndex !== null) {
+            const params = new URLSearchParams();
+            params.set('difficulty', this.currentDifficulty);
+            params.set('program', this.currentProgramIndex.toString());
+            
+            return `${window.location.origin}${window.location.pathname}#${params.toString()}`;
+        }
+        return window.location.href;
     }
 }

@@ -42,50 +42,6 @@ body {
     padding: 30px;
 }
 
-.controls {
-    background: #f7fafc;
-    padding: 25px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    border-left: 4px solid #667eea;
-}
-
-.controls h2 {
-    color: #2d3748;
-    margin-bottom: 20px;
-    font-size: 1.3em;
-}
-
-.control-group {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.control-group label {
-    font-weight: 600;
-    color: #4a5568;
-    min-width: 80px;
-}
-
-.control-group select {
-    padding: 10px 15px;
-    border: 2px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 16px;
-    background: white;
-    color: #2d3748;
-    min-width: 150px;
-}
-
-.control-group select:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
 .btn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -165,12 +121,33 @@ body {
     border-bottom: 1px solid #4a5568;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+}
+
+.code-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .code-header h3 {
     margin: 0;
     font-size: 1.1em;
+    line-height: 1.2;
+}
+
+.program-name-display {
+    font-size: 0.85em;
+    color: #90cdf4;
+    font-style: italic;
+    opacity: 0.9;
+    margin-top: 2px;
+}
+
+.code-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .erl-link {
@@ -190,7 +167,7 @@ body {
     transform: translateY(-1px);
 }
 
-.code-display h3, .trace-section h3 {
+.trace-section h3 {
     background: #1a202c;
     color: white;
     padding: 15px 20px;
@@ -350,6 +327,43 @@ body {
     color: #2d3748;
     margin-bottom: 20px;
     font-size: 1.3em;
+}
+
+.selection-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.selection-controls .control-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.selection-controls label {
+    font-weight: 600;
+    color: #4a5568;
+    min-width: 80px;
+}
+
+.selection-controls select {
+    padding: 10px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 16px;
+    background: white;
+    color: #2d3748;
+    min-width: 150px;
+}
+
+.selection-controls select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .program-table-container {

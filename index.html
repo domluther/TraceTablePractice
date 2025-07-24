@@ -16,25 +16,26 @@
         </div>
         
         <div class="content">
-            <div class="controls">
-                <h2>Program Settings</h2>
-                
-                <div class="control-group">
-                    <label for="difficulty">Difficulty:</label>
-                    <select id="difficulty">
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <button id="generateRandomBtn" class="btn">Generate Random Program</button>
-                </div>
-            </div>
-            
             <div class="program-selection">
                 <h3>Select a Program</h3>
+                
+                <div class="selection-controls">
+                    <div class="control-group">
+                        <label for="difficulty">Difficulty:</label>
+                        <select id="difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button id="generateRandomBtn" class="btn btn-secondary" title="Pick a random program from current difficulty">
+                            🎲 Random
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="program-table-container">
                     <table id="programTable" class="program-table">
                         <thead>
@@ -54,10 +55,18 @@
             <div class="code-section">
                 <div class="code-display">
                     <div class="code-header">
-                        <h3>Program Code</h3>
-                        <a id="erlLink" href="#" target="_blank" class="erl-link" style="display: none;" title="Open in ERL IDE">
-                            🔗 Open in ERL IDE
-                        </a>
+                        <div class="code-title">
+                            <h3>Program Code</h3>
+                            <span id="programName" class="program-name-display"></span>
+                        </div>
+                        <div class="code-header-actions">
+                            <button id="shareBtn" class="erl-link" style="display: none;" title="Copy shareable link">
+                                🔗 Share Link
+                            </button>
+                            <a id="erlLink" href="#" target="_blank" class="erl-link" style="display: none;" title="Open in ERL IDE">
+                                🖥️ Open in ERL IDE
+                            </a>
+                        </div>
                     </div>
                     <div id="codeDisplay" class="code-content">
                         Select a program to start practicing!
