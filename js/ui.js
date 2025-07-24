@@ -19,9 +19,15 @@ export class UI {
 
     init() {
         this.setupEventListeners();
+        this.setupURLNavigation(); // Set up URL navigation handling
         this.updateProgramTable();
         this.updateButtonStates(); // Set initial button states
         this.updateContentVisibility(); // Hide content sections initially
+        
+        // Load program from URL after a short delay to ensure everything is ready
+        setTimeout(() => {
+            this.loadFromURL(); // Load program from URL if present
+        }, 100);
     }
 
     setupEventListeners() {
