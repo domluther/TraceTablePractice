@@ -20,16 +20,21 @@ export class UI {
     init() {
         this.setupEventListeners();
         this.updateProgramTable();
-        this.updateNavigationButtons(); // Set initial button states
-        this.loadFromURL(); // Load program from URL if specified
-        this.setupURLNavigation(); // Setup browser back/forward handling
+        this.updateButtonStates(); // Set initial button states
+        this.updateContentVisibility(); // Hide content sections initially
     }
 
     setupEventListeners() {
         // Difficulty change
         document.getElementById('difficulty').addEventListener('change', () => {
+            // Clear current program selection when difficulty changes
+            this.currentProgram = null;
+            this.currentProgramIndex = null;
+            this.currentDifficulty = null;
+            
             this.updateProgramTable();
-            this.updateNavigationButtons(); // Update navigation when difficulty changes
+            this.updateButtonStates(); // Update button states
+            this.updateContentVisibility(); // Hide content sections since no program selected
         });
 
         // Generate random program button
@@ -128,7 +133,8 @@ export class UI {
         this.displayCode(this.currentProgram.code);
         this.executeProgram(this.currentProgram.code);
         this.traceTable.createTraceTable(this.expectedTrace, this.programVariables);
-        this.updateNavigationButtons();
+        this.updateButtonStates();
+        this.updateContentVisibility(); // Show content sections now that program is selected
         this.updateURL(); // Update URL with current selection
         
         // Hide feedback
@@ -144,12 +150,12 @@ export class UI {
         });
         
         // Add input values display if available
-        if (this.currentProgram.inputs && this.currentProgram.inputs.length > 0) {
+        if (this.currentProgram && this.currentProgram.inputs && this.currentProgram.inputs.length > 0) {
             numberedCode += `\n<span style="color: #90cdf4;">Input values: ${this.currentProgram.inputs.map(input => `"${input}"`).join(', ')}</span>`;
         }
         
         // Add random value display if available
-        if (this.currentProgram.randomValue !== undefined) {
+        if (this.currentProgram && this.currentProgram.randomValue !== undefined) {
             numberedCode += `\n<span style="color: #90cdf4;">Random value: ${this.currentProgram.randomValue}</span>`;
         }
         
@@ -244,14 +250,24 @@ export class UI {
     }
 
     shuffleInputs() {
-        // Clear the table first
-        this.clearTable();
-        
         // Only shuffle if we have a current program loaded
         if (!this.currentProgram) {
             alert('Please select a program first');
             return;
         }
+        
+        // Check if the current program has multiple input sets
+        const programList = programs[this.currentDifficulty];
+        const currentProgram = programList[this.currentProgramIndex];
+        const hasMultipleInputs = currentProgram && currentProgram.inputSets && currentProgram.inputSets.length > 1;
+        
+        if (!hasMultipleInputs) {
+            alert('This program only has one set of inputs - nothing to shuffle!');
+            return;
+        }
+        
+        // Clear the table first
+        this.clearTable();
         
         // Regenerate the same program with different inputs
         this.generateSpecificProgram(this.currentDifficulty, this.currentProgramIndex);
@@ -272,18 +288,20 @@ export class UI {
 
         // Load the new program
         this.generateSpecificProgram(this.currentDifficulty, newIndex);
-        this.updateNavigationButtons();
+        this.updateButtonStates();
         this.clearTable(); // Clear the table when navigating
     }
 
-    updateNavigationButtons() {
+    updateButtonStates() {
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
 
         if (!this.currentDifficulty || this.currentProgramIndex === null) {
-            // No program loaded - disable both buttons
+            // No program loaded - disable navigation and shuffle buttons
             prevBtn.disabled = true;
             nextBtn.disabled = true;
+            shuffleBtn.disabled = true;
             return;
         }
 
@@ -294,6 +312,35 @@ export class UI {
         
         // Update next button
         nextBtn.disabled = this.currentProgramIndex >= programList.length - 1;
+        
+        // Update shuffle button - only enable if current program has multiple input sets
+        const currentProgram = programList[this.currentProgramIndex];
+        const hasMultipleInputs = currentProgram && currentProgram.inputSets && currentProgram.inputSets.length > 1;
+        shuffleBtn.disabled = !hasMultipleInputs;
+    }
+
+    updateContentVisibility() {
+        // Show/hide content sections based on whether a program is selected
+        const hasProgramSelected = this.currentDifficulty && this.currentProgramIndex !== null;
+        
+        const sectionsToToggle = [
+            '.code-section',
+            '.mark-btn-container', 
+            '.keyboard-shortcuts'
+        ];
+        
+        sectionsToToggle.forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.style.display = hasProgramSelected ? 'block' : 'none';
+            }
+        });
+        
+        // Also hide feedback div when no program is selected
+        const feedbackDiv = document.getElementById('feedback');
+        if (feedbackDiv && !hasProgramSelected) {
+            feedbackDiv.style.display = 'none';
+        }
     }
 
     handleKeyboardNavigation(event) {

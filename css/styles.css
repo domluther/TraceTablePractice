@@ -101,6 +101,15 @@ body {
     box-shadow: 0 6px 20px rgba(237, 137, 54, 0.3);
 }
 
+.btn:disabled {
+    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%) !important;
+    color: #cbd5e0 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 .code-section {
     margin-bottom: 30px;
 }
