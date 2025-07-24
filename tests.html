@@ -755,6 +755,226 @@ print("Done")`;
         }
         
         /**
+         * Test string concatenation edge cases that previously caused issues
+         * Covers: function calls vs string concatenation detection, complex string literals,
+         *         assignment precedence, and edge cases found during integration testing
+         */
+        function testStringConcatenationEdgeCases() {
+            const testInterpreter = new Interpreter();
+            
+            // Test 1: Function calls in assignments should not be treated as string concatenation
+            testInterpreter.executeWithoutReset(`num1 = 42
+result1 = int(num1)`);
+            assertEqual(testInterpreter.variables.result1, 42, 'Function Call Assignment: int() function should be recognized, not string concatenation');
+            
+            testInterpreter.executeWithoutReset(`text1 = "Hello"
+result2 = str(text1)`);
+            assertEqual(testInterpreter.variables.result2, "Hello", 'Function Call Assignment: str() function should be recognized, not string concatenation');
+            
+            testInterpreter.executeWithoutReset(`decimal1 = 3.14
+result3 = float(decimal1)`);
+            assertEqual(testInterpreter.variables.result3, 3.14, 'Function Call Assignment: float() function should be recognized, not string concatenation');
+            
+            // Test 2: String concatenation with function calls should work correctly
+            testInterpreter.executeWithoutReset(`age = 25
+message1 = "Age: " + str(age)`);
+            assertEqual(testInterpreter.variables.message1, "Age: 25", 'String Concatenation with Function: Should properly concatenate string with str() result');
+            
+            // Test 3: Mixed quotes in string concatenation
+            testInterpreter.executeWithoutReset(`name = "John"
+greeting = 'Hello ' + name + "!"`);
+            assertEqual(testInterpreter.variables.greeting, "Hello John!", 'Mixed Quotes Concatenation: Should handle both single and double quotes');
+            
+            // Test 4: Complex string concatenation with variables and literals
+            testInterpreter.executeWithoutReset(`first = "Alice"
+last = "Smith"
+fullName = first + " " + last`);
+            assertEqual(testInterpreter.variables.fullName, "Alice Smith", 'Variable String Concatenation: Should concatenate variables with literal strings');
+            
+            // Test 5: String concatenation detection with arithmetic expressions
+            testInterpreter.executeWithoutReset(`x = 5
+y = 10
+mathResult = x + y
+stringResult = "Result: " + str(x + y)`);
+            assertEqual(testInterpreter.variables.mathResult, 15, 'Arithmetic vs String: Pure arithmetic should remain numeric');
+            assertEqual(testInterpreter.variables.stringResult, "Result: 15", 'Arithmetic vs String: String concatenation with arithmetic should work');
+            
+            // Test 6: Edge case - empty string concatenation
+            testInterpreter.executeWithoutReset(`empty = ""
+result4 = empty + "test"`);
+            assertEqual(testInterpreter.variables.result4, "test", 'Empty String Concatenation: Should handle empty string concatenation');
+            
+            // Test 7: String concatenation precedence over arithmetic
+            testInterpreter.executeWithoutReset(`a = "10"
+b = "20"
+stringMath = a + b`);
+            assertEqual(testInterpreter.variables.stringMath, "1020", 'String vs Numeric: String variables should concatenate, not add mathematically');
+        }
+        
+        /**
+         * Test complex print statement evaluation edge cases
+         * Covers: print statements with mixed quotes, complex expressions, 
+         *         function calls in print, and parsing issues found during debugging
+         */
+        function testComplexPrintStatements() {
+            const testInterpreter = new Interpreter();
+            const testProgram = { inputs: [], randomValue: undefined };
+            
+            // Test 1: Print with mixed quotes and concatenation
+            testInterpreter.executeProgram(`name = "Alice"
+print("Hello " + name + '!')`, testProgram);
+            assertEqual(testInterpreter.outputs[0], "Hello Alice!", 'Mixed Quotes Print: Should handle mixed quotes in print concatenation');
+            
+            // Reset for next test
+            testInterpreter.outputs = [];
+            
+            // Test 2: Print with function calls and concatenation
+            testInterpreter.executeProgram(`age = 25
+print("Age is: " + str(age))`, testProgram);
+            assertEqual(testInterpreter.outputs[0], "Age is: 25", 'Function Call Print: Should evaluate str() function in print statement');
+            
+            // Reset for next test
+            testInterpreter.outputs = [];
+            
+            // Test 3: Print with complex string literal parsing
+            testInterpreter.executeProgram(`message = "Welcome"
+print(message + " to the 'new' system!")`, testProgram);
+            assertEqual(testInterpreter.outputs[0], "Welcome to the 'new' system!", 'Complex String Print: Should handle quotes within string literals');
+            
+            // Reset for next test  
+            testInterpreter.outputs = [];
+            
+            // Test 4: Print with arithmetic and string mixing
+            testInterpreter.executeProgram(`x = 5
+y = 3
+print("Sum: " + str(x + y) + ", Product: " + str(x * y))`, testProgram);
+            assertEqual(testInterpreter.outputs[0], "Sum: 8, Product: 15", 'Arithmetic String Print: Should evaluate arithmetic within str() calls');
+            
+            // Reset for next test
+            testInterpreter.outputs = [];
+            
+            // Test 5: Print with input() function and string concatenation prompt
+            const inputProgram = { inputs: ["World"], randomValue: undefined };
+            testInterpreter.executeProgram(`name = input("Enter your name: " + "please")
+print("Hello " + name)`, inputProgram);
+            assertEqual(testInterpreter.variables.name, "World", 'Input Prompt Concatenation: Should handle string concatenation in input prompt');
+            assertEqual(testInterpreter.outputs[0], "Hello World", 'Input Result Print: Should use input result in print statement');
+            
+            // Reset for next test
+            testInterpreter.outputs = [];
+            
+            // Test 6: Print with nested quotes and escape scenarios
+            testInterpreter.executeProgram(`quote = '"Success"'
+print("He said: " + quote)`, testProgram);
+            assertEqual(testInterpreter.outputs[0], 'He said: "Success"', 'Nested Quotes Print: Should handle nested quote scenarios');
+        }
+        
+        /**
+         * Test function call detection and precedence in assignments
+         * Covers: function call recognition before string concatenation check,
+         *         assignment precedence issues, and edge cases in function evaluation
+         */
+        function testFunctionCallPrecedence() {
+            const testInterpreter = new Interpreter();
+            
+            // Test 1: Built-in function calls should be detected before string concatenation
+            testInterpreter.executeWithoutReset(`value1 = 42.7
+intResult = int(value1)`);
+            assertEqual(testInterpreter.variables.intResult, 42, 'int() Function Precedence: Should convert float to int, not treat as string');
+            
+            testInterpreter.executeWithoutReset(`value2 = 100
+floatResult = float(value2)`);
+            assertEqual(testInterpreter.variables.floatResult, 100.0, 'float() Function Precedence: Should convert int to float, not treat as string');
+            
+            testInterpreter.executeWithoutReset(`value3 = 123
+strResult = str(value3)`);
+            assertEqual(testInterpreter.variables.strResult, "123", 'str() Function Precedence: Should convert number to string, not treat as string concatenation');
+            
+            // Test 2: Function calls with complex expressions
+            testInterpreter.executeWithoutReset(`a = 5
+b = 7
+complexInt = int(a + b + 0.5)`);
+            assertEqual(testInterpreter.variables.complexInt, 12, 'Complex Function Call: Should evaluate expression inside function call');
+            
+            // Test 3: Function calls in conditional assignments
+            testInterpreter.executeWithoutReset(`score = 85.7
+if score > 80 then
+    finalScore = int(score)
+else
+    finalScore = 0
+endif`);
+            assertEqual(testInterpreter.variables.finalScore, 85, 'Conditional Function Call: Should execute int() in conditional assignment');
+            
+            // Test 4: Chained function calls and assignments
+            testInterpreter.executeWithoutReset(`original = "42"
+step1 = float(original)
+step2 = int(step1)`);
+            assertEqual(testInterpreter.variables.step1, 42.0, 'Chained Functions Step 1: Should convert string to float');
+            assertEqual(testInterpreter.variables.step2, 42, 'Chained Functions Step 2: Should convert float to int');
+            
+            // Test 5: Function calls with variables as parameters
+            testInterpreter.executeWithoutReset(`inputValue = 99.9
+param = inputValue
+result5 = int(param)`);
+            assertEqual(testInterpreter.variables.result5, 99, 'Variable Parameter Function: Should use variable as function parameter');
+            
+            // Test 6: Function call vs string concatenation disambiguation  
+            testInterpreter.executeWithoutReset(`text = "test"
+notConcat = str(text)
+isConcat = "str" + text`);
+            assertEqual(testInterpreter.variables.notConcat, "test", 'Function vs Concat: str() should be function call, not concatenation');
+            assertEqual(testInterpreter.variables.isConcat, "strtest", 'Function vs Concat: Literal "str" should be string concatenation');
+        }
+        
+        /**
+         * Test reset() method and interpreter state management
+         * Covers: proper cleanup between program executions, variable reset,
+         *         output clearing, and state isolation
+         */
+        function testInterpreterStateManagement() {
+            const testInterpreter = new Interpreter();
+            
+            // Test 1: Initial state
+            assertEqual(Object.keys(testInterpreter.variables).length, 0, 'Initial State: Should start with no variables');
+            assertEqual(testInterpreter.outputs.length, 0, 'Initial State: Should start with no outputs');
+            assertEqual(testInterpreter.trace.length, 0, 'Initial State: Should start with no trace entries');
+            
+            // Test 2: Execute some code and verify state changes
+            testInterpreter.execute(`x = 10
+y = 20
+print("Hello")`);
+            
+            assertEqual(testInterpreter.variables.x, 10, 'After Execution: Should have variable x');
+            assertEqual(testInterpreter.variables.y, 20, 'After Execution: Should have variable y');
+            assertEqual(testInterpreter.outputs.length, 1, 'After Execution: Should have one output');
+            assert(testInterpreter.trace.length > 0, 'After Execution: Should have trace entries');
+            
+            // Test 3: Reset and verify clean state
+            testInterpreter.reset();
+            
+            assertEqual(Object.keys(testInterpreter.variables).length, 0, 'After Reset: Should have no variables');
+            assertEqual(testInterpreter.outputs.length, 0, 'After Reset: Should have no outputs');
+            assertEqual(testInterpreter.trace.length, 0, 'After Reset: Should have no trace entries');
+            
+            // Test 4: Execute different code after reset
+            testInterpreter.execute(`a = 100
+print("World")`);
+            
+            assertEqual(testInterpreter.variables.a, 100, 'After Reset Execute: Should have new variable a');
+            assert(!testInterpreter.variables.hasOwnProperty('x'), 'After Reset Execute: Should not have old variable x');
+            assert(!testInterpreter.variables.hasOwnProperty('y'), 'After Reset Execute: Should not have old variable y');
+            assertEqual(testInterpreter.outputs[0], "World", 'After Reset Execute: Should have new output');
+            
+            // Test 5: Multiple reset calls should be safe
+            testInterpreter.reset();
+            testInterpreter.reset();
+            testInterpreter.reset();
+            
+            assertEqual(Object.keys(testInterpreter.variables).length, 0, 'Multiple Resets: Should remain clean after multiple resets');
+            assertEqual(testInterpreter.outputs.length, 0, 'Multiple Resets: Should have no outputs after multiple resets');
+        }
+        
+        /**
          * Test array functionality in OCR ERL
          * Covers: array declaration, initialization, element access, trace table expansion
          */
@@ -859,7 +1079,13 @@ current_name = names[index]`, { inputs: [] });
                 'Constants': ['const pi should be 3.14159', 'const vat should be 0.2', 'total should be 120 (100 * 1.2)'],
                 'For Loops with Positive Step': ['Positive Step For Loop: Should have 5 outputs for step 2', 'Positive Step For Loop: First even number should be "2"', 'Positive Step For Loop: Second even number should be "4"', 'Positive Step For Loop: Final even number should be "10"'],
                 'For Loops with Negative Step': ['Negative Step For Loop: Should have 11 outputs for countdown', 'Negative Step For Loop: Countdown should start with "10"', 'Negative Step For Loop: Countdown should end with "0"'],
-                'Switch/Case': ['day should be "Mon"', 'First output should be "Monday"', 'Second output should be "Done"']
+                'Switch/Case': ['day should be "Mon"', 'First output should be "Monday"', 'Second output should be "Done"'],
+                
+                // NEW: Edge case categories for recently fixed issues
+                '🔧 String Concatenation Edge Cases': ['Function Call Assignment', 'String Concatenation with Function', 'Mixed Quotes Concatenation', 'Variable String Concatenation', 'Arithmetic vs String', 'Empty String Concatenation', 'String vs Numeric'],
+                '🔧 Complex Print Statements': ['Mixed Quotes Print', 'Function Call Print', 'Complex String Print', 'Arithmetic String Print', 'Input Prompt Concatenation', 'Input Result Print', 'Nested Quotes Print'],
+                '🔧 Function Call Precedence': ['Function Precedence', 'Complex Function Call', 'Conditional Function Call', 'Chained Functions', 'Variable Parameter Function', 'Function vs Concat'],
+                '🔧 Interpreter State Management': ['Initial State', 'After Execution', 'After Reset', 'After Reset Execute', 'Multiple Resets']
             };
             
             let html = '';
@@ -987,6 +1213,12 @@ current_name = names[index]`, { inputs: [] });
             testForLoopWithPositiveStep();
             testForLoopWithNegativeStep();
             testSwitchCase();
+            
+            // NEW: Test edge cases found during refactoring and debugging
+            testStringConcatenationEdgeCases();
+            testComplexPrintStatements();
+            testFunctionCallPrecedence();
+            testInterpreterStateManagement();
             
             // Display results
             displayTestResults();

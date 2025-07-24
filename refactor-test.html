@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refactored Interpreter Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .pass { color: green; }
+        .fail { color: red; }
+        .results { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>Refactored Interpreter Test</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import { Interpreter as OriginalInterpreter } from './js/interpreter.js';
+        import { Interpreter as RefactoredInterpreter } from './js/interpreter-refactored.js';
+
+        const results = [];
+
+        function assertEqual(actual, expected, message) {
+            const passed = JSON.stringify(actual) === JSON.stringify(expected);
+            results.push({
+                passed,
+                message,
+                actual,
+                expected
+            });
+            return passed;
+        }
+
+        function testInterpreters() {
+            const testCases = [
+                {
+                    name: "Basic Arithmetic",
+                    code: `x = 5
+y = 3
+z = x + y * 2`,
+                    inputs: []
+                },
+                {
+                    name: "String Concatenation",
+                    code: `name = "John"
+greeting = "Hello " + name + "!"
+print(greeting)`,
+                    inputs: []
+                },
+                {
+                    name: "Array Operations",
+                    code: `array nums[3]
+nums[0] = 10
+nums[1] = 20
+nums[2] = nums[0] + nums[1]`,
+                    inputs: []
+                },
+                {
+                    name: "For Loop",
+                    code: `total = 0
+for i = 1 to 3
+    total = total + i
+next i`,
+                    inputs: []
+                },
+                {
+                    name: "ASC/CHR Functions",
+                    code: `ascii_val = ASC("A")
+letter = CHR(65)
+print(ascii_val)
+print(letter)`,
+                    inputs: []
+                },
+                {
+                    name: "If Statement",
+                    code: `x = 10
+if x > 5 then
+    result = "big"
+else
+    result = "small"
+endif`,
+                    inputs: []
+                },
+                {
+                    name: "String Methods",
+                    code: `text = "Hello"
+upper_text = text.upper
+length = text.length`,
+                    inputs: []
+                }
+            ];
+
+            let passCount = 0;
+            let totalTests = 0;
+
+            for (const testCase of testCases) {
+                console.log(`Testing: ${testCase.name}`);
+                
+                try {
+                    const original = new OriginalInterpreter();
+                    const refactored = new RefactoredInterpreter();
+                    
+                    const originalResult = original.executeProgram(testCase.code, { inputs: testCase.inputs });
+                    const refactoredResult = refactored.executeProgram(testCase.code, { inputs: testCase.inputs });
+                    
+                    // Test variables
+                    const variablesMatch = assertEqual(
+                        refactored.variables,
+                        original.variables,
+                        `${testCase.name} - Variables should match`
+                    );
+                    totalTests++;
+                    if (variablesMatch) passCount++;
+                    
+                    // Test outputs
+                    const outputsMatch = assertEqual(
+                        refactored.outputs,
+                        original.outputs,
+                        `${testCase.name} - Outputs should match`
+                    );
+                    totalTests++;
+                    if (outputsMatch) passCount++;
+                    
+                    // Test trace length (should be same structure)
+                    const traceLengthMatch = assertEqual(
+                        refactored.trace.length,
+                        original.trace.length,
+                        `${testCase.name} - Trace length should match`
+                    );
+                    totalTests++;
+                    if (traceLengthMatch) passCount++;
+                    
+                } catch (error) {
+                    results.push({
+                        passed: false,
+                        message: `${testCase.name} - Error occurred: ${error.message}`,
+                        actual: error.message,
+                        expected: "No error"
+                    });
+                    totalTests++;
+                }
+            }
+
+            // Display results
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h2>Test Results: ${passCount}/${totalTests} passed</h2>
+                ${results.map(result => `
+                    <div class="${result.passed ? 'pass' : 'fail'}">
+                        ${result.passed ? '✓' : '✗'} ${result.message}
+                        ${!result.passed ? `<br>&nbsp;&nbsp;Expected: ${JSON.stringify(result.expected)}<br>&nbsp;&nbsp;Actual: ${JSON.stringify(result.actual)}` : ''}
+                    </div>
+                `).join('')}
+            `;
+            
+            console.log(`Test Results: ${passCount}/${totalTests} passed`);
+            return passCount === totalTests;
+        }
+
+        // Run tests when page loads
+        testInterpreters();
+    </script>
+</body>
+</html>

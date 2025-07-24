@@ -11,50 +11,79 @@ export class Interpreter {
         this.currentProgram = null;
     }
 
-    reset() {
-        this.variables = {};
-        this.constants = {};
-        this.outputs = [];
-        this.trace = [];
-        this.inputs = [];
-        this.inputIndex = 0;
-        this.currentProgram = null;
-    }
-
     // Convenience method for executing code without a program object
     execute(code) {
         return this.executeProgram(code, { inputs: [], randomValue: undefined });
     }
 
-    // Execute code without resetting state (for testing)
-    executeWithoutReset(code) {
-        const lines = code.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        this.programLines = lines;
-        
-        this.executeBlock(lines, 0, lines.length);
-        
-        return {
-            variables: this.getExpandedVariableNames(),
-            outputs: this.outputs,
-            trace: this.trace
-        };
-    }
-
-    executeProgram(program, inputData = { inputs: [], randomValue: undefined }) {
-        this.reset();
-        this.inputs = inputData.inputs || [];
+    executeProgram(code, program) {
+        // Initialize state
+        this.variables = {};
+        this.constants = {};
+        this.outputs = [];
+        this.trace = [];
+        this.inputs = program.inputs || [];
         this.inputIndex = 0;
-        this.randomValue = inputData.randomValue;
+        this.currentProgram = program;
+
+        // Simple interpreter for trace table generation
+        const lines = code.split('\n')
+            .map(line => line.trim())
+            .filter(line => line);  // Filter out only empty lines, keep comments
         
-        const lines = program.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-        this.programLines = lines;
+        let i = 0;
+        let executionSteps = 0;
+        const maxExecutionSteps = 1000; // Safety limit
         
-        this.executeBlock(lines, 0, lines.length);
+        while (i < lines.length && executionSteps < maxExecutionSteps) {
+            executionSteps++;
+            const line = lines[i];
+            const lineNum = i + 1;
+            
+            // Skip comments - lines starting with //
+            if (line.startsWith('//')) {
+                i++;
+                continue;
+            }
+            
+            if (line.startsWith('if ') && line.includes(' then')) {
+                // Handle if statement - condition evaluation doesn't change variables
+                i = this.handleIfStatement(lines, i);
+            } else if (line.startsWith('switch ')) {
+                // Handle switch statement
+                i = this.handleSwitchStatement(lines, i);
+            } else if (line.startsWith('while ')) {
+                // Handle while loop - condition evaluation doesn't change variables
+                i = this.handleWhileLoop(lines, i);
+            } else if (line === 'do') {
+                // Handle do-until loop
+                i = this.handleDoUntilLoop(lines, i);
+            } else if (line.startsWith('for ') && line.includes(' to ')) {
+                // Handle for loop
+                i = this.handleForLoop(lines, i);
+            } else if (line.startsWith('next ') || line === 'endif' || line === 'else' || 
+                       line.startsWith('elseif ') || line === 'endwhile' || line.startsWith('until ') ||
+                       line.startsWith('case ') || line === 'default' || line === 'endswitch') {
+                // Skip control flow statements as they're handled by their parent structures
+                i++;
+            } else {
+                // Regular statement - only trace if it actually changes variables OR produces output
+                const result = this.executeStatement(line, lineNum, this.variables);
+                if (result.shouldTrace && (Object.keys(result.changedVariables || {}).length > 0 || result.output)) {
+                    this.addTraceEntry(lineNum, this.variables, result.output, result.changedVariables);
+                }
+                i++;
+            }
+        }
         
+        if (executionSteps >= maxExecutionSteps) {
+            throw new Error('Execution exceeded maximum steps - possible infinite loop detected');
+        }
+
         return {
+            trace: this.trace,
             variables: this.getExpandedVariableNames(),
-            outputs: this.outputs,
-            trace: this.trace
+            outputs: this.outputs
         };
     }
 
@@ -108,13 +137,13 @@ export class Interpreter {
                 // Also record the full array for completeness
                 changeRecord[arrayName] = vars[arrayName];
             } else {
-                // Array declaration like "array nums[3]" - don't trace empty declarations
+                // Array declaration like "array nums[3]"
                 const match = line.match(/array\s+(\w+)\[(\d+)\]/);
                 if (match) {
                     const arrayName = match[1];
                     const size = parseInt(match[2]);
                     vars[arrayName] = new Array(size).fill(0);
-                    // Don't add to changeRecord - empty array declarations shouldn't be traced
+                    changeRecord[arrayName] = vars[arrayName];
                 }
             }
         } else if (line.startsWith('const ')) {
@@ -130,16 +159,11 @@ export class Interpreter {
         } else if (line.startsWith('print(')) {
             // Print statement
             const content = line.substring(6, line.length - 1);
-            if (content.startsWith('"') && content.endsWith('"') && !content.slice(1, -1).includes('"')) {
-                // Simple string literal with no internal quotes
+            if (content.startsWith('"') && content.endsWith('"')) {
                 output = content.slice(1, -1);
             } else if (this.isStringConcatenation(content, vars)) {
                 // Use the existing string concatenation method which handles complex expressions
                 output = this.evaluateStringConcatenation(content, vars);
-            } else if (content.includes('.upper') || content.includes('.lower') || content.includes('.length') ||
-                       content.includes('.left(') || content.includes('.right(') || content.includes('.substring(')) {
-                // Handle string methods in print
-                output = this.evaluateStringMethod(content, vars).toString();
             } else if (this.isArithmeticExpression(content)) {
                 // Handle arithmetic expressions like print(x*2) - AFTER checking for string methods
                 output = this.evaluateArithmeticExpression(content, vars).toString();
@@ -150,9 +174,6 @@ export class Interpreter {
                 if (vars[varName] !== undefined) {
                     output = vars[varName].toString();
                 }
-            } else {
-                // Fallback: if nothing else matches, treat as string concatenation
-                output = this.evaluateStringConcatenation(content, vars);
             }
             if (output) this.outputs.push(output);
         } else if (line.includes('=') && !line.includes('==') && !line.includes('!=') && !line.includes('<=') && !line.includes('>=')) {
@@ -191,21 +212,18 @@ export class Interpreter {
                     vars[arrayName][index] = newValue;
                     changeRecord[`${arrayName}[${index}]`] = newValue;
                 }
-            } else {
-                // Regular assignment - handle different expression types
-                let newValue;
-                
-                // Check for type conversion functions first (they can contain string concatenation)
-                if (value.startsWith('int(') || value.startsWith('str(') || 
-                    value.startsWith('float(') || value.startsWith('real(') || 
-                    value.startsWith('bool(') || value.startsWith('ASC(') || 
-                    value.startsWith('CHR(') || value.startsWith('random(')) {
-                    newValue = this.evaluateExpression(value, vars);
-                } else if (this.isStringConcatenation(value, vars)) {
-                    newValue = this.evaluateStringConcatenation(value, vars);
+            } else if (value.startsWith('input(')) {
+                // Handle input function
+                if (this.inputIndex < this.inputs.length) {
+                    vars[varName] = this.inputs[this.inputIndex];
+                    this.inputIndex++;
                 } else {
-                    newValue = this.evaluateExpression(value, vars);
+                    vars[varName] = '';
                 }
+                changeRecord[varName] = vars[varName];
+            } else {
+                // Regular assignment
+                const newValue = this.evaluateExpression(value, vars);
                 vars[varName] = newValue;
                 changeRecord[varName] = newValue;
             }
@@ -283,33 +301,17 @@ export class Interpreter {
      */
     evaluateStringMethod(expression, vars) {
         if (expression.includes('.left(')) {
-            const match = expression.match(/(\w+)\.left\(([^)]+)\)/);
+            const match = expression.match(/(\w+)\.left\((\d+)\)/);
             if (match && vars[match[1]] !== undefined) {
                 const varName = match[1];
-                const lengthParam = match[2].trim();
-                let length;
-                if (vars[lengthParam] !== undefined) {
-                    length = parseInt(vars[lengthParam]);
-                } else if (!isNaN(lengthParam)) {
-                    length = parseInt(lengthParam);
-                } else {
-                    length = 1;
-                }
+                const length = parseInt(match[2]);
                 return vars[varName].toString().substring(0, length);
             }
         } else if (expression.includes('.right(')) {
-            const match = expression.match(/(\w+)\.right\(([^)]+)\)/);
+            const match = expression.match(/(\w+)\.right\((\d+)\)/);
             if (match && vars[match[1]] !== undefined) {
                 const varName = match[1];
-                const lengthParam = match[2].trim();
-                let length;
-                if (vars[lengthParam] !== undefined) {
-                    length = parseInt(vars[lengthParam]);
-                } else if (!isNaN(lengthParam)) {
-                    length = parseInt(lengthParam);
-                } else {
-                    length = 1;
-                }
+                const length = parseInt(match[2]);
                 const str = vars[varName].toString();
                 return str.substring(str.length - length);
             }
@@ -395,18 +397,12 @@ export class Interpreter {
         // Handle other type conversions
         if (expression.startsWith('int(') && expression.endsWith(')')) {
             const inner = expression.substring(4, expression.length - 1).trim();
-            if (inner.startsWith('input(')) {
-                // Handle int(input()) case
-                const inputValue = this.evaluateExpression(inner, vars);
-                return parseInt(inputValue);
-            } else if (vars[inner] !== undefined) {
+            if (vars[inner] !== undefined) {
                 return parseInt(vars[inner]);
             } else if (!isNaN(inner)) {
                 return parseInt(inner);
             } else {
-                // Handle complex expressions like int(a + b + 0.5)
-                const arithmeticResult = this.evaluateArithmeticExpression(inner, vars);
-                return parseInt(arithmeticResult);
+                return 0;
             }
         }
         
@@ -421,53 +417,23 @@ export class Interpreter {
         
         if (expression.startsWith('float(') && expression.endsWith(')')) {
             const inner = expression.substring(6, expression.length - 1).trim();
-            if (inner.startsWith('input(')) {
-                // Handle float(input()) case
-                const inputValue = this.evaluateExpression(inner, vars);
-                return parseFloat(inputValue);
-            } else if (vars[inner] !== undefined) {
+            if (vars[inner] !== undefined) {
                 return parseFloat(vars[inner]);
             } else if (!isNaN(inner)) {
                 return parseFloat(inner);
             } else {
-                // Handle complex expressions like float(a + b)
-                const arithmeticResult = this.evaluateArithmeticExpression(inner, vars);
-                return parseFloat(arithmeticResult);
+                return 0.0;
             }
         }
         
         if (expression.startsWith('real(') && expression.endsWith(')')) {
             const inner = expression.substring(5, expression.length - 1).trim();
-            if (inner.startsWith('input(')) {
-                // Handle real(input()) case
-                const inputValue = this.evaluateExpression(inner, vars);
-                return parseFloat(inputValue);
-            } else if (vars[inner] !== undefined) {
+            if (vars[inner] !== undefined) {
                 return parseFloat(vars[inner]);
             } else if (!isNaN(inner)) {
                 return parseFloat(inner);
             } else {
-                // Handle complex expressions like real(a + b)
-                const arithmeticResult = this.evaluateArithmeticExpression(inner, vars);
-                return parseFloat(arithmeticResult);
-            }
-        }
-
-        // Handle input() function
-        if (expression.startsWith('input(') && expression.endsWith(')')) {
-            // Extract and evaluate the prompt (though we don't use it for trace tables)
-            const promptExpression = expression.slice(6, -1);
-            if (promptExpression && this.isStringConcatenation(promptExpression, vars)) {
-                // Evaluate the prompt to ensure any variables are processed
-                this.evaluateStringConcatenation(promptExpression, vars);
-            }
-            
-            if (this.inputIndex < this.inputs.length) {
-                const inputValue = this.inputs[this.inputIndex];
-                this.inputIndex++;
-                return inputValue;
-            } else {
-                return '';
+                return 0.0;
             }
         }
 
@@ -482,24 +448,6 @@ export class Interpreter {
             return this.evaluateCHRFunction(argument, vars);
         }
         
-        // Handle random function
-        if (expression.startsWith('random(') && expression.endsWith(')')) {
-            const args = expression.slice(7, -1);
-            if (this.randomValue !== undefined) {
-                // Use the provided random value for testing
-                return this.randomValue;
-            } else {
-                // Parse range and generate random number
-                const parts = args.split(',').map(s => s.trim());
-                if (parts.length === 2) {
-                    const min = parseInt(parts[0]);
-                    const max = parseInt(parts[1]);
-                    return Math.floor(Math.random() * (max - min + 1)) + min;
-                }
-                return 0;
-            }
-        }
-        
         // Handle variables
         if (vars[expression] !== undefined) {
             return vars[expression];
@@ -510,9 +458,8 @@ export class Interpreter {
             return parseFloat(expression);
         }
         
-        // Handle string literals (both single and double quotes)
-        if ((expression.startsWith('"') && expression.endsWith('"')) ||
-            (expression.startsWith("'") && expression.endsWith("'"))) {
+        // Handle string literals
+        if (expression.startsWith('"') && expression.endsWith('"')) {
             return expression.slice(1, -1);
         }
         
@@ -571,35 +518,17 @@ export class Interpreter {
             return true;
         }
         
-        // Check if expression contains + and any string indicators
-        if (!value.includes('+')) {
-            return false;
-        }
-        
-        const parts = value.split('+').map(p => p.trim());
-        
-        return parts.some(part => {
-            // Check for string literals (both single and double quotes)
-            if ((part.startsWith('"') && part.endsWith('"')) || 
-                (part.startsWith("'") && part.endsWith("'"))) {
-                return true;
-            }
-            
-            // Check for string methods
-            if (part.includes('.left(') || part.includes('.right(') ||
-                part.includes('.substring(') || part.includes('.upper') ||
-                part.includes('.lower') || part.startsWith('str(') ||
-                part.startsWith('CHR(') || part.startsWith('ASC(')) {
-                return true;
-            }
-            
-            // Check if variable contains a string value
-            if (vars[part] !== undefined && typeof vars[part] === 'string') {
-                return true;
-            }
-            
-            return false;
-        });
+        const result = value.includes('+') && 
+               value.split('+').some(part => {
+                    const trimmed = part.trim();
+                    return (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+                           (vars[trimmed] !== undefined && typeof vars[trimmed] === 'string') ||
+                           trimmed.includes('.left(') || trimmed.includes('.right(') ||
+                           trimmed.includes('.substring(') || trimmed.includes('.upper') ||
+                           trimmed.includes('.lower') || trimmed.startsWith('str(') ||
+                           trimmed.startsWith('CHR(') || trimmed.startsWith('ASC(');
+               });
+        return result;
     }
 
     isArithmeticExpression(value) {
@@ -655,15 +584,13 @@ export class Interpreter {
             } else if (part.startsWith('CHR(') && part.endsWith(')')) {
                 const argument = part.slice(4, -1);
                 result += this.evaluateCHRFunction(argument, vars);
-            } else if ((part.startsWith('"') && part.endsWith('"')) || 
-                       (part.startsWith("'") && part.endsWith("'"))) {
-                // Handle both single and double quoted strings
+            } else if (part.startsWith('"') && part.endsWith('"')) {
                 result += part.slice(1, -1);
             } else if (part.includes('.left(') || part.includes('.right(') || 
                        part.includes('.substring(') || part.includes('.upper') || 
                        part.includes('.lower') || part.includes('.length')) {
                 result += this.evaluateStringMethod(part, vars);
-            } else if (part === '""' || part === "''") {
+            } else if (part === '""') {
                 result += '';
             } else if (part.includes('[') && part.includes(']')) {
                 // Handle array access like colours[0]
@@ -694,28 +621,15 @@ export class Interpreter {
         const parts = [];
         let current = '';
         let inQuotes = false;
-        let quoteChar = null; // Track which quote character we're in
         let parenDepth = 0;
         let i = 0;
         
         while (i < value.length) {
             const char = value[i];
             
-            if ((char === '"' || char === "'") && (i === 0 || value[i-1] !== '\\')) {
-                if (!inQuotes) {
-                    // Starting a quoted string
-                    inQuotes = true;
-                    quoteChar = char;
-                    current += char;
-                } else if (char === quoteChar) {
-                    // Ending the quoted string with matching quote
-                    inQuotes = false;
-                    quoteChar = null;
-                    current += char;
-                } else {
-                    // Different quote character inside string
-                    current += char;
-                }
+            if (char === '"' && (i === 0 || value[i-1] !== '\\')) {
+                inQuotes = !inQuotes;
+                current += char;
             } else if (!inQuotes && char === '(') {
                 parenDepth++;
                 current += char;
@@ -1111,17 +1025,7 @@ export class Interpreter {
      */
     executeBlock(lines, startIndex, endIndex) {
         let bodyLine = startIndex;
-        let iterationCount = 0;
-        const maxIterations = 10000; // Safety limit to prevent infinite loops
-        
         while (bodyLine < endIndex) {
-            iterationCount++;
-            if (iterationCount > maxIterations) {
-                console.error(`Infinite loop detected in executeBlock! Line range: ${startIndex}-${endIndex}, Current line: ${bodyLine}`);
-                console.error(`Current line content: "${lines[bodyLine]}"`);
-                throw new Error(`Infinite loop detected after ${maxIterations} iterations`);
-            }
-            
             const bodyLineCode = lines[bodyLine];
             const bodyLineNum = bodyLine + 1;
             
@@ -1241,18 +1145,8 @@ export class Interpreter {
             }
         }
         
-        // Execute the while loop with safety limit
-        let loopIterations = 0;
-        const maxLoopIterations = 1000;
-        
+        // Execute the while loop
         while (this.evaluateCondition(condition, this.variables)) {
-            loopIterations++;
-            if (loopIterations > maxLoopIterations) {
-                console.error(`Infinite while loop detected! Condition: "${condition}"`);
-                console.error(`Variables at loop start:`, this.variables);
-                throw new Error(`Infinite while loop detected after ${maxLoopIterations} iterations`);
-            }
-            
             this.executeBlock(lines, i + 1, endwhileIndex);
         }
         
@@ -1277,16 +1171,7 @@ export class Interpreter {
         }
         
         // Execute the do-until loop (execute body at least once, then check condition)
-        let loopIterations = 0;
-        const maxLoopIterations = 1000;
-        
         do {
-            loopIterations++;
-            if (loopIterations > maxLoopIterations) {
-                console.error(`Infinite do-until loop detected!`);
-                throw new Error(`Infinite do-until loop detected after ${maxLoopIterations} iterations`);
-            }
-            
             this.executeBlock(lines, i + 1, untilIndex);
             
             // Get the until condition
