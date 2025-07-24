@@ -177,6 +177,7 @@ body {
 
 .btn-select {
     background: #667eea;
+    color: white
 }
 
 .btn-select:hover {
@@ -244,7 +245,10 @@ body {
     background: var(--bg-darker);
     color: white;
     padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
+}
+
+.code-title h3 { 
+    padding: 0px;
 }
 
 .program-name-display {
