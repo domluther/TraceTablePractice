@@ -270,7 +270,7 @@ export class ScoreManager {
         `;
 
         if (levelInfo.next) {
-            const pointsNeeded = levelInfo.next.threshold - overall.totalCorrect;
+            const pointsNeeded = Math.max(levelInfo.next.threshold - overall.totalCorrect, 0);
             html += `
                 <div class="level-progress">
                     <div class="progress-info">
