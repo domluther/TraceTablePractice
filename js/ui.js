@@ -4,6 +4,7 @@ import { programs } from './programs.js';
 import { TraceTable } from './trace-table.js';
 import { Interpreter } from './interpreter.js';
 import { ScoreManager } from './score-manager.js';
+import { SiteNavigation } from './navigation.js';
 
 export class UI {
     constructor() {
@@ -15,12 +16,16 @@ export class UI {
         this.currentDifficulty = null;
         this.expectedTrace = [];
         this.programVariables = [];
+
+        // Initialize site navigation
+        this.siteNavigation = new SiteNavigation();
+        this.siteNavigation.init();
     }
 
     init() {
         this.setupEventListeners();
         this.setupURLNavigation(); // Set up URL navigation handling
-        this.setupNavigation(); // Set up site navigation
+        // this.setupNavigation(); // Set up site navigation
         this.updateProgramTable();
         this.updateButtonStates(); // Set initial button states
         this.updateContentVisibility(); // Hide content sections initially
@@ -84,38 +89,7 @@ export class UI {
         });
     }
 
-    setupNavigation() {
-        const navToggle = document.getElementById('navToggle');
-        const navDropdown = document.getElementById('siteNavDropdown');
-        const navMenu = document.getElementById('navMenu');
 
-        // Toggle dropdown on button click
-        navToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            navDropdown.classList.toggle('active');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!navDropdown.contains(e.target)) {
-                navDropdown.classList.remove('active');
-            }
-        });
-
-        // Close dropdown when pressing Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                navDropdown.classList.remove('active');
-            }
-        });
-
-        // Close dropdown when clicking on a link
-        navMenu.addEventListener('click', (e) => {
-            if (e.target.classList.contains('nav-item')) {
-                navDropdown.classList.remove('active');
-            }
-        });
-    }
 
     updateProgramTable() {
         const difficulty = document.getElementById('difficulty').value;

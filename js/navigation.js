@@ -4,7 +4,7 @@
  * with auto-generated menu items
  */
 
-class SiteNavigation {
+export class SiteNavigation {
     constructor() {
         this.navToggle = null;
         this.navDropdown = null;
@@ -13,47 +13,48 @@ class SiteNavigation {
         // Navigation menu data
         this.navMenuData = [
             {
-                title: "Trace Tables",
-                description: "Practice OCR ERL algorithm tracing",
-                url: "https://tracetablepractice.netlify.app/",
-                id: "trace-tables",
-                keywords: ["tracetablepractice", "trace"]
-            },
-            {
-                title: "Programming Practice",
-                description: "Input/output and basic programming concepts",
-                url: "https://input-output-practice.netlify.app/",
-                id: "programming-practice",
-                keywords: ["input-output-practice", "programming"]
-            },
-            {
-                title: "Data Units",
+                title: "1.2 - Data Units",
                 description: "Convert units and calculate file sizes",
                 url: "https://convertdataunits.netlify.app/",
                 id: "data-units",
                 keywords: ["convertdataunits", "data", "units"]
             },
             {
-                title: "Network Addresses",
+                title: "1.3 - Network Addresses",
                 description: "Identify IP addresses and MAC addresses",
                 url: "https://ipormac.netlify.app/",
                 id: "network-addresses",
                 keywords: ["ipormac", "network", "ip", "mac"]
             },
             {
-                title: "Sort Algorithms",
+                title: "2.1 - Sorting Algorithms",
                 description: "Visualize bubble, merge & insertion sorts",
                 url: "https://ocrsortvisualiser.netlify.app/",
                 id: "sort-algorithms",
                 keywords: ["ocrsortvisualiser", "sort", "algorithm"]
             },
             {
-                title: "Boolean Algebra",
+                title: "2.1 - Trace Tables",
+                description: "Practice OCR ERL algorithm tracing",
+                url: "https://tracetablepractice.netlify.app/",
+                id: "trace-tables",
+                keywords: ["tracetablepractice", "trace"]
+            },
+            {
+                title: "2.2 - Programming Practice",
+                description: "Input/output and basic programming concepts",
+                url: "https://input-output-practice.netlify.app/",
+                id: "programming-practice",
+                keywords: ["input-output-practice", "programming"]
+            },
+
+            {
+                title: "2.4 - Boolean Algebra",
                 description: "Logic gates and Boolean expressions",
                 url: "https://booleanalgebrapractice.netlify.app/",
                 id: "boolean-algebra",
                 keywords: ["booleanalgebrapractice", "boolean", "logic"]
-            }
+            },
         ];
     }
 
@@ -150,41 +151,29 @@ class SiteNavigation {
         // Toggle dropdown on button click
         this.navToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.toggleDropdown();
+            this.navDropdown.classList.toggle('active');
         });
 
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!this.navDropdown.contains(e.target)) {
-                this.closeDropdown();
+            this.navDropdown.classList.remove('active');
             }
         });
 
         // Close dropdown when pressing Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                this.closeDropdown();
+            this.navDropdown.classList.remove('active');
             }
         });
 
         // Close dropdown when clicking on a link
         this.navMenu.addEventListener('click', (e) => {
             if (e.target.classList.contains('nav-item')) {
-                this.closeDropdown();
+            this.navDropdown.classList.remove('active');
             }
         });
-    }
-
-    toggleDropdown() {
-        this.navDropdown.classList.toggle('active');
-    }
-
-    closeDropdown() {
-        this.navDropdown.classList.remove('active');
-    }
-
-    openDropdown() {
-        this.navDropdown.classList.add('active');
     }
 
     /**
@@ -195,9 +184,3 @@ class SiteNavigation {
         return this.navMenuData.find(item => item.id === currentId) || null;
     }
 }
-
-// Initialize navigation when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const navigation = new SiteNavigation();
-    navigation.init();
-});
