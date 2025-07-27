@@ -261,7 +261,7 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-normal);
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
     letter-spacing: 0.5px;
     text-decoration: none;
     display: inline-block;

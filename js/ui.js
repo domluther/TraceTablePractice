@@ -1,5 +1,4 @@
 // UI management and event handling module
-// import { Interpreter } from "./interpreter.js";
 import { ASTInterpreter } from "./ast.js";
 import { SiteNavigation } from "./navigation.js";
 import { programs } from "./programs.js";
@@ -247,6 +246,7 @@ export class UI {
 	executeProgram(code) {
 		// Use the AST interpreter to generate the trace
 		const result = this.interpreter.executeProgram(code, this.currentProgram);
+		console.log(this.currentProgram);
 		this.expectedTrace = result.trace;
 		this.programVariables = result.variables;
 	}
