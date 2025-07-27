@@ -9,4 +9,5 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Expose UI instance globally for onclick handlers
     window.ui = ui;
+
 });

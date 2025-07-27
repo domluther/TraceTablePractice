@@ -11,6 +11,9 @@ export class UI {
         this.traceTable = new TraceTable();
         this.interpreter = new Interpreter();
         this.scoreManager = new ScoreManager();
+        // Initialize the score manager globally
+        window.scoreManager = this.scoreManager;
+
         this.currentProgram = null;
         this.currentProgramIndex = null;
         this.currentDifficulty = null;
