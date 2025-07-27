@@ -5,38 +5,39 @@
 // ============================================================================
 
 class ASTNode {
-  constructor(type) {
+  constructor(type, line = 0) {
     this.type = type;
+    this.line = line;
   }
 }
 
 // Expression nodes
 class LiteralNode extends ASTNode {
-  constructor(value, dataType = 'auto') {
-    super('literal');
+  constructor(value, dataType = 'auto', line = 0) {
+    super('literal', line);
     this.value = value;
     this.dataType = dataType;
   }
 }
 
 class VariableNode extends ASTNode {
-  constructor(name) {
-    super('variable');
+  constructor(name, line = 0) {
+    super('variable', line);
     this.name = name;
   }
 }
 
 class ArrayAccessNode extends ASTNode {
-  constructor(arrayName, index) {
-    super('arrayAccess');
+  constructor(arrayName, index, line = 0) {
+    super('arrayAccess', line);
     this.arrayName = arrayName;
     this.index = index; // Can be another expression node
   }
 }
 
 class BinaryOpNode extends ASTNode {
-  constructor(operator, left, right) {
-    super('binaryOp');
+  constructor(operator, left, right, line = 0) {
+    super('binaryOp', line);
     this.operator = operator;
     this.left = left;
     this.right = right;
@@ -44,24 +45,24 @@ class BinaryOpNode extends ASTNode {
 }
 
 class UnaryOpNode extends ASTNode {
-  constructor(operator, operand) {
-    super('unaryOp');
+  constructor(operator, operand, line = 0) {
+    super('unaryOp', line);
     this.operator = operator;
     this.operand = operand;
   }
 }
 
 class FunctionCallNode extends ASTNode {
-  constructor(functionName, args) {
-    super('functionCall');
+  constructor(functionName, args, line = 0) {
+    super('functionCall', line);
     this.functionName = functionName;
     this.args = args;
   }
 }
 
 class StringMethodNode extends ASTNode {
-  constructor(object, method, args = []) {
-    super('stringMethod');
+  constructor(object, method, args = [], line = 0) {
+    super('stringMethod', line);
     this.object = object;
     this.method = method;
     this.args = args;
@@ -70,8 +71,8 @@ class StringMethodNode extends ASTNode {
 
 // Statement nodes
 class AssignmentNode extends ASTNode {
-  constructor(target, value, isConstant = false) {
-    super('assignment');
+  constructor(target, value, isConstant = false, line = 0) {
+    super('assignment', line);
     this.target = target; // Can be VariableNode or ArrayAccessNode
     this.value = value;
     this.isConstant = isConstant;
@@ -79,15 +80,15 @@ class AssignmentNode extends ASTNode {
 }
 
 class PrintNode extends ASTNode {
-  constructor(expression) {
-    super('print');
+  constructor(expression, line = 0) {
+    super('print', line);
     this.expression = expression;
   }
 }
 
 class ArrayDeclarationNode extends ASTNode {
-  constructor(name, size = null, initialValues = null) {
-    super('arrayDeclaration');
+  constructor(name, size = null, initialValues = null, line = 0) {
+    super('arrayDeclaration', line);
     this.name = name;
     this.size = size;
     this.initialValues = initialValues;
@@ -96,8 +97,8 @@ class ArrayDeclarationNode extends ASTNode {
 
 // Control flow nodes
 class IfNode extends ASTNode {
-  constructor(condition, thenBlock, elseifBlocks = [], elseBlock = null) {
-    super('if');
+  constructor(condition, thenBlock, elseifBlocks = [], elseBlock = null, line = 0) {
+    super('if', line);
     this.condition = condition;
     this.thenBlock = thenBlock;
     this.elseifBlocks = elseifBlocks; // Array of {condition, block}
@@ -106,24 +107,24 @@ class IfNode extends ASTNode {
 }
 
 class WhileNode extends ASTNode {
-  constructor(condition, body) {
-    super('while');
+  constructor(condition, body, line = 0) {
+    super('while', line);
     this.condition = condition;
     this.body = body;
   }
 }
 
 class DoUntilNode extends ASTNode {
-  constructor(body, condition) {
-    super('doUntil');
+  constructor(body, condition, line = 0) {
+    super('doUntil', line);
     this.body = body;
     this.condition = condition;
   }
 }
 
 class ForNode extends ASTNode {
-  constructor(variable, start, end, step, body) {
-    super('for');
+  constructor(variable, start, end, step, body, line = 0) {
+    super('for', line);
     this.variable = variable;
     this.start = start;
     this.end = end;
@@ -133,8 +134,8 @@ class ForNode extends ASTNode {
 }
 
 class SwitchNode extends ASTNode {
-  constructor(expression, cases, defaultCase = null) {
-    super('switch');
+  constructor(expression, cases, defaultCase = null, line = 0) {
+    super('switch', line);
     this.expression = expression;
     this.cases = cases; // Array of {value, body}
     this.defaultCase = defaultCase;
@@ -142,8 +143,8 @@ class SwitchNode extends ASTNode {
 }
 
 class BlockNode extends ASTNode {
-  constructor(statements) {
-    super('block');
+  constructor(statements, line = 0) {
+    super('block', line);
     this.statements = statements;
   }
 }
@@ -439,16 +440,18 @@ class Parser {
 
   statement() {
     try {
-      if (this.match('CONST')) return this.constDeclaration();
-      if (this.match('ARRAY')) return this.arrayDeclaration();
-      if (this.match('PRINT')) return this.printStatement();
-      if (this.match('IF')) return this.ifStatement();
-      if (this.match('WHILE')) return this.whileStatement();
-      if (this.match('DO')) return this.doUntilStatement();
-      if (this.match('FOR')) return this.forStatement();
-      if (this.match('SWITCH')) return this.switchStatement();
+      const startLine = this.peek().line;
       
-      return this.assignmentOrExpression();
+      if (this.match('CONST')) return this.constDeclaration(startLine);
+      if (this.match('ARRAY')) return this.arrayDeclaration(startLine);
+      if (this.match('PRINT')) return this.printStatement(startLine);
+      if (this.match('IF')) return this.ifStatement(startLine);
+      if (this.match('WHILE')) return this.whileStatement(startLine);
+      if (this.match('DO')) return this.doUntilStatement(startLine);
+      if (this.match('FOR')) return this.forStatement(startLine);
+      if (this.match('SWITCH')) return this.switchStatement(startLine);
+      
+      return this.assignmentOrExpression(startLine);
     } catch (error) {
       // Skip to next line on parse error
       this.synchronize();
@@ -456,15 +459,15 @@ class Parser {
     }
   }
 
-  constDeclaration() {
+  constDeclaration(line) {
     const name = this.consume('IDENTIFIER', 'Expected variable name after const').value;
     this.consume('EQUALS', 'Expected = after const variable name');
     const value = this.expression();
     this.consumeNewlineOrEOF();
-    return new AssignmentNode(new VariableNode(name), value, true);
+    return new AssignmentNode(new VariableNode(name, line), value, true, line);
   }
 
-  arrayDeclaration() {
+  arrayDeclaration(line) {
     const name = this.consume('IDENTIFIER', 'Expected array name').value;
     
     if (this.match('LBRACKET')) {
@@ -472,7 +475,7 @@ class Parser {
       const size = this.expression();
       this.consume('RBRACKET', 'Expected ] after array size');
       this.consumeNewlineOrEOF();
-      return new ArrayDeclarationNode(name, size);
+      return new ArrayDeclarationNode(name, size, null, line);
     } else if (this.match('EQUALS')) {
       // array name = [values] format
       this.consume('LBRACKET', 'Expected [ after =');
@@ -486,21 +489,21 @@ class Parser {
       
       this.consume('RBRACKET', 'Expected ] after array values');
       this.consumeNewlineOrEOF();
-      return new ArrayDeclarationNode(name, null, values);
+      return new ArrayDeclarationNode(name, null, values, line);
     }
     
     throw new Error('Invalid array declaration syntax');
   }
 
-  printStatement() {
+  printStatement(line) {
     this.consume('LPAREN', 'Expected ( after print');
     const expr = this.expression();
     this.consume('RPAREN', 'Expected ) after print expression');
     this.consumeNewlineOrEOF();
-    return new PrintNode(expr);
+    return new PrintNode(expr, line);
   }
 
-  ifStatement() {
+  ifStatement(line) {
     const condition = this.expression();
     this.consume('THEN', 'Expected then after if condition');
     this.consumeNewlineOrEOF();
@@ -525,35 +528,35 @@ class Parser {
     this.consume('ENDIF', 'Expected endif');
     this.consumeNewlineOrEOF();
     
-    return new IfNode(condition, thenBlock, elseifBlocks, elseBlock);
+    return new IfNode(condition, thenBlock, elseifBlocks, elseBlock, line);
   }
 
-  whileStatement() {
+  whileStatement(line) {
     const condition = this.expression();
     this.consumeNewlineOrEOF();
     const body = this.block(['ENDWHILE']);
     this.consume('ENDWHILE', 'Expected endwhile');
     this.consumeNewlineOrEOF();
-    return new WhileNode(condition, body);
+    return new WhileNode(condition, body, line);
   }
 
-  doUntilStatement() {
+  doUntilStatement(line) {
     this.consumeNewlineOrEOF();
     const body = this.block(['UNTIL']);
     this.consume('UNTIL', 'Expected until');
     const condition = this.expression();
     this.consumeNewlineOrEOF();
-    return new DoUntilNode(body, condition);
+    return new DoUntilNode(body, condition, line);
   }
 
-  forStatement() {
+  forStatement(line) {
     const variable = this.consume('IDENTIFIER', 'Expected variable name in for loop').value;
     this.consume('EQUALS', 'Expected = after for variable');
     const start = this.expression();
     this.consume('TO', 'Expected to in for loop');
     const end = this.expression();
     
-    let step = new LiteralNode(1);
+    let step = new LiteralNode(1, 'number', line);
     if (this.match('STEP')) {
       step = this.expression();
     }
@@ -564,10 +567,10 @@ class Parser {
     this.advance(); // Skip the variable name after next
     this.consumeNewlineOrEOF();
     
-    return new ForNode(variable, start, end, step, body);
+    return new ForNode(variable, start, end, step, body, line);
   }
 
-  switchStatement() {
+  switchStatement(line) {
     const expr = this.expression();
     this.consume('COLON', 'Expected : after switch expression');
     this.consumeNewlineOrEOF();
@@ -592,16 +595,16 @@ class Parser {
     this.consume('ENDSWITCH', 'Expected endswitch');
     this.consumeNewlineOrEOF();
     
-    return new SwitchNode(expr, cases, defaultCase);
+    return new SwitchNode(expr, cases, defaultCase, line);
   }
 
-  assignmentOrExpression() {
+  assignmentOrExpression(line) {
     const expr = this.expression();
     
     if (this.match('EQUALS')) {
       const value = this.expression();
       this.consumeNewlineOrEOF();
-      return new AssignmentNode(expr, value);
+      return new AssignmentNode(expr, value, false, line);
     }
     
     this.consumeNewlineOrEOF();
@@ -635,8 +638,9 @@ class Parser {
     
     while (this.matchOperator('OR')) {
       const operator = this.previous().value;
+      const line = this.previous().line;
       const right = this.logicalAnd();
-      expr = new BinaryOpNode(operator, expr, right);
+      expr = new BinaryOpNode(operator, expr, right, line);
     }
     
     return expr;
@@ -647,8 +651,9 @@ class Parser {
     
     while (this.matchOperator('AND')) {
       const operator = this.previous().value;
+      const line = this.previous().line;
       const right = this.equality();
-      expr = new BinaryOpNode(operator, expr, right);
+      expr = new BinaryOpNode(operator, expr, right, line);
     }
     
     return expr;
@@ -659,8 +664,9 @@ class Parser {
     
     while (this.matchOperator('==', '!=')) {
       const operator = this.previous().value;
+      const line = this.previous().line;
       const right = this.comparison();
-      expr = new BinaryOpNode(operator, expr, right);
+      expr = new BinaryOpNode(operator, expr, right, line);
     }
     
     return expr;
@@ -671,8 +677,9 @@ class Parser {
     
     while (this.matchOperator('>', '>=', '<', '<=')) {
       const operator = this.previous().value;
+      const line = this.previous().line;
       const right = this.term();
-      expr = new BinaryOpNode(operator, expr, right);
+      expr = new BinaryOpNode(operator, expr, right, line);
     }
     
     return expr;
@@ -683,8 +690,9 @@ class Parser {
     
     while (this.matchOperator('+', '-')) {
       const operator = this.previous().value;
+      const line = this.previous().line;
       const right = this.factor();
-      expr = new BinaryOpNode(operator, expr, right);
+      expr = new BinaryOpNode(operator, expr, right, line);
     }
     
     return expr;
@@ -695,8 +703,9 @@ class Parser {
     
     while (this.matchOperator('*', '/', 'MOD', 'DIV')) {
       const operator = this.previous().value;
+      const line = this.previous().line;
       const right = this.exponent();
-      expr = new BinaryOpNode(operator, expr, right);
+      expr = new BinaryOpNode(operator, expr, right, line);
     }
     
     return expr;
@@ -708,8 +717,9 @@ class Parser {
     // Right associative
     if (this.matchOperator('^')) {
       const operator = this.previous().value;
+      const line = this.previous().line;
       const right = this.exponent();
-      expr = new BinaryOpNode(operator, expr, right);
+      expr = new BinaryOpNode(operator, expr, right, line);
     }
     
     return expr;
@@ -718,8 +728,9 @@ class Parser {
   unary() {
     if (this.matchOperator('-', '+')) {
       const operator = this.previous().value;
+      const line = this.previous().line;
       const right = this.unary();
-      return new UnaryOpNode(operator, right);
+      return new UnaryOpNode(operator, right, line);
     }
     
     return this.postfix();
@@ -732,7 +743,7 @@ class Parser {
       if (this.match('LBRACKET')) {
         const index = this.expression();
         this.consume('RBRACKET', 'Expected ] after array index');
-        expr = new ArrayAccessNode(expr.name, index);
+        expr = new ArrayAccessNode(expr.name, index, expr.line);
       } else if (this.match('DOT')) {
         const method = this.consume('IDENTIFIER', 'Expected method name after .').value;
         
@@ -744,10 +755,10 @@ class Parser {
             } while (this.match('COMMA'));
           }
           this.consume('RPAREN', 'Expected ) after method arguments');
-          expr = new StringMethodNode(expr, method, args);
+          expr = new StringMethodNode(expr, method, args, expr.line);
         } else {
           // Property access (e.g., .length)
-          expr = new StringMethodNode(expr, method, []);
+          expr = new StringMethodNode(expr, method, [], expr.line);
         }
       } else {
         break;
@@ -758,16 +769,18 @@ class Parser {
   }
 
   primary() {
+    const line = this.peek().line;
+    
     if (this.match('BOOLEAN')) {
-      return new LiteralNode(this.previous().value, 'boolean');
+      return new LiteralNode(this.previous().value, 'boolean', line);
     }
     
     if (this.match('NUMBER')) {
-      return new LiteralNode(this.previous().value, 'number');
+      return new LiteralNode(this.previous().value, 'number', line);
     }
     
     if (this.match('STRING')) {
-      return new LiteralNode(this.previous().value, 'string');
+      return new LiteralNode(this.previous().value, 'string', line);
     }
     
     if (this.match('IDENTIFIER')) {
@@ -782,10 +795,10 @@ class Parser {
           } while (this.match('COMMA'));
         }
         this.consume('RPAREN', 'Expected ) after function arguments');
-        return new FunctionCallNode(name, args);
+        return new FunctionCallNode(name, args, line);
       }
       
-      return new VariableNode(name);
+      return new VariableNode(name, line);
     }
     
     if (this.match('LPAREN')) {
@@ -930,18 +943,18 @@ export class ASTInterpreter {
     }
   }
 
-  executeNode(node, lineNum = 0) {
+  executeNode(node) {
     if (!node) return null;
 
     switch (node.type) {
       case 'block':
         return this.executeBlock(node);
       case 'assignment':
-        return this.executeAssignment(node, lineNum);
+        return this.executeAssignment(node);
       case 'print':
-        return this.executePrint(node, lineNum);
+        return this.executePrint(node);
       case 'arrayDeclaration':
-        return this.executeArrayDeclaration(node, lineNum);
+        return this.executeArrayDeclaration(node);
       case 'if':
         return this.executeIf(node);
       case 'while':
@@ -963,7 +976,7 @@ export class ASTInterpreter {
     }
   }
 
-  executeAssignment(node, lineNum) {
+  executeAssignment(node) {
     const value = this.evaluateExpression(node.value);
     const changeRecord = {};
 
@@ -991,12 +1004,37 @@ export class ASTInterpreter {
     }
 
     if (Object.keys(changeRecord).length > 0) {
-      this.addTraceEntry(lineNum, this.variables, '', changeRecord);
+      this.addTraceEntry(node.line, this.variables, '', changeRecord);
     }
   }
 
-  executePrint(node, lineNum) {
+  executePrint(node) {
     const value = this.evaluateExpression(node.expression);
+    const output = value.toString();
+    this.outputs.push(output);
+    this.addTraceEntry(node.line, this.variables, output);
+  }
+
+  executeArrayDeclaration(node) {
+    const changeRecord = {};
+    
+    if (node.initialValues) {
+      const values = node.initialValues.map(expr => this.evaluateExpression(expr));
+      this.variables[node.name] = values;
+      
+      for (let i = 0; i < values.length; i++) {
+        changeRecord[`${node.name}[${i}]`] = values[i];
+      }
+    } else if (node.size) {
+      const size = this.evaluateExpression(node.size);
+      this.variables[node.name] = new Array(size).fill(0);
+      // Don't trace empty array declarations
+    }
+
+    if (Object.keys(changeRecord).length > 0) {
+      this.addTraceEntry(node.line, this.variables, '', changeRecord);
+    }
+  const value = this.evaluateExpression(node.expression);
     const output = value.toString();
     this.outputs.push(output);
     this.addTraceEntry(lineNum, this.variables, output);
@@ -1085,7 +1123,7 @@ export class ASTInterpreter {
       // Trace the loop variable assignment
       const changeRecord = {};
       changeRecord[node.variable] = i;
-      this.addTraceEntry(0, this.variables, '', changeRecord);
+      this.addTraceEntry(node.line, this.variables, '', changeRecord);
       
       this.executeNode(node.body);
     }
