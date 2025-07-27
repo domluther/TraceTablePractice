@@ -1,4 +1,5 @@
 // UI management and event handling module
+import { ASTInterpreter } from "./ast.js";
 import { Interpreter } from "./interpreter.js";
 import { SiteNavigation } from "./navigation.js";
 import { programs } from "./programs.js";
@@ -10,6 +11,7 @@ export class UI {
 		this.traceTable = new TraceTable();
 		this.interpreter = new Interpreter();
 		this.scoreManager = new ScoreManager();
+		this.ASTInterpreter = new ASTInterpreter();
 		// Initialize the score manager globally
 		window.scoreManager = this.scoreManager;
 
@@ -245,6 +247,12 @@ export class UI {
 	executeProgram(code) {
 		// Use the interpreter to generate the trace
 		const result = this.interpreter.executeProgram(code, this.currentProgram);
+		console.log("Interpreter Result:", result);
+		const result2 = this.ASTInterpreter.executeProgram(
+			code,
+			this.currentProgram,
+		);
+		console.log("AST Interpreter Result:", result2);
 		this.expectedTrace = result.trace;
 		this.programVariables = result.variables;
 	}
