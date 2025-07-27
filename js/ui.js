@@ -1,6 +1,6 @@
 // UI management and event handling module
+// import { Interpreter } from "./interpreter.js";
 import { ASTInterpreter } from "./ast.js";
-import { Interpreter } from "./interpreter.js";
 import { SiteNavigation } from "./navigation.js";
 import { programs } from "./programs.js";
 import { ScoreManager } from "./score-manager.js";
@@ -9,9 +9,9 @@ import { TraceTable } from "./trace-table.js";
 export class UI {
 	constructor() {
 		this.traceTable = new TraceTable();
-		this.interpreter = new Interpreter();
+		// this.interpreter = new Interpreter();
+		this.interpreter = new ASTInterpreter();
 		this.scoreManager = new ScoreManager();
-		this.ASTInterpreter = new ASTInterpreter();
 		// Initialize the score manager globally
 		window.scoreManager = this.scoreManager;
 
@@ -245,17 +245,64 @@ export class UI {
 	}
 
 	executeProgram(code) {
-		// Use the interpreter to generate the trace
+		// Use the AST interpreter to generate the trace
 		const result = this.interpreter.executeProgram(code, this.currentProgram);
-		console.log("Interpreter Result:", result);
-		const result2 = this.ASTInterpreter.executeProgram(
-			code,
-			this.currentProgram,
-		);
-		console.log("AST Interpreter Result:", result2);
 		this.expectedTrace = result.trace;
 		this.programVariables = result.variables;
 	}
+
+compareResults(expected, actual) {
+    const deepEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b); // simple but sufficient
+
+    let differences = [];
+
+    if (!deepEqual(expected.variables, actual.variables)) {
+        differences.push({
+            key: "variables",
+            expected: expected.variables,
+            actual: actual.variables,
+        });
+    }
+
+    if (!deepEqual(expected.outputs, actual.outputs)) {
+        differences.push({
+            key: "outputs",
+            expected: expected.outputs,
+            actual: actual.outputs,
+        });
+    }
+
+    if (expected.trace.length !== actual.trace.length) {
+        differences.push({
+            key: "trace length",
+            expected: expected.trace.length,
+            actual: actual.trace.length,
+        });
+    } else {
+        expected.trace.forEach((expectedStep, i) => {
+            const actualStep = actual.trace[i];
+            if (!deepEqual(expectedStep, actualStep)) {
+                differences.push({
+                    key: `trace[${i}]`,
+                    expected: expectedStep,
+                    actual: actualStep,
+                });
+            }
+        });
+    }
+
+    if (differences.length === 0) {
+        console.log("%c✔ AST Interpreter matches the expected result", "color: green");
+    } else {
+        console.warn("%c❌ Differences found between result and result2:", "color: red");
+        differences.forEach(diff => {
+            console.warn(`Mismatch in ${diff.key}:`);
+            console.log("Expected:", diff.expected);
+            console.log("Actual  :", diff.actual);
+        });
+    }
+}
+
 
 	markAnswer() {
 		const result = this.traceTable.markAnswer();

@@ -273,8 +273,8 @@ next x`,
         {
             code: `for x = 0 to 2
     choice = input("Enter a word")
-    case = input("upper or lower")
-    if case == "upper" then
+    size = input("upper or lower")
+    if size == "upper" then
         print(choice.upper)
     else
         print(choice.lower)
@@ -331,7 +331,7 @@ next x`,
                 ["2", "5", "8"],
                 ["0", "7", "3"],
                 ["1", "4", "9"],
-                ["6", "10", "2"]
+                ["5", "10", "2"]
             ]
         },
         {

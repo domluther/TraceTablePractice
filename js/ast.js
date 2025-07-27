@@ -375,7 +375,7 @@ class Lexer {
       'array': 'ARRAY',
       'const': 'CONST',
       'print': 'PRINT',
-      'input': 'INPUT',
+      // 'input': 'INPUT', // Remove this - input should be treated as a function, not a keyword
       'true': 'BOOLEAN',
       'false': 'BOOLEAN',
       'and': 'OPERATOR',
@@ -564,7 +564,12 @@ class Parser {
     this.consumeNewlineOrEOF();
     const body = this.block(['NEXT']);
     this.consume('NEXT', 'Expected next');
-    this.advance(); // Skip the variable name after next
+    
+    // The variable name after NEXT is optional in some syntaxes
+    if (this.check('IDENTIFIER')) {
+      this.advance(); // Skip the variable name after next
+    }
+    
     this.consumeNewlineOrEOF();
     
     return new ForNode(variable, start, end, step, body, line);
@@ -602,6 +607,15 @@ class Parser {
     const expr = this.expression();
     
     if (this.match('EQUALS')) {
+      // Check if we're trying to assign to a keyword
+      if (expr.type === 'variable') {
+        const varName = expr.name.toLowerCase();
+        const keywords = ['if', 'then', 'else', 'elseif', 'endif', 'while', 'endwhile', 'do', 'until', 'for', 'to', 'step', 'next', 'switch', 'case', 'default', 'endswitch', 'array', 'const', 'print', 'true', 'false', 'and', 'or', 'mod', 'div'];
+        if (keywords.includes(varName)) {
+          throw new Error(`Cannot use reserved keyword '${expr.name}' as a variable name at line ${line}`);
+        }
+      }
+      
       const value = this.expression();
       this.consumeNewlineOrEOF();
       return new AssignmentNode(expr, value, false, line);
@@ -965,8 +979,18 @@ export class ASTInterpreter {
         return this.executeFor(node);
       case 'switch':
         return this.executeSwitch(node);
-      default:
+      case 'functionCall':
+      case 'variable':
+      case 'literal':
+      case 'binaryOp':
+      case 'unaryOp':
+      case 'arrayAccess':
+      case 'stringMethod':
+        // These are expressions that might be standalone statements
+        // Evaluate them but don't do anything with the result
         return this.evaluateExpression(node);
+      default:
+        throw new Error(`Unknown node type: ${node.type}`);
     }
   }
 
@@ -1003,9 +1027,8 @@ export class ASTInterpreter {
       changeRecord[`${arrayName}[${index}]`] = value;
     }
 
-    if (Object.keys(changeRecord).length > 0) {
-      this.addTraceEntry(node.line, this.variables, '', changeRecord);
-    }
+    // Always add trace entry for assignments, even if no variables changed
+    this.addTraceEntry(node.line, this.variables, '', changeRecord);
   }
 
   executePrint(node) {
@@ -1022,6 +1045,7 @@ export class ASTInterpreter {
       const values = node.initialValues.map(expr => this.evaluateExpression(expr));
       this.variables[node.name] = values;
       
+      // Only add individual array elements to the change record for trace table
       for (let i = 0; i < values.length; i++) {
         changeRecord[`${node.name}[${i}]`] = values[i];
       }
@@ -1033,31 +1057,6 @@ export class ASTInterpreter {
 
     if (Object.keys(changeRecord).length > 0) {
       this.addTraceEntry(node.line, this.variables, '', changeRecord);
-    }
-  const value = this.evaluateExpression(node.expression);
-    const output = value.toString();
-    this.outputs.push(output);
-    this.addTraceEntry(lineNum, this.variables, output);
-  }
-
-  executeArrayDeclaration(node, lineNum) {
-    const changeRecord = {};
-    
-    if (node.initialValues) {
-      const values = node.initialValues.map(expr => this.evaluateExpression(expr));
-      this.variables[node.name] = values;
-      
-      for (let i = 0; i < values.length; i++) {
-        changeRecord[`${node.name}[${i}]`] = values[i];
-      }
-    } else if (node.size) {
-      const size = this.evaluateExpression(node.size);
-      this.variables[node.name] = new Array(size).fill(0);
-      // Don't trace empty array declarations
-    }
-
-    if (Object.keys(changeRecord).length > 0) {
-      this.addTraceEntry(lineNum, this.variables, '', changeRecord);
     }
   }
 
