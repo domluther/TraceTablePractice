@@ -8,9 +8,10 @@ import { TraceTable } from "./trace-table.js";
 export class UI {
 	constructor() {
 		this.traceTable = new TraceTable();
-		// this.interpreter = new Interpreter();
 		this.interpreter = new ASTInterpreter();
 		this.scoreManager = new ScoreManager();
+		this.siteNavigation = new SiteNavigation();
+
 		// Initialize the score manager globally
 		window.scoreManager = this.scoreManager;
 
@@ -19,16 +20,13 @@ export class UI {
 		this.currentDifficulty = null;
 		this.expectedTrace = [];
 		this.programVariables = [];
-
-		// Initialize site navigation
-		this.siteNavigation = new SiteNavigation();
-		this.siteNavigation.init();
 	}
 
 	init() {
 		this.setupEventListeners();
 		this.setupURLNavigation(); // Set up URL navigation handling
-		// this.setupNavigation(); // Set up site navigation
+		// Adds nav menu
+		this.siteNavigation.init();
 		this.updateProgramTable();
 		this.updateButtonStates(); // Set initial button states
 		this.updateContentVisibility(); // Hide content sections initially

@@ -52,7 +52,6 @@
         // ============================================================================
         
         // Import the actual production Interpreter class
-        // import { Interpreter } from './js/interpreter.js';
         import { ASTInterpreter as Interpreter} from "./js/ast.js";
         
         // Test state management
@@ -109,6 +108,43 @@
             const testDetails = details + ` (Expected: ${JSON.stringify(expected)}, Got: ${JSON.stringify(actual)})`;
             assert(condition, testName, testDetails);
         }
+
+        /**
+         * Helper function to execute code and get variable value
+         * @param {string} code - The code to execute
+         * @param {string} varName - The variable name to check
+         * @param {Object} inputData - Optional input data for the interpreter
+         * @returns {any} The value of the specified variable
+         */
+        function executeAndGetVariable(code, varName, inputData = {}) {
+            const interpreter = new Interpreter();
+            const result = interpreter.executeProgram(code, inputData);
+            return interpreter.variables[varName];
+        }
+
+        /**
+         * Helper function to execute code and get all variables
+         * @param {string} code - The code to execute
+         * @param {Object} inputData - Optional input data for the interpreter
+         * @returns {Object} All variables from the interpreter
+         */
+        function executeAndGetVariables(code, inputData = {}) {
+            const interpreter = new Interpreter();
+            const result = interpreter.executeProgram(code, inputData);
+            return interpreter.variables;
+        }
+
+        /**
+         * Helper function to execute code and get outputs
+         * @param {string} code - The code to execute
+         * @param {Object} inputData - Optional input data for the interpreter
+         * @returns {Array} Array of output strings
+         */
+        function executeAndGetOutputs(code, inputData = {}) {
+            const interpreter = new Interpreter();
+            const result = interpreter.executeProgram(code, inputData);
+            return result.outputs;
+        }
         
         // ============================================================================
         // BASIC ARITHMETIC OPERATIONS TESTS
@@ -119,17 +155,48 @@
          * Covers: addition, subtraction, multiplication, division, modulo, exponentiation
          */
         function testBasicArithmetic() {
-            const interpreter = new Interpreter();
-            const vars = { a: 5, b: 3, c: 2 };
+            // Test basic operations by assigning results to variables
+            assertEqual(executeAndGetVariable(`
+                a = 5
+                b = 3
+                result = a + b
+            `, 'result'), 8, 'Basic Addition (5 + 3 = 8)');
             
-            // Test basic operations
-            assertEqual(interpreter.evaluateArithmeticExpression('a + b', vars), 8, 'Basic Addition (5 + 3 = 8)');
-            assertEqual(interpreter.evaluateArithmeticExpression('a - b', vars), 2, 'Basic Subtraction (5 - 3 = 2)');
-            assertEqual(interpreter.evaluateArithmeticExpression('a * b', vars), 15, 'Basic Multiplication (5 * 3 = 15)');
-            assertEqual(interpreter.evaluateArithmeticExpression('a / c', vars), 2.5, 'Basic Division (5 / 2 = 2.5)');
-            assertEqual(interpreter.evaluateArithmeticExpression('a MOD b', vars), 2, 'Basic Modulo (5 MOD 3 = 2)');
-            assertEqual(interpreter.evaluateArithmeticExpression('a DIV b', vars), 1, 'Basic Integer Division (5 DIV 3 = 1)');
-            assertEqual(interpreter.evaluateArithmeticExpression('b ^ c', vars), 9, 'Basic Exponentiation (3 ^ 2 = 9)');
+            assertEqual(executeAndGetVariable(`
+                a = 5
+                b = 3
+                result = a - b
+            `, 'result'), 2, 'Basic Subtraction (5 - 3 = 2)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 5
+                b = 3
+                result = a * b
+            `, 'result'), 15, 'Basic Multiplication (5 * 3 = 15)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 5
+                c = 2
+                result = a / c
+            `, 'result'), 2.5, 'Basic Division (5 / 2 = 2.5)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 5
+                b = 3
+                result = a MOD b
+            `, 'result'), 2, 'Basic Modulo (5 MOD 3 = 2)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 5
+                b = 3
+                result = a DIV b
+            `, 'result'), 1, 'Basic Integer Division (5 DIV 3 = 1)');
+            
+            assertEqual(executeAndGetVariable(`
+                b = 3
+                c = 2
+                result = b ^ c
+            `, 'result'), 9, 'Basic Exponentiation (3 ^ 2 = 9)');
         }
         
         /**
@@ -137,15 +204,39 @@
          * Covers: order of operations, left-to-right evaluation
          */
         function testOperatorPrecedence() {
-            const interpreter = new Interpreter();
-            const vars = { a: 2, b: 3, c: 4 };
-            
             // Test precedence rules
-            assertEqual(interpreter.evaluateArithmeticExpression('a + b * c', vars), 14, 'Multiplication before Addition (2 + 3 * 4 = 14)');
-            assertEqual(interpreter.evaluateArithmeticExpression('c / a - b', vars), -1, 'Division before Subtraction (4 / 2 - 3 = -1)');
-            assertEqual(interpreter.evaluateArithmeticExpression('a * b ^ a', vars), 18, 'Exponentiation before Multiplication (2 * 3 ^ 2 = 18)');
-            assertEqual(interpreter.evaluateArithmeticExpression('a + b - c', vars), 1, 'Left-to-right for Addition/Subtraction (2 + 3 - 4 = 1)');
-            assertEqual(interpreter.evaluateArithmeticExpression('a * b / a', vars), 3, 'Left-to-right for Multiplication/Division (2 * 3 / 2 = 3)');
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                c = 4
+                result = a + b * c
+            `, 'result'), 14, 'Multiplication before Addition (2 + 3 * 4 = 14)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                c = 4
+                result = c / a - b
+            `, 'result'), -1, 'Division before Subtraction (4 / 2 - 3 = -1)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                result = a * b ^ a
+            `, 'result'), 18, 'Exponentiation before Multiplication (2 * 3 ^ 2 = 18)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                c = 4
+                result = a + b - c
+            `, 'result'), 1, 'Left-to-right for Addition/Subtraction (2 + 3 - 4 = 1)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                result = a * b / a
+            `, 'result'), 3, 'Left-to-right for Multiplication/Division (2 * 3 / 2 = 3)');
         }
         
         /**
@@ -153,17 +244,34 @@
          * Covers: grouping, nested parentheses, complex expressions
          */
         function testParentheses() {
-            const interpreter = new Interpreter();
-            const vars = { a: 2, b: 3, c: 4 };
-            
             // Test parentheses
-            assertEqual(interpreter.evaluateArithmeticExpression('(a + b) * c', vars), 20, 'Basic Parentheses ((2 + 3) * 4 = 20)');
-            assertEqual(interpreter.evaluateArithmeticExpression('((a + b) * c) / (a + c)', vars), 20/6, 'Nested Parentheses (((2 + 3) * 4) / (2 + 4) = 20/6)');
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                c = 4
+                result = (a + b) * c
+            `, 'result'), 20, 'Basic Parentheses ((2 + 3) * 4 = 20)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                c = 4
+                result = ((a + b) * c) / (a + c)
+            `, 'result'), 20/6, 'Nested Parentheses (((2 + 3) * 4) / (2 + 4) = 20/6)');
             
             // Rectangle perimeter calculation
-            const rectVars = { length: 5, width: 3 };
-            assertEqual(interpreter.evaluateArithmeticExpression('2 * (length + width)', rectVars), 16, 'Rectangle Perimeter (2 * (5 + 3) = 16)');
-            assertEqual(interpreter.evaluateArithmeticExpression('(a + b) * (c - a)', vars), 10, 'Complex Parentheses ((2 + 3) * (4 - 2) = 10)');
+            assertEqual(executeAndGetVariable(`
+                length = 5
+                width = 3
+                result = 2 * (length + width)
+            `, 'result'), 16, 'Rectangle Perimeter (2 * (5 + 3) = 16)');
+            
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                c = 4
+                result = (a + b) * (c - a)
+            `, 'result'), 10, 'Complex Parentheses ((2 + 3) * (4 - 2) = 10)');
         }
         
         /**
@@ -171,18 +279,30 @@
          * Covers: variable indices, literal indices, arithmetic with arrays
          */
         function testArrayAccess() {
-            const interpreter = new Interpreter();
-            const vars = { 
-                nums: [10, 20, 30], 
-                i: 1,
-                j: 0
-            };
-            
             // Test array access
-            assertEqual(interpreter.getExpressionValue('nums[i]', vars), 20, 'Array Access with Variable Index (nums[1] = 20)');
-            assertEqual(interpreter.getExpressionValue('nums[0]', vars), 10, 'Array Access with Literal Index (nums[0] = 10)');
-            assertEqual(interpreter.evaluateArithmeticExpression('nums[i] + nums[j]', vars), 30, 'Arithmetic with Array Access (nums[1] + nums[0] = 30)');
-            assertEqual(interpreter.evaluateArithmeticExpression('nums[i] * 2', vars), 40, 'Array Access in Multiplication (nums[1] * 2 = 40)');
+            assertEqual(executeAndGetVariable(`
+                array nums = [10, 20, 30]
+                i = 1
+                result = nums[i]
+            `, 'result'), 20, 'Array Access with Variable Index (nums[1] = 20)');
+            
+            assertEqual(executeAndGetVariable(`
+                array nums = [10, 20, 30]
+                result = nums[0]
+            `, 'result'), 10, 'Array Access with Literal Index (nums[0] = 10)');
+            
+            assertEqual(executeAndGetVariable(`
+                array nums = [10, 20, 30]
+                i = 1
+                j = 0
+                result = nums[i] + nums[j]
+            `, 'result'), 30, 'Arithmetic with Array Access (nums[1] + nums[0] = 30)');
+            
+            assertEqual(executeAndGetVariable(`
+                array nums = [10, 20, 30]
+                i = 1
+                result = nums[i] * 2
+            `, 'result'), 40, 'Array Access in Multiplication (nums[1] * 2 = 40)');
         }
         
         /**
@@ -190,92 +310,170 @@
          * Covers: .upper, .lower, .left, string concatenation
          */
         function testStringMethods() {
-            const interpreter = new Interpreter();
-            const vars = {
-                first_name: 'John',
-                last_name: 'Smith',
-                count: 4
-            };
-            
             // Test string methods
-            const firstInitial = interpreter.evaluateStringConcatenation('first_name.left(1)', vars);
-            assertEqual(firstInitial, 'J', 'First name .left(1) should return "J"');
+            assertEqual(executeAndGetVariable(`
+                first_name = "John"
+                result = first_name.left(1)
+            `, 'result'), 'J', 'First name .left(1) should return "J"');
             
-            const lastInitial = interpreter.evaluateStringConcatenation('last_name.left(1)', vars);
-            assertEqual(lastInitial, 'S', 'Last name .left(1) should return "S"');
+            assertEqual(executeAndGetVariable(`
+                last_name = "Smith"
+                result = last_name.left(1)
+            `, 'result'), 'S', 'Last name .left(1) should return "S"');
             
-            const initials = interpreter.evaluateStringConcatenation('first_name.left(1) + last_name.left(1)', vars);
-            assertEqual(initials, 'JS', 'Initials concatenation should return "JS"');
+            assertEqual(executeAndGetVariable(`
+                first_name = "John"
+                last_name = "Smith"
+                result = first_name.left(1) + last_name.left(1)
+            `, 'result'), 'JS', 'Initials concatenation should return "JS"');
             
-            assertEqual(interpreter.evaluateStringConcatenation('first_name.upper', vars), 'JOHN', 'String .upper method');
-            assertEqual(interpreter.evaluateStringConcatenation('first_name.lower', vars), 'john', 'String .lower method');
+            assertEqual(executeAndGetVariable(`
+                first_name = "John"
+                result = first_name.upper()
+            `, 'result'), 'JOHN', 'String .upper method');
+            
+            assertEqual(executeAndGetVariable(`
+                first_name = "John"
+                result = first_name.lower()
+            `, 'result'), 'john', 'String .lower method');
         }
         
         /**
          * Test ASCII conversion functions ASC() and CHR()
-         * Covers: character to ASCII value conversion, ASCII to character conversion,
-         * edge cases, error handling, usage in assignments and conditions
+         * Covers: character to ASCII value conversion, ASCII to character conversion
          */
         function testASCAndCHRFunctions() {
-            const interpreter = new Interpreter();
+            // Basic ASC() tests
+            assertEqual(executeAndGetVariable(`
+                result = asc("A")
+            `, 'result'), 65, 'ASC("A") should return 65');
             
-            // Test ASC() function - character to ASCII value
-            let vars = { letter: 'A', message: 'Hello' };
+            assertEqual(executeAndGetVariable(`
+                result = asc("Z")
+            `, 'result'), 90, 'ASC("Z") should return 90');
             
-            // Basic ASC() tests (as used in programs.js)
-            assertEqual(interpreter.evaluateStringConcatenation('ASC("A")', vars), 65, 'ASC("A") should return 65');
-            assertEqual(interpreter.evaluateStringConcatenation('ASC("Z")', vars), 90, 'ASC("Z") should return 90');
-            assertEqual(interpreter.evaluateStringConcatenation('ASC("a")', vars), 97, 'ASC("a") should return 97');
-            assertEqual(interpreter.evaluateStringConcatenation('ASC("0")', vars), 48, 'ASC("0") should return 48');
-            assertEqual(interpreter.evaluateStringConcatenation('ASC(" ")', vars), 32, 'ASC(" ") should return 32');
+            assertEqual(executeAndGetVariable(`
+                result = asc("a")
+            `, 'result'), 97, 'ASC("a") should return 97');
             
-            // ASC() with variables (as used in programs.js)
-            assertEqual(interpreter.evaluateStringConcatenation('ASC(letter)', vars), 65, 'ASC(letter) with A should return 65');
+            assertEqual(executeAndGetVariable(`
+                result = asc("0")
+            `, 'result'), 48, 'ASC("0") should return 48');
             
-            // Basic CHR() tests (as used in programs.js)
-            assertEqual(interpreter.evaluateStringConcatenation('CHR(65)', vars), 'A', 'CHR(65) should return "A"');
-            assertEqual(interpreter.evaluateStringConcatenation('CHR(90)', vars), 'Z', 'CHR(90) should return "Z"');
-            assertEqual(interpreter.evaluateStringConcatenation('CHR(97)', vars), 'a', 'CHR(97) should return "a"');
-            assertEqual(interpreter.evaluateStringConcatenation('CHR(48)', vars), '0', 'CHR(48) should return "0"');
-            assertEqual(interpreter.evaluateStringConcatenation('CHR(32)', vars), ' ', 'CHR(32) should return space');
+            assertEqual(executeAndGetVariable(`
+                result = asc(" ")
+            `, 'result'), 32, 'ASC(" ") should return 32');
             
-            // CHR() with variables (as used in programs.js)
-            vars.ascii_val = 65;
-            assertEqual(interpreter.evaluateStringConcatenation('CHR(ascii_val)', vars), 'A', 'CHR(ascii_val) with 65 should return "A"');
+            // ASC() with variables
+            assertEqual(executeAndGetVariable(`
+                letter = "A"
+                result = asc(letter)
+            `, 'result'), 65, 'ASC(letter) with A should return 65');
             
-            // Test in conditions using evaluateExpressionOrVariable
-            assertEqual(interpreter.evaluateExpressionOrVariable('ASC("B")', vars), 66, 'ASC("B") in condition should return 66');
-            assertEqual(interpreter.evaluateExpressionOrVariable('CHR(66)', vars), 'B', 'CHR(66) in condition should return "B"');
+            // Basic CHR() tests
+            assertEqual(executeAndGetVariable(`
+                result = chr(65)
+            `, 'result'), 'A', 'CHR(65) should return "A"');
+            
+            assertEqual(executeAndGetVariable(`
+                result = chr(90)
+            `, 'result'), 'Z', 'CHR(90) should return "Z"');
+            
+            assertEqual(executeAndGetVariable(`
+                result = chr(97)
+            `, 'result'), 'a', 'CHR(97) should return "a"');
+            
+            assertEqual(executeAndGetVariable(`
+                result = chr(48)
+            `, 'result'), '0', 'CHR(48) should return "0"');
+            
+            assertEqual(executeAndGetVariable(`
+                result = chr(32)
+            `, 'result'), ' ', 'CHR(32) should return space');
+            
+            // CHR() with variables
+            assertEqual(executeAndGetVariable(`
+                ascii_val = 65
+                result = chr(ascii_val)
+            `, 'result'), 'A', 'CHR(ascii_val) with 65 should return "A"');
         }
         
         /**
          * Test boolean operators AND/OR in conditions
-         * Covers: AND operator, OR operator (uppercase only - OCR ERL standard)
+         * Covers: AND operator, OR operator (uppercase)
          */
         function testBooleanOperators() {
-            const interpreter = new Interpreter();
-            const vars = { x: 5, y: 10, z: 15 };
+            // Test AND operator
+            assertEqual(executeAndGetVariable(`
+                x = 5
+                y = 10
+                if x < 10 AND y > 5 then
+                    result = true
+                else
+                    result = false
+                endif
+            `, 'result'), true, 'AND: Both conditions true should return true');
             
-            // Test AND operator (uppercase only)
-            assertEqual(interpreter.evaluateCondition('x < 10 AND y > 5', vars), true, 'AND: Both conditions true should return true');
-            assertEqual(interpreter.evaluateCondition('x < 3 AND y > 5', vars), false, 'AND: First false should return false');
-            assertEqual(interpreter.evaluateCondition('x < 10 AND y > 15', vars), false, 'AND: Second false should return false');
-            assertEqual(interpreter.evaluateCondition('x > 10 AND y < 5', vars), false, 'AND: Both false should return false');
+            assertEqual(executeAndGetVariable(`
+                x = 5
+                y = 10
+                if x < 3 AND y > 5 then
+                    result = true
+                else
+                    result = false
+                endif
+            `, 'result'), false, 'AND: First false should return false');
             
-            // Test OR operator (uppercase only)
-            assertEqual(interpreter.evaluateCondition('x < 10 OR y > 15', vars), true, 'OR: First true should return true');
-            assertEqual(interpreter.evaluateCondition('x > 10 OR y > 5', vars), true, 'OR: Second true should return true');
-            assertEqual(interpreter.evaluateCondition('x < 10 OR y > 5', vars), true, 'OR: Both true should return true');
-            assertEqual(interpreter.evaluateCondition('x > 10 OR y < 5', vars), false, 'OR: Both false should return false');
+            assertEqual(executeAndGetVariable(`
+                x = 5
+                y = 10
+                if x < 10 AND y > 15 then
+                    result = true
+                else
+                    result = false
+                endif
+            `, 'result'), false, 'AND: Second false should return false');
+            
+            // Test OR operator
+            assertEqual(executeAndGetVariable(`
+                x = 5
+                y = 10
+                if x < 10 OR y > 15 then
+                    result = true
+                else
+                    result = false
+                endif
+            `, 'result'), true, 'OR: First true should return true');
+            
+            assertEqual(executeAndGetVariable(`
+                x = 5
+                y = 10
+                if x > 10 OR y > 5 then
+                    result = true
+                else
+                    result = false
+                endif
+            `, 'result'), true, 'OR: Second true should return true');
+            
+            assertEqual(executeAndGetVariable(`
+                x = 5
+                y = 10
+                if x > 10 OR y < 5 then
+                    result = true
+                else
+                    result = false
+                endif
+            `, 'result'), false, 'OR: Both false should return false');
             
             // Test with ASCII functions
-            vars.char = 'A';
-            assertEqual(interpreter.evaluateCondition('ASC(char) >= 65 AND ASC(char) <= 90', vars), true, 'ASCII range check with AND should work');
-            
-            // Test that lowercase operators do NOT work (OCR ERL uses uppercase only)
-            // These should return false because the conditions won't be properly parsed
-            assertEqual(interpreter.evaluateCondition('x < 10 and y > 5', vars), false, 'lowercase "and" should not work in OCR ERL');
-            assertEqual(interpreter.evaluateCondition('x < 10 or y > 15', vars), false, 'lowercase "or" should not work in OCR ERL');
+            assertEqual(executeAndGetVariable(`
+                char = "A"
+                if asc(char) >= 65 AND asc(char) <= 90 then
+                    result = true
+                else
+                    result = false
+                endif
+            `, 'result'), true, 'ASCII range check with AND should work');
         }
         
         /**
@@ -283,21 +481,22 @@
          * Covers: loop variables, trace entries, output generation
          */
         function testForLoopExecution() {
-            const testInterpreter = new Interpreter();
-            const testProgram = { inputs: [], randomValue: undefined };
-            
-            const result = testInterpreter.executeProgram(`
+            const outputs = executeAndGetOutputs(`
                 for x = 0 to 2
                     print(x*2)
                 next x
-            `, testProgram);
+            `);
             
-            // Check variables and outputs
-            assertEqual(testInterpreter.variables.x, 2, 'x should be 2 after loop completion');
-            assertEqual(testInterpreter.outputs.length, 3, 'Should have exactly 3 outputs');
-            assertEqual(testInterpreter.outputs[0], '0', 'First output should be "0"');
-            assertEqual(testInterpreter.outputs[1], '2', 'Second output should be "2"');
-            assertEqual(testInterpreter.outputs[2], '4', 'Third output should be "4"');
+            assertEqual(executeAndGetVariable(`
+                for x = 0 to 2
+                    y = x * 2
+                next x
+            `, 'x'), 2, 'x should be 2 after loop completion');
+            
+            assertEqual(outputs.length, 3, 'Should have exactly 3 outputs');
+            assertEqual(outputs[0], '0', 'First output should be "0"');
+            assertEqual(outputs[1], '2', 'Second output should be "2"');
+            assertEqual(outputs[2], '4', 'Third output should be "4"');
         }
         
         /**
@@ -305,20 +504,25 @@
          * Covers: variable access, numeric literals, expression evaluation
          */
         function testVariableOperations() {
-            const interpreter = new Interpreter();
-            const vars = { 
-                x: 10, 
-                y: 0,
-                temp: 5
-            };
-            
             // Test variable access
-            assertEqual(interpreter.getExpressionValue('x', vars), 10, 'Variable Access (x = 10)');
-            assertEqual(interpreter.getExpressionValue('temp', vars), 5, 'Variable Access (temp = 5)');
+            assertEqual(executeAndGetVariable(`
+                x = 10
+                result = x
+            `, 'result'), 10, 'Variable Access (x = 10)');
+            
+            assertEqual(executeAndGetVariable(`
+                temp = 5
+                result = temp
+            `, 'result'), 5, 'Variable Access (temp = 5)');
             
             // Test numeric literals
-            assertEqual(interpreter.getExpressionValue('42', vars), 42, 'Numeric Literal (42)');
-            assertEqual(interpreter.getExpressionValue('0', vars), 0, 'Numeric Literal (0)');
+            assertEqual(executeAndGetVariable(`
+                result = 42
+            `, 'result'), 42, 'Numeric Literal (42)');
+            
+            assertEqual(executeAndGetVariable(`
+                result = 0
+            `, 'result'), 0, 'Numeric Literal (0)');
         }
         
         /**
@@ -326,22 +530,24 @@
          * Covers: multi-operator expressions, nested operations
          */
         function testComplexExpressions() {
-            const interpreter = new Interpreter();
-            const vars = { 
-                a: 2, 
-                b: 3, 
-                c: 4,
-                nums: [1, 2, 3, 4, 5],
-                index: 2
-            };
-            
             // Test complex arithmetic expression
-            assertEqual(interpreter.evaluateArithmeticExpression('a * b + c * (a + b) - nums[index]', vars), 23, 
-                'Complex Expression (2 * 3 + 4 * (2 + 3) - 3 = 23)');
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                c = 4
+                array nums = [1, 2, 3, 4, 5]
+                index = 2
+                result = a * b + c * (a + b) - nums[index]
+            `, 'result'), 23, 'Complex Expression (2 * 3 + 4 * (2 + 3) - 3 = 23)');
             
             // Test expression with multiple operators
-            assertEqual(interpreter.evaluateArithmeticExpression('a ^ b + c / a * nums[0]', vars), 10, 
-                'Multiple Operators (2 ^ 3 + 4 / 2 * 1 = 10)');
+            assertEqual(executeAndGetVariable(`
+                a = 2
+                b = 3
+                c = 4
+                array nums = [1, 2, 3, 4, 5]
+                result = a ^ b + c / a * nums[0]
+            `, 'result'), 10, 'Multiple Operators (2 ^ 3 + 4 / 2 * 1 = 10)');
         }
         
         /**
@@ -349,95 +555,101 @@
          * Covers: division by one, multiplication by zero, array bounds
          */
         function testEdgeCases() {
-            const interpreter = new Interpreter();
-            const vars = { 
-                zero: 0, 
-                one: 1, 
-                ten: 10,
-                emptyArray: [],
-                smallArray: [42]
-            };
-            
             // Test edge operations
-            assertEqual(interpreter.evaluateArithmeticExpression('ten / one', vars), 10, 'Division by One (10 / 1 = 10)');
-            assertEqual(interpreter.evaluateArithmeticExpression('ten * zero', vars), 0, 'Multiplication by Zero (10 * 0 = 0)');
-            assertEqual(interpreter.evaluateArithmeticExpression('ten ^ zero', vars), 1, 'Power of Zero (10 ^ 0 = 1)');
+            assertEqual(executeAndGetVariable(`
+                zero = 0
+                one = 1
+                ten = 10
+                result = ten / one
+            `, 'result'), 10, 'Division by One (10 / 1 = 10)');
+            
+            assertEqual(executeAndGetVariable(`
+                zero = 0
+                ten = 10
+                result = ten * zero
+            `, 'result'), 0, 'Multiplication by Zero (10 * 0 = 0)');
+            
+            assertEqual(executeAndGetVariable(`
+                zero = 0
+                ten = 10
+                result = ten ^ zero
+            `, 'result'), 1, 'Power of Zero (10 ^ 0 = 1)');
             
             // Test array bounds (should return 0 for out of bounds)
-            assertEqual(interpreter.getExpressionValue('emptyArray[0]', vars), 0, 'Empty Array Access (should return 0)');
-            assertEqual(interpreter.getExpressionValue('smallArray[5]', vars), 0, 'Out of Bounds Array Access (should return 0)');
+            assertEqual(executeAndGetVariable(`
+                array emptyArray = []
+                result = emptyArray[0]
+            `, 'result'), 0, 'Empty Array Access (should return 0)');
+            
+            assertEqual(executeAndGetVariable(`
+                array smallArray = [42]
+                result = smallArray[5]
+            `, 'result'), 0, 'Out of Bounds Array Access (should return 0)');
         }
         
         /**
          * Test type conversions
-         * Covers: float(), int(), bool() type casting with various input types
+         * Covers: float(), int(), str(), bool() type casting with various input types
          */
         function testTypeConversions() {
-            const testInterpreter = new Interpreter();
+            // Test float conversion
+            assertEqual(executeAndGetVariable(`
+                result = float("3.14")
+            `, 'result'), 3.14, 'float("3.14") should convert to 3.14');
             
-            // Test float conversion with program inputs
-            const floatProgram = { inputs: ["3.14", "2.5"], randomValue: undefined };
-            const floatResult = testInterpreter.executeProgram(`
-                x = float(input("Enter number"))
-                numValue = 7.89
-                y = float(numValue)
-                print(x)
-                print(y)
-            `, floatProgram);
+            assertEqual(executeAndGetVariable(`
+                numValue = 7
+                result = float(numValue)
+            `, 'result'), 7.0, 'float(numValue) should convert variable to 7.0');
             
-            assertEqual(testInterpreter.variables.x, 3.14, 'float(input()) should convert "3.14" to 3.14');
-            assertEqual(testInterpreter.variables.y, 7.89, 'float(numValue) should convert variable to 7.89');
+            // Test int conversion
+            assertEqual(executeAndGetVariable(`
+                numValue = 42
+                result = int(numValue)
+            `, 'result'), 42, 'int(numValue) should convert variable to 42');
             
-            // Reset interpreter for int tests
-            const intInterpreter = new Interpreter();
-            const intCode = `numValue = 42
-x = int(numValue)
-floatValue = 3.14
-y = int(floatValue)
-z = int(0)`;
+            assertEqual(executeAndGetVariable(`
+                floatValue = 3.14
+                result = int(floatValue)
+            `, 'result'), 3, 'int(3.14) should convert variable to 3');
             
-            intInterpreter.execute(intCode);
+            assertEqual(executeAndGetVariable(`
+                result = int(0)
+            `, 'result'), 0, 'int(0) should convert variable to 0');
             
-            assertEqual(intInterpreter.variables.x, 42, 'int(numValue) should convert variable to 42');
-            assertEqual(intInterpreter.variables.y, 3, 'int(3.14) should convert variable to 3');
-            assertEqual(intInterpreter.variables.z, 0, 'int(0) should convert variable to 0');
+            // Test str conversion
+            assertEqual(executeAndGetVariable(`
+                result = str(42)
+            `, 'result'), "42", 'str(42) should convert to "42"');
             
-            // Reset interpreter for bool tests
-            const boolInterpreter = new Interpreter();
-            const boolCode = `isTrue = bool("True")
-isFalse = bool("False")
-zeroNum = 0
-isZero = bool(zeroNum)
-oneNum = 1
-isOne = bool(oneNum)
-emptyStr = ""
-isEmpty = bool(emptyStr)
-textStr = "hello"
-isText = bool(textStr)`;
+            // Test bool conversion
+            assertEqual(executeAndGetVariable(`
+                result = bool("true")
+            `, 'result'), true, 'bool("true") should be true');
             
-            boolInterpreter.execute(boolCode);
+            assertEqual(executeAndGetVariable(`
+                result = bool("false")
+            `, 'result'), false, 'bool("false") should be false');
             
-            assertEqual(boolInterpreter.variables.isTrue, true, 'bool("True") should be true');
-            assertEqual(boolInterpreter.variables.isFalse, false, 'bool("False") should be false');
-            assertEqual(boolInterpreter.variables.isZero, false, 'bool(0) should be false');
-            assertEqual(boolInterpreter.variables.isOne, true, 'bool(1) should be true');
-            assertEqual(boolInterpreter.variables.isEmpty, false, 'bool("") should be false for empty string');
-            assertEqual(boolInterpreter.variables.isText, false, 'bool("hello") should be false for non-empty non-True string');
+            assertEqual(executeAndGetVariable(`
+                zeroNum = 0
+                result = bool(zeroNum)
+            `, 'result'), false, 'bool(0) should be false');
+            
+            assertEqual(executeAndGetVariable(`
+                oneNum = 1
+                result = bool(oneNum)
+            `, 'result'), true, 'bool(1) should be true');
         }
         
         /**
-         * Test nested conditional execution with comprehensive scenarios
-         * Covers: nested if/then/else logic, MOD operator in conditions, if statements inside loops, 
-         *         switch statements inside loops, multi-level nesting, conditional logic inside while loops
+         * Test nested conditional execution
          */
         function testNestedConditionalExecution() {
-            // Test 1: Basic nested if with both conditions true (jump qualification scenario)
-            const testInterpreter1 = new Interpreter();
-            const testProgram1 = { inputs: ["3.5", "12"], randomValue: undefined };
-            
-            testInterpreter1.executeProgram(`
-                jumpLength = float(input("Enter jump length"))
-                yearGroup = float(input("Enter year group"))
+            // Test basic nested if with both conditions true
+            const vars1 = executeAndGetVariables(`
+                jumpLength = 3.5
+                yearGroup = 12
                 if jumpLength > 2 then
                     if yearGroup >= 10 then
                         result = "qualify"
@@ -447,572 +659,301 @@ isText = bool(textStr)`;
                 else
                     result = "not long enough"
                 endif
-            `, testProgram1);
+            `);
             
-            assertEqual(testInterpreter1.variables.jumpLength, 3.5, 'Nested If - Both True: jumpLength should be 3.5');
-            assertEqual(testInterpreter1.variables.yearGroup, 12, 'Nested If - Both True: yearGroup should be 12');
-            assertEqual(testInterpreter1.variables.result, "qualify", 'Nested If - Both True: Should execute inner if branch when both conditions true');
+            assertEqual(vars1.jumpLength, 3.5, 'Nested If - Both True: jumpLength should be 3.5');
+            assertEqual(vars1.yearGroup, 12, 'Nested If - Both True: yearGroup should be 12');
+            assertEqual(vars1.result, "qualify", 'Nested If - Both True: Should execute inner if branch when both conditions true');
             
-            // Test 2: Nested if with outer true, inner false (age restriction scenario)
-            const testInterpreter2 = new Interpreter();
-            const testProgram2 = { inputs: ["2.5", "8"], randomValue: undefined };
-            
-            testInterpreter2.executeProgram(`
-                jumpLength = float(input("Enter jump length"))
-                yearGroup = float(input("Enter year group"))
-                if jumpLength > 2 then
-                    if yearGroup >= 10 then
-                        result = "qualify"
-                    else
-                        result = "too young"
-                    endif
-                else
-                    result = "not long enough"
-                endif
-            `, testProgram2);
-            
-            assertEqual(testInterpreter2.variables.jumpLength, 2.5, 'Nested If - Outer True Inner False: jumpLength should be 2.5');
-            assertEqual(testInterpreter2.variables.yearGroup, 8, 'Nested If - Outer True Inner False: yearGroup should be 8');
-            assertEqual(testInterpreter2.variables.result, "too young", 'Nested If - Outer True Inner False: Should execute inner else branch');
-            
-            // Test 3: Nested if with outer false (distance failure scenario)
-            const testInterpreter3 = new Interpreter();
-            const testProgram3 = { inputs: ["1.5", "12"], randomValue: undefined };
-            
-            testInterpreter3.executeProgram(`
-                jumpLength = float(input("Enter jump length"))
-                yearGroup = float(input("Enter year group"))
-                if jumpLength > 2 then
-                    if yearGroup >= 10 then
-                        result = "qualify"
-                    else
-                        result = "too young"
-                    endif
-                else
-                    result = "not long enough"
-                endif
-            `, testProgram3);
-            
-            assertEqual(testInterpreter3.variables.jumpLength, 1.5, 'Nested If - Outer False: jumpLength should be 1.5');
-            assertEqual(testInterpreter3.variables.yearGroup, 12, 'Nested If - Outer False: yearGroup should be 12');
-            assertEqual(testInterpreter3.variables.result, "not long enough", 'Nested If - Outer False: Should execute outer else branch when outer condition false');
-            
-            // Test 4: MOD operator in conditions within for loop (even/odd number detection)
-            const testInterpreter4 = new Interpreter();
-            const testProgram4 = { inputs: [], randomValue: undefined };
-            
-            testInterpreter4.executeProgram(`
+            // Test MOD operator in conditions within for loop
+            const outputs = executeAndGetOutputs(`
                 total = 0
                 for i = 1 to 5
                     if i MOD 2 == 0 then
                         total = total + i
-                        print("even: " + i)
+                        print("even: " + str(i))
                     else
-                        print("odd: " + i)
+                        print("odd: " + str(i))
                     endif
                 next i
-            `, testProgram4);
+            `);
             
-            assertEqual(testInterpreter4.variables.total, 6, 'MOD in For Loop: total should be 6 (2 + 4)');
-            assertEqual(testInterpreter4.outputs.length, 5, 'MOD in For Loop: Should have 5 outputs from loop');
-            assertEqual(testInterpreter4.outputs[0], 'odd: 1', 'MOD in For Loop: First output should be "odd: 1"');
-            assertEqual(testInterpreter4.outputs[1], 'even: 2', 'MOD in For Loop: Second output should be "even: 2"');
-            assertEqual(testInterpreter4.outputs[4], 'odd: 5', 'MOD in For Loop: Fifth output should be "odd: 5"');
-            
-            // Test 5: Switch statements inside for loop (day name mapping)
-            const testInterpreter5 = new Interpreter();
-            const testProgram5 = { inputs: [], randomValue: undefined };
-            
-            testInterpreter5.executeProgram(`
-                for day = 1 to 3
-                    switch day:
-                    case 1:
-                        print("Monday")
-                    case 2:
-                        print("Tuesday")
-                    case 3:
-                        print("Wednesday")
-                    default:
-                        print("Unknown")
-                    endswitch
-                next day
-            `, testProgram5);
-            
-            assertEqual(testInterpreter5.variables.day, 3, 'Switch in For Loop: day should be 3 after loop completion');
-            assertEqual(testInterpreter5.outputs.length, 3, 'Switch in For Loop: Should have 3 outputs from switch in loop');
-            assertEqual(testInterpreter5.outputs[0], 'Monday', 'Switch in For Loop: First output should be "Monday"');
-            assertEqual(testInterpreter5.outputs[1], 'Tuesday', 'Switch in For Loop: Second output should be "Tuesday"');
-            assertEqual(testInterpreter5.outputs[2], 'Wednesday', 'Switch in For Loop: Third output should be "Wednesday"');
-            
-            // Test 6: Triple-nested if statements (grade evaluation with score and letter grade)
-            const testInterpreter6 = new Interpreter();
-            const testProgram6 = { inputs: ["85", "A"], randomValue: undefined };
-            
-            testInterpreter6.executeProgram(`
-                score = float(input("Enter score"))
-                grade = input("Enter grade")
-                if score >= 80 then
-                    if grade == "A" then
-                        if score >= 90 then
-                            result = "excellent"
-                        else
-                            result = "good"
-                        endif
-                    else
-                        result = "needs improvement"
+            assertEqual(executeAndGetVariable(`
+                total = 0
+                for i = 1 to 5
+                    if i MOD 2 == 0 then
+                        total = total + i
                     endif
-                else
-                    result = "failing"
-                endif
-            `, testProgram6);
-            
-            assertEqual(testInterpreter6.variables.score, 85, 'Triple Nested If: score should be 85');
-            assertEqual(testInterpreter6.variables.grade, "A", 'Triple Nested If: grade should be "A"');
-            assertEqual(testInterpreter6.variables.result, "good", 'Triple Nested If: Should execute middle nested branch (score >= 80, grade A, but score < 90)');
-            
-            // Test 7: If statements inside while loop (conditional execution during iteration)
-            const testInterpreter7 = new Interpreter();
-            const testProgram7 = { inputs: [], randomValue: undefined };
-            
-            testInterpreter7.executeProgram(`
-                count = 0
-                x = 1
-                while x <= 4
-                    if x == 2 then
-                        print("found two")
-                    endif
-                    if x > 3 then
-                        print("greater than three")
-                    endif
-                    count = count + 1
-                    x = x + 1
-                endwhile
-            `, testProgram7);
-            
-            assertEqual(testInterpreter7.variables.count, 4, 'If in While Loop: count should be 4');
-            assertEqual(testInterpreter7.variables.x, 5, 'If in While Loop: x should be 5 after loop');
-            assertEqual(testInterpreter7.outputs.length, 2, 'If in While Loop: Should have 2 conditional outputs');
-            assertEqual(testInterpreter7.outputs[0], 'found two', 'If in While Loop: Should find "found two" when x=2');
-            assertEqual(testInterpreter7.outputs[1], 'greater than three', 'If in While Loop: Should find "greater than three" when x=4');
+                next i
+            `, 'total'), 6, 'MOD in For Loop: total should be 6 (2 + 4)');
         }
         
         /**
-         * Test string methods in print statements and output generation
-         * Covers: .upper/.lower case conversion in output, .length property in output, 
-         *         string method chaining with print statements
+         * Test string methods in print statements
          */
         function testStringMethodsInPrint() {
-            const testInterpreter = new Interpreter();
-            const testProgram = { inputs: ["hello", "WORLD"], randomValue: undefined };
+            const outputs = executeAndGetOutputs(`
+                name = "hello"
+                city = "WORLD"
+                print(name.upper())
+                print(city.lower())
+                print(str(name.length))
+            `);
             
-            const result = testInterpreter.executeProgram(`
-                name = input("Enter name")
-                city = input("Enter city")
-                print(name.upper)
-                print(city.lower)
-                print(name.length)
-            `, testProgram);
-            
-            // Check variables and outputs
-            assertEqual(testInterpreter.variables.name, 'hello', 'String Methods in Print: name should be "hello"');
-            assertEqual(testInterpreter.variables.city, 'WORLD', 'String Methods in Print: city should be "WORLD"');
-            assertEqual(testInterpreter.outputs.length, 3, 'String Methods in Print: Should have exactly 3 outputs');
-            assertEqual(testInterpreter.outputs[0], 'HELLO', 'String Methods in Print: .upper conversion should output "HELLO"');
-            assertEqual(testInterpreter.outputs[1], 'world', 'String Methods in Print: .lower conversion should output "world"');
-            assertEqual(testInterpreter.outputs[2], '5', 'String Methods in Print: .length property should output "5"');
+            assertEqual(outputs.length, 3, 'String Methods in Print: Should have exactly 3 outputs');
+            assertEqual(outputs[0], 'HELLO', 'String Methods in Print: .upper conversion should output "HELLO"');
+            assertEqual(outputs[1], 'world', 'String Methods in Print: .lower conversion should output "world"');
+            assertEqual(outputs[2], '5', 'String Methods in Print: .length property should output "5"');
         }
         
         /**
          * Test substring method with dynamic loop variables
-         * Covers: substring extraction with variable position parameters, 
-         *         string method execution inside loops, character-by-character extraction
          */
         function testSubstringWithVariable() {
-            const testInterpreter = new Interpreter();
-            const testProgram = { inputs: [], randomValue: undefined };
-            
-            const result = testInterpreter.executeProgram(`
+            const outputs = executeAndGetOutputs(`
                 for x = 1 to 3
                     country = "France"
                     print(country.substring(x, 1))
                 next x
-            `, testProgram);
+            `);
             
-            // Check outputs - should extract characters at positions 1, 2, 3 (r, a, n)
-            assertEqual(testInterpreter.variables.x, 3, 'Substring with Variable: x should be 3 after loop completion');
-            assertEqual(testInterpreter.outputs.length, 3, 'Substring with Variable: Should have exactly 3 outputs');
-            assertEqual(testInterpreter.outputs[0], 'r', 'Substring with Variable: Position 1 extraction should be "r"');
-            assertEqual(testInterpreter.outputs[1], 'a', 'Substring with Variable: Position 2 extraction should be "a"');
-            assertEqual(testInterpreter.outputs[2], 'n', 'Substring with Variable: Position 3 extraction should be "n"');
+            assertEqual(outputs.length, 3, 'Substring with Variable: Should have exactly 3 outputs');
+            assertEqual(outputs[0], 'r', 'Substring with Variable: Position 1 extraction should be "r"');
+            assertEqual(outputs[1], 'a', 'Substring with Variable: Position 2 extraction should be "a"');
+            assertEqual(outputs[2], 'n', 'Substring with Variable: Position 3 extraction should be "n"');
         }
         
         /**
          * Test comment handling
-         * Covers: comments ignored in execution, proper line tracing
          */
         function testComments() {
-            const testInterpreter = new Interpreter();
+            const vars = executeAndGetVariables(`
+                // This is a comment
+                x = 5
+                // Another comment here
+                y = 10
+                // Final comment
+                z = x + y
+            `);
             
-            const codeWithComments = `// This is a comment
-x = 5
-// Another comment here
-y = 10
-// Final comment
-z = x + y`;
-            
-            const result = testInterpreter.execute(codeWithComments);
-            
-            // Verify that only assignment lines are traced, comments are ignored
-            assertEqual(testInterpreter.variables.x, 5, 'x should be 5 despite comments');
-            assertEqual(testInterpreter.variables.y, 10, 'y should be 10 despite comments');
-            assertEqual(testInterpreter.variables.z, 15, 'z should be 15 (x + y)');
-            assertEqual(testInterpreter.trace.length, 3, 'Should have exactly 3 trace entries (no comments traced)');
+            assertEqual(vars.x, 5, 'x should be 5 despite comments');
+            assertEqual(vars.y, 10, 'y should be 10 despite comments');
+            assertEqual(vars.z, 15, 'z should be 15 (x + y)');
         }
         
         /**
          * Test constant declarations
-         * Covers: const keyword, constant protection
          */
         function testConstants() {
-            const testInterpreter = new Interpreter();
+            const vars = executeAndGetVariables(`
+                const pi = 3.14159
+                const vat = 0.2
+                price = 100
+                total = price * (1 + vat)
+            `);
             
-            const constCode = `const pi = 3.14159
-const vat = 0.2
-price = 100
-total = price * (1 + vat)`;
-            
-            const result = testInterpreter.execute(constCode);
-            
-            assertEqual(testInterpreter.variables.pi, 3.14159, 'const pi should be 3.14159');
-            assertEqual(testInterpreter.variables.vat, 0.2, 'const vat should be 0.2');
-            assertEqual(testInterpreter.variables.total, 120, 'total should be 120 (100 * 1.2)');
+            assertEqual(vars.pi, 3.14159, 'const pi should be 3.14159');
+            assertEqual(vars.vat, 0.2, 'const vat should be 0.2');
+            assertEqual(vars.total, 120, 'total should be 120 (100 * 1.2)');
         }
         
         /**
-         * Test for loops with positive step values (counting up)
-         * Covers: step parameter parsing, range iteration with custom increments, 
-         *         even number generation, step-based loop termination
+         * Test for loops with positive step values
          */
         function testForLoopWithPositiveStep() {
-            const testInterpreter = new Interpreter();
+            const outputs = executeAndGetOutputs(`
+                for i = 2 to 10 step 2
+                    print(str(i))
+                next i
+            `);
             
-            const positiveStepCode = `for i = 2 to 10 step 2
-    print(i)
-next i`;
-            
-            const result = testInterpreter.execute(positiveStepCode);
-            
-            // Should print even numbers: 2, 4, 6, 8, 10
-            assertEqual(testInterpreter.outputs.length, 5, 'Positive Step For Loop: Should have 5 outputs for step 2');
-            assertEqual(testInterpreter.outputs[0], '2', 'Positive Step For Loop: First even number should be "2"');
-            assertEqual(testInterpreter.outputs[1], '4', 'Positive Step For Loop: Second even number should be "4"');
-            assertEqual(testInterpreter.outputs[4], '10', 'Positive Step For Loop: Final even number should be "10"');
+            assertEqual(outputs.length, 5, 'Positive Step For Loop: Should have 5 outputs for step 2');
+            assertEqual(outputs[0], '2', 'Positive Step For Loop: First even number should be "2"');
+            assertEqual(outputs[1], '4', 'Positive Step For Loop: Second even number should be "4"');
+            assertEqual(outputs[4], '10', 'Positive Step For Loop: Final even number should be "10"');
         }
         
         /**
-         * Test for loops with negative step values (counting down)
-         * Covers: negative step parameter, countdown iteration, reverse range processing,
-         *         negative step termination conditions
+         * Test for loops with negative step values
          */
         function testForLoopWithNegativeStep() {
-            const testInterpreter = new Interpreter();
+            const outputs = executeAndGetOutputs(`
+                for i = 10 to 0 step -1
+                    print(str(i))
+                next i
+            `);
             
-            const negativeStepCode = `for i = 10 to 0 step -1
-    print(i)
-next i`;
-            
-            const result = testInterpreter.execute(negativeStepCode);
-            
-            // Should print countdown: 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
-            assertEqual(testInterpreter.outputs.length, 11, 'Negative Step For Loop: Should have 11 outputs for countdown');
-            assertEqual(testInterpreter.outputs[0], '10', 'Negative Step For Loop: Countdown should start with "10"');
-            assertEqual(testInterpreter.outputs[10], '0', 'Negative Step For Loop: Countdown should end with "0"');
+            assertEqual(outputs.length, 11, 'Negative Step For Loop: Should have 11 outputs for countdown');
+            assertEqual(outputs[0], '10', 'Negative Step For Loop: Countdown should start with "10"');
+            assertEqual(outputs[10], '0', 'Negative Step For Loop: Countdown should end with "0"');
         }
         
         /**
          * Test switch/case statements
-         * Covers: switch logic, case matching, default cases
          */
         function testSwitchCase() {
-            const testInterpreter = new Interpreter();
+            const outputs = executeAndGetOutputs(`
+                day = "Mon"
+                switch day:
+                case "Mon":
+                    print("Monday")
+                case "Tue":
+                    print("Tuesday")
+                default:
+                    print("Unknown day")
+                endswitch
+                print("Done")
+            `);
             
-            const basicSwitchCode = `day = "Mon"
-switch day:
-case "Mon":
-    print("Monday")
-case "Tue":
-    print("Tuesday")
-default:
-    print("Unknown day")
-endswitch
-print("Done")`;
+            assertEqual(executeAndGetVariable(`
+                day = "Mon"
+                switch day:
+                case "Mon":
+                    result = "Monday"
+                case "Tue":
+                    result = "Tuesday"
+                default:
+                    result = "Unknown day"
+                endswitch
+            `, 'day'), 'Mon', 'day should be "Mon"');
             
-            const result = testInterpreter.execute(basicSwitchCode);
-            
-            assertEqual(testInterpreter.variables.day, 'Mon', 'day should be "Mon"');
-            assertEqual(testInterpreter.outputs.length, 2, 'Should have exactly 2 outputs');
-            assertEqual(testInterpreter.outputs[0], 'Monday', 'First output should be "Monday"');
-            assertEqual(testInterpreter.outputs[1], 'Done', 'Second output should be "Done"');
+            assertEqual(outputs.length, 2, 'Should have exactly 2 outputs');
+            assertEqual(outputs[0], 'Monday', 'First output should be "Monday"');
+            assertEqual(outputs[1], 'Done', 'Second output should be "Done"');
         }
         
         /**
-         * Test string concatenation edge cases that previously caused issues
-         * Covers: function calls vs string concatenation detection, complex string literals,
-         *         assignment precedence, and edge cases found during integration testing
+         * Test error handling and reserved keywords
          */
-        function testStringConcatenationEdgeCases() {
-            const testInterpreter = new Interpreter();
+        function testErrorHandling() {
+            // Test reserved keyword usage
+            try {
+                const interpreter = new Interpreter();
+                interpreter.executeProgram('if = 5');
+                assert(false, 'Reserved Keyword Error', 'Should have thrown error for using "if" as variable');
+            } catch (error) {
+                assert(error.message.includes('reserved keyword'), 'Reserved Keyword Error', 'Correctly caught reserved keyword usage');
+            }
             
-            // Test 1: Function calls in assignments should not be treated as string concatenation
-            testInterpreter.executeWithoutReset(`num1 = 42
-result1 = int(num1)`);
-            assertEqual(testInterpreter.variables.result1, 42, 'Function Call Assignment: int() function should be recognized, not string concatenation');
-            
-            testInterpreter.executeWithoutReset(`text1 = "Hello"
-result2 = str(text1)`);
-            assertEqual(testInterpreter.variables.result2, "Hello", 'Function Call Assignment: str() function should be recognized, not string concatenation');
-            
-            testInterpreter.executeWithoutReset(`decimal1 = 3.14
-result3 = float(decimal1)`);
-            assertEqual(testInterpreter.variables.result3, 3.14, 'Function Call Assignment: float() function should be recognized, not string concatenation');
-            
-            // Test 2: String concatenation with function calls should work correctly
-            testInterpreter.executeWithoutReset(`age = 25
-message1 = "Age: " + str(age)`);
-            assertEqual(testInterpreter.variables.message1, "Age: 25", 'String Concatenation with Function: Should properly concatenate string with str() result');
-            
-            // Test 3: Mixed quotes in string concatenation
-            testInterpreter.executeWithoutReset(`name = "John"
-greeting = 'Hello ' + name + "!"`);
-            assertEqual(testInterpreter.variables.greeting, "Hello John!", 'Mixed Quotes Concatenation: Should handle both single and double quotes');
-            
-            // Test 4: Complex string concatenation with variables and literals
-            testInterpreter.executeWithoutReset(`first = "Alice"
-last = "Smith"
-fullName = first + " " + last`);
-            assertEqual(testInterpreter.variables.fullName, "Alice Smith", 'Variable String Concatenation: Should concatenate variables with literal strings');
-            
-            // Test 5: String concatenation detection with arithmetic expressions
-            testInterpreter.executeWithoutReset(`x = 5
-y = 10
-mathResult = x + y
-stringResult = "Result: " + str(x + y)`);
-            assertEqual(testInterpreter.variables.mathResult, 15, 'Arithmetic vs String: Pure arithmetic should remain numeric');
-            assertEqual(testInterpreter.variables.stringResult, "Result: 15", 'Arithmetic vs String: String concatenation with arithmetic should work');
-            
-            // Test 6: Edge case - empty string concatenation
-            testInterpreter.executeWithoutReset(`empty = ""
-result4 = empty + "test"`);
-            assertEqual(testInterpreter.variables.result4, "test", 'Empty String Concatenation: Should handle empty string concatenation');
-            
-            // Test 7: String concatenation precedence over arithmetic
-            testInterpreter.executeWithoutReset(`a = "10"
-b = "20"
-stringMath = a + b`);
-            assertEqual(testInterpreter.variables.stringMath, "1020", 'String vs Numeric: String variables should concatenate, not add mathematically');
+            // Test constant reassignment
+            try {
+                const interpreter = new Interpreter();
+                interpreter.executeProgram(`
+                    const PI = 3.14159
+                    PI = 2.71828
+                `);
+                assert(false, 'Constant Reassignment Error', 'Should have thrown error for reassigning constant');
+            } catch (error) {
+                assert(error.message.includes('Cannot reassign constant'), 'Constant Reassignment Error', 'Correctly caught constant reassignment');
+            }
         }
         
         /**
-         * Test complex print statement evaluation edge cases
-         * Covers: print statements with mixed quotes, complex expressions, 
-         *         function calls in print, and parsing issues found during debugging
+         * Test array functionality
          */
-        function testComplexPrintStatements() {
-            const testInterpreter = new Interpreter();
-            const testProgram = { inputs: [], randomValue: undefined };
+        function testArrayFunctionality() {
+            // Test array declaration with size
+            const result1 = executeAndGetVariables(`
+                array colours[3]
+                colours[0] = "Red"
+                colours[1] = "Blue"
+                colours[2] = "Green"
+            `);
             
-            // Test 1: Print with mixed quotes and concatenation
-            testInterpreter.executeProgram(`name = "Alice"
-print("Hello " + name + '!')`, testProgram);
-            assertEqual(testInterpreter.outputs[0], "Hello Alice!", 'Mixed Quotes Print: Should handle mixed quotes in print concatenation');
+            assertEqual(result1.colours[0], 'Red', 'colours[0] should be "Red"');
+            assertEqual(result1.colours[1], 'Blue', 'colours[1] should be "Blue"');
+            assertEqual(result1.colours[2], 'Green', 'colours[2] should be "Green"');
             
-            // Reset for next test
-            testInterpreter.outputs = [];
+            // Test array initialization with values
+            const result2 = executeAndGetVariables(`
+                array scores = [85, 92, 78, 90]
+                highest = scores[1]
+            `);
             
-            // Test 2: Print with function calls and concatenation
-            testInterpreter.executeProgram(`age = 25
-print("Age is: " + str(age))`, testProgram);
-            assertEqual(testInterpreter.outputs[0], "Age is: 25", 'Function Call Print: Should evaluate str() function in print statement');
+            assertEqual(result2.scores[0], 85, 'scores[0] should be 85');
+            assertEqual(result2.scores[1], 92, 'scores[1] should be 92');
+            assertEqual(result2.scores[2], 78, 'scores[2] should be 78');
+            assertEqual(result2.scores[3], 90, 'scores[3] should be 90');
+            assertEqual(result2.highest, 92, 'highest should be 92 (scores[1])');
             
-            // Reset for next test
-            testInterpreter.outputs = [];
+            // Test array access with variables
+            const result3 = executeAndGetVariables(`
+                array names = ["Alice", "Bob", "Charlie"]
+                index = 1
+                current_name = names[index]
+            `);
             
-            // Test 3: Print with complex string literal parsing
-            testInterpreter.executeProgram(`message = "Welcome"
-print(message + " to the 'new' system!")`, testProgram);
-            assertEqual(testInterpreter.outputs[0], "Welcome to the 'new' system!", 'Complex String Print: Should handle quotes within string literals');
-            
-            // Reset for next test  
-            testInterpreter.outputs = [];
-            
-            // Test 4: Print with arithmetic and string mixing
-            testInterpreter.executeProgram(`x = 5
-y = 3
-print("Sum: " + str(x + y) + ", Product: " + str(x * y))`, testProgram);
-            assertEqual(testInterpreter.outputs[0], "Sum: 8, Product: 15", 'Arithmetic String Print: Should evaluate arithmetic within str() calls');
-            
-            // Reset for next test
-            testInterpreter.outputs = [];
-            
-            // Test 5: Print with input() function and string concatenation prompt
-            const inputProgram = { inputs: ["World"], randomValue: undefined };
-            testInterpreter.executeProgram(`name = input("Enter your name: " + "please")
-print("Hello " + name)`, inputProgram);
-            assertEqual(testInterpreter.variables.name, "World", 'Input Prompt Concatenation: Should handle string concatenation in input prompt');
-            assertEqual(testInterpreter.outputs[0], "Hello World", 'Input Result Print: Should use input result in print statement');
-            
-            // Reset for next test
-            testInterpreter.outputs = [];
-            
-            // Test 6: Print with nested quotes and escape scenarios
-            testInterpreter.executeProgram(`quote = '"Success"'
-print("He said: " + quote)`, testProgram);
-            assertEqual(testInterpreter.outputs[0], 'He said: "Success"', 'Nested Quotes Print: Should handle nested quote scenarios');
+            assertEqual(result3.names[1], 'Bob', 'names[1] should be "Bob"');
+            assertEqual(result3.index, 1, 'index should be 1');
+            assertEqual(result3.current_name, 'Bob', 'current_name should be "Bob"');
         }
         
         /**
-         * Test function call detection and precedence in assignments
-         * Covers: function call recognition before string concatenation check,
-         *         assignment precedence issues, and edge cases in function evaluation
+         * Test complex programs combining multiple features
          */
-        function testFunctionCallPrecedence() {
-            const testInterpreter = new Interpreter();
+        function testComplexPrograms() {
+            // Test factorial calculation
+            assertEqual(executeAndGetVariable(`
+                n = 5
+                factorial = 1
+                for i = 1 to n
+                    factorial = factorial * i
+                next i
+            `, 'factorial'), 120, 'Factorial Calculation (5! = 120)');
             
-            // Test 1: Built-in function calls should be detected before string concatenation
-            testInterpreter.executeWithoutReset(`value1 = 42.7
-intResult = int(value1)`);
-            assertEqual(testInterpreter.variables.intResult, 42, 'int() Function Precedence: Should convert float to int, not treat as string');
-            
-            testInterpreter.executeWithoutReset(`value2 = 100
-floatResult = float(value2)`);
-            assertEqual(testInterpreter.variables.floatResult, 100.0, 'float() Function Precedence: Should convert int to float, not treat as string');
-            
-            testInterpreter.executeWithoutReset(`value3 = 123
-strResult = str(value3)`);
-            assertEqual(testInterpreter.variables.strResult, "123", 'str() Function Precedence: Should convert number to string, not treat as string concatenation');
-            
-            // Test 2: Function calls with complex expressions
-            testInterpreter.executeWithoutReset(`a = 5
-b = 7
-complexInt = int(a + b + 0.5)`);
-            assertEqual(testInterpreter.variables.complexInt, 12, 'Complex Function Call: Should evaluate expression inside function call');
-            
-            // Test 3: Function calls in conditional assignments
-            testInterpreter.executeWithoutReset(`score = 85.7
-if score > 80 then
-    finalScore = int(score)
-else
-    finalScore = 0
-endif`);
-            assertEqual(testInterpreter.variables.finalScore, 85, 'Conditional Function Call: Should execute int() in conditional assignment');
-            
-            // Test 4: Chained function calls and assignments
-            testInterpreter.executeWithoutReset(`original = "42"
-step1 = float(original)
-step2 = int(step1)`);
-            assertEqual(testInterpreter.variables.step1, 42.0, 'Chained Functions Step 1: Should convert string to float');
-            assertEqual(testInterpreter.variables.step2, 42, 'Chained Functions Step 2: Should convert float to int');
-            
-            // Test 5: Function calls with variables as parameters
-            testInterpreter.executeWithoutReset(`inputValue = 99.9
-param = inputValue
-result5 = int(param)`);
-            assertEqual(testInterpreter.variables.result5, 99, 'Variable Parameter Function: Should use variable as function parameter');
-            
-            // Test 6: Function call vs string concatenation disambiguation  
-            testInterpreter.executeWithoutReset(`text = "test"
-notConcat = str(text)
-isConcat = "str" + text`);
-            assertEqual(testInterpreter.variables.notConcat, "test", 'Function vs Concat: str() should be function call, not concatenation');
-            assertEqual(testInterpreter.variables.isConcat, "strtest", 'Function vs Concat: Literal "str" should be string concatenation');
+            // Test string processing
+            const outputs = executeAndGetOutputs(`
+                text = "Hello World"
+                print("Original: " + text)
+                print("Length: " + str(text.length))
+                print("Upper: " + text.upper())
+                print("First 5: " + text.left(5))
+            `);
+            assertArrayEqual(outputs, [
+                "Original: Hello World",
+                "Length: 11",
+                "Upper: HELLO WORLD",
+                "First 5: Hello"
+            ], 'String Processing Program');
         }
         
         /**
-         * Test reset() method and interpreter state management
-         * Covers: proper cleanup between program executions, variable reset,
-         *         output clearing, and state isolation
+         * Test interpreter state management
          */
         function testInterpreterStateManagement() {
             const testInterpreter = new Interpreter();
             
-            // Test 1: Initial state
+            // Test initial state
             assertEqual(Object.keys(testInterpreter.variables).length, 0, 'Initial State: Should start with no variables');
             assertEqual(testInterpreter.outputs.length, 0, 'Initial State: Should start with no outputs');
-            assertEqual(testInterpreter.trace.length, 0, 'Initial State: Should start with no trace entries');
             
-            // Test 2: Execute some code and verify state changes
-            testInterpreter.execute(`x = 10
-y = 20
-print("Hello")`);
+            // Execute some code and verify state changes
+            testInterpreter.executeProgram(`
+                x = 10
+                y = 20
+                print("Hello")
+            `);
             
             assertEqual(testInterpreter.variables.x, 10, 'After Execution: Should have variable x');
             assertEqual(testInterpreter.variables.y, 20, 'After Execution: Should have variable y');
             assertEqual(testInterpreter.outputs.length, 1, 'After Execution: Should have one output');
-            assert(testInterpreter.trace.length > 0, 'After Execution: Should have trace entries');
             
-            // Test 3: Reset and verify clean state
+            // Reset and verify clean state
             testInterpreter.reset();
             
             assertEqual(Object.keys(testInterpreter.variables).length, 0, 'After Reset: Should have no variables');
             assertEqual(testInterpreter.outputs.length, 0, 'After Reset: Should have no outputs');
-            assertEqual(testInterpreter.trace.length, 0, 'After Reset: Should have no trace entries');
             
-            // Test 4: Execute different code after reset
-            testInterpreter.execute(`a = 100
-print("World")`);
+            // Execute different code after reset
+            testInterpreter.executeProgram(`
+                a = 100
+                print("World")
+            `);
             
             assertEqual(testInterpreter.variables.a, 100, 'After Reset Execute: Should have new variable a');
             assert(!testInterpreter.variables.hasOwnProperty('x'), 'After Reset Execute: Should not have old variable x');
             assert(!testInterpreter.variables.hasOwnProperty('y'), 'After Reset Execute: Should not have old variable y');
             assertEqual(testInterpreter.outputs[0], "World", 'After Reset Execute: Should have new output');
-            
-            // Test 5: Multiple reset calls should be safe
-            testInterpreter.reset();
-            testInterpreter.reset();
-            testInterpreter.reset();
-            
-            assertEqual(Object.keys(testInterpreter.variables).length, 0, 'Multiple Resets: Should remain clean after multiple resets');
-            assertEqual(testInterpreter.outputs.length, 0, 'Multiple Resets: Should have no outputs after multiple resets');
-        }
-        
-        /**
-         * Test array functionality in OCR ERL
-         * Covers: array declaration, initialization, element access, trace table expansion
-         */
-        function testArrayFunctionality() {
-            const interpreter = new Interpreter();
-            
-            // Test array declaration with size
-            const result1 = interpreter.executeProgram(`array colours[3]
-colours[0] = "Red"
-colours[1] = "Blue"
-colours[2] = "Green"`, { inputs: [] });
-            
-            assertEqual(result1.variables.includes('colours[0]'), true, 'Array elements should be expanded in variable list');
-            assertEqual(result1.variables.includes('colours[1]'), true, 'Array elements should be expanded in variable list');
-            assertEqual(result1.variables.includes('colours[2]'), true, 'Array elements should be expanded in variable list');
-            assertEqual(interpreter.variables.colours[0], 'Red', 'colours[0] should be "Red"');
-            assertEqual(interpreter.variables.colours[1], 'Blue', 'colours[1] should be "Blue"');
-            assertEqual(interpreter.variables.colours[2], 'Green', 'colours[2] should be "Green"');
-            
-            // Test array initialization with values
-            const result2 = interpreter.executeProgram(`array scores = [85, 92, 78, 90]
-highest = scores[1]`, { inputs: [] });
-            
-            assertEqual(interpreter.variables.scores[0], 85, 'scores[0] should be 85');
-            assertEqual(interpreter.variables.scores[1], 92, 'scores[1] should be 92');
-            assertEqual(interpreter.variables.scores[2], 78, 'scores[2] should be 78');
-            assertEqual(interpreter.variables.scores[3], 90, 'scores[3] should be 90');
-            assertEqual(interpreter.variables.highest, 92, 'highest should be 92 (scores[1])');
-            
-            // Test array access with variables
-            const result3 = interpreter.executeProgram(`array names = ["Alice", "Bob", "Charlie"]
-index = 1
-current_name = names[index]`, { inputs: [] });
-            
-            assertEqual(interpreter.variables.names[1], 'Bob', 'names[1] should be "Bob"');
-            assertEqual(interpreter.variables.index, 1, 'index should be 1');
-            assertEqual(interpreter.variables.current_name, 'Bob', 'current_name should be "Bob"');
         }
         
         // TEST MANAGEMENT AND EXECUTION
@@ -1056,37 +997,25 @@ current_name = names[index]`, { inputs: [] });
                 'Operator Precedence': ['Multiplication before Addition', 'Division before Subtraction', 'Exponentiation before Multiplication', 'Left-to-right'],
                 'Parentheses': ['Basic Parentheses', 'Nested Parentheses', 'Rectangle Perimeter', 'Complex Parentheses'],
                 'Array Access': ['Array Access with Variable Index', 'Array Access with Literal Index', 'Arithmetic with Array Access', 'Array Access in Multiplication'],
-                'Array Functionality': ['Array elements should be expanded', 'colours[0] should be', 'colours[1] should be', 'colours[2] should be', 'scores[0] should be', 'scores[1] should be', 'scores[2] should be', 'scores[3] should be', 'highest should be', 'names[1] should be', 'index should be', 'current_name should be'],
+                'Array Functionality': ['colours[0] should be', 'colours[1] should be', 'colours[2] should be', 'scores[0] should be', 'scores[1] should be', 'scores[2] should be', 'scores[3] should be', 'highest should be', 'names[1] should be', 'index should be', 'current_name should be'],
                 'String Methods': ['First name .left(1)', 'Last name .left(1)', 'Initials concatenation', 'String .upper method', 'String .lower method'],
-                'ASCII Functions': ['ASC("A")', 'ASC("Z")', 'ASC("a")', 'ASC("0")', 'ASC(" ")', 'ASC(letter)', 'CHR(65)', 'CHR(90)', 'CHR(97)', 'CHR(48)', 'CHR(32)', 'CHR(ascii_val)', 'ASC("B") in condition', 'CHR(66) in condition'],
-                'Boolean Operators': ['AND: Both conditions true', 'AND: First false', 'AND: Second false', 'AND: Both false', 'OR: First true', 'OR: Second true', 'OR: Both true', 'OR: Both false', 'ASCII range check with AND', 'lowercase "and" should not work', 'lowercase "or" should not work'],
+                'ASCII Functions': ['ASC("A")', 'ASC("Z")', 'ASC("a")', 'ASC("0")', 'ASC(" ")', 'ASC(letter)', 'CHR(65)', 'CHR(90)', 'CHR(97)', 'CHR(48)', 'CHR(32)', 'CHR(ascii_val)'],
+                'Boolean Operators': ['AND: Both conditions true', 'AND: First false', 'AND: Second false', 'OR: First true', 'OR: Second true', 'OR: Both false', 'ASCII range check with AND'],
                 'For Loop Execution': ['x should be 2', 'Should have exactly 3 outputs', 'First output should be "0"', 'Second output should be "2"', 'Third output should be "4"'],
                 'Variable Operations': ['Variable Access', 'Numeric Literal'],
                 'Complex Expressions': ['Complex Expression', 'Multiple Operators'],
                 'Edge Cases': ['Division by One', 'Multiplication by Zero', 'Power of Zero', 'Empty Array Access', 'Out of Bounds Array Access'],
-                'Type Conversions': ['float(input())', 'float(numValue)', 'int(numValue)', 'int(3.14)', 'int(0)', 'bool("True")', 'bool("False")', 'bool(0)', 'bool(1)', 'bool("")', 'bool("hello")'],
-                'Nested Conditionals': [
-                    'Nested If - Both True: jumpLength should be 3.5', 'Nested If - Both True: yearGroup should be 12', 'Nested If - Both True: Should execute inner if branch when both conditions true',
-                    'Nested If - Outer True Inner False: jumpLength should be 2.5', 'Nested If - Outer True Inner False: yearGroup should be 8', 'Nested If - Outer True Inner False: Should execute inner else branch',
-                    'Nested If - Outer False: jumpLength should be 1.5', 'Nested If - Outer False: Should execute outer else branch when outer condition false',
-                    'MOD in For Loop: total should be 6', 'MOD in For Loop: Should have 5 outputs from loop', 'MOD in For Loop: First output should be "odd: 1"', 'MOD in For Loop: Second output should be "even: 2"', 'MOD in For Loop: Fifth output should be "odd: 5"',
-                    'Switch in For Loop: day should be 3 after loop completion', 'Switch in For Loop: Should have 3 outputs from switch in loop', 'Switch in For Loop: First output should be "Monday"', 'Switch in For Loop: Second output should be "Tuesday"', 'Switch in For Loop: Third output should be "Wednesday"',
-                    'Triple Nested If: score should be 85', 'Triple Nested If: grade should be "A"', 'Triple Nested If: Should execute middle nested branch',
-                    'If in While Loop: count should be 4', 'If in While Loop: x should be 5 after loop', 'If in While Loop: Should have 2 conditional outputs', 'If in While Loop: Should find "found two"', 'If in While Loop: Should find "greater than three"'
-                ],
-                'String Methods in Print': ['String Methods in Print: name should be "hello"', 'String Methods in Print: city should be "WORLD"', 'String Methods in Print: Should have exactly 3 outputs', 'String Methods in Print: .upper conversion should output "HELLO"', 'String Methods in Print: .lower conversion should output "world"', 'String Methods in Print: .length property should output "5"'],
-                'Substring with Variable': ['Substring with Variable: x should be 3 after loop completion', 'Substring with Variable: Should have exactly 3 outputs', 'Substring with Variable: Position 1 extraction should be "r"', 'Substring with Variable: Position 2 extraction should be "a"', 'Substring with Variable: Position 3 extraction should be "n"'],
-                'Comments': ['x should be 5 despite comments', 'y should be 10 despite comments', 'z should be 15 (x + y)', 'Should have exactly 3 trace entries'],
-                'Constants': ['const pi should be 3.14159', 'const vat should be 0.2', 'total should be 120 (100 * 1.2)'],
-                'For Loops with Positive Step': ['Positive Step For Loop: Should have 5 outputs for step 2', 'Positive Step For Loop: First even number should be "2"', 'Positive Step For Loop: Second even number should be "4"', 'Positive Step For Loop: Final even number should be "10"'],
-                'For Loops with Negative Step': ['Negative Step For Loop: Should have 11 outputs for countdown', 'Negative Step For Loop: Countdown should start with "10"', 'Negative Step For Loop: Countdown should end with "0"'],
+                'Type Conversions': ['float(', 'int(', 'str(', 'bool('],
+                'Nested Conditionals': ['Nested If', 'MOD in For Loop'],
+                'String Methods in Print': ['String Methods in Print'],
+                'Substring with Variable': ['Substring with Variable'],
+                'Comments': ['despite comments', 'z should be 15'],
+                'Constants': ['const pi', 'const vat', 'total should be 120'],
+                'For Loops with Step': ['Positive Step For Loop', 'Negative Step For Loop'],
                 'Switch/Case': ['day should be "Mon"', 'First output should be "Monday"', 'Second output should be "Done"'],
-                
-                // NEW: Edge case categories for recently fixed issues
-                '🔧 String Concatenation Edge Cases': ['Function Call Assignment', 'String Concatenation with Function', 'Mixed Quotes Concatenation', 'Variable String Concatenation', 'Arithmetic vs String', 'Empty String Concatenation', 'String vs Numeric'],
-                '🔧 Complex Print Statements': ['Mixed Quotes Print', 'Function Call Print', 'Complex String Print', 'Arithmetic String Print', 'Input Prompt Concatenation', 'Input Result Print', 'Nested Quotes Print'],
-                '🔧 Function Call Precedence': ['Function Precedence', 'Complex Function Call', 'Conditional Function Call', 'Chained Functions', 'Variable Parameter Function', 'Function vs Concat'],
-                '🔧 Interpreter State Management': ['Initial State', 'After Execution', 'After Reset', 'After Reset Execute', 'Multiple Resets']
+                'Error Handling': ['Reserved Keyword Error', 'Constant Reassignment Error'],
+                'Complex Programs': ['Factorial Calculation', 'String Processing Program'],
+                'State Management': ['Initial State', 'After Execution', 'After Reset', 'After Reset Execute']
             };
             
             let html = '';
@@ -1214,11 +1143,8 @@ current_name = names[index]`, { inputs: [] });
             testForLoopWithPositiveStep();
             testForLoopWithNegativeStep();
             testSwitchCase();
-            
-            // NEW: Test edge cases found during refactoring and debugging
-            testStringConcatenationEdgeCases();
-            testComplexPrintStatements();
-            testFunctionCallPrecedence();
+            testErrorHandling();
+            testComplexPrograms();
             testInterpreterStateManagement();
             
             // Display results

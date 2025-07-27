@@ -1,4 +1,4 @@
-// AST-based Interpreter for OCR Exam Reference Language
+// AST-based Interpreter for OCR Exam Reference Language - FIXED VERSION
 
 // ============================================================================
 // AST NODE TYPES
@@ -375,7 +375,6 @@ class Lexer {
       'array': 'ARRAY',
       'const': 'CONST',
       'print': 'PRINT',
-      // 'input': 'INPUT', // Remove this - input should be treated as a function, not a keyword
       'true': 'BOOLEAN',
       'false': 'BOOLEAN',
       'and': 'OPERATOR',
@@ -410,7 +409,7 @@ class Lexer {
 }
 
 // ============================================================================
-// PARSER
+// PARSER - WITH RESERVED KEYWORD CHECKING
 // ============================================================================
 
 class Parser {
@@ -604,18 +603,16 @@ class Parser {
   }
 
   assignmentOrExpression(line) {
+    // Check if we're trying to use a reserved keyword as a variable name
+    if (this.checkReservedKeywordAssignment()) {
+      const token = this.peek();
+      const keywordName = token.value.toLowerCase();
+      throw new Error(`Cannot use reserved keyword '${keywordName}' as a variable name at line ${line}`);
+    }
+    
     const expr = this.expression();
     
     if (this.match('EQUALS')) {
-      // Check if we're trying to assign to a keyword
-      if (expr.type === 'variable') {
-        const varName = expr.name.toLowerCase();
-        const keywords = ['if', 'then', 'else', 'elseif', 'endif', 'while', 'endwhile', 'do', 'until', 'for', 'to', 'step', 'next', 'switch', 'case', 'default', 'endswitch', 'array', 'const', 'print', 'true', 'false', 'and', 'or', 'mod', 'div'];
-        if (keywords.includes(varName)) {
-          throw new Error(`Cannot use reserved keyword '${expr.name}' as a variable name at line ${line}`);
-        }
-      }
-      
       const value = this.expression();
       this.consumeNewlineOrEOF();
       return new AssignmentNode(expr, value, false, line);
@@ -623,6 +620,17 @@ class Parser {
     
     this.consumeNewlineOrEOF();
     return expr;
+  }
+
+  // *** NEW METHOD: Check if current token is a reserved keyword being used in assignment ***
+  checkReservedKeywordAssignment() {
+    const reservedKeywords = ['IF', 'THEN', 'ELSE', 'ELSEIF', 'ENDIF', 'WHILE', 'ENDWHILE', 
+                              'DO', 'UNTIL', 'FOR', 'TO', 'STEP', 'NEXT', 'SWITCH', 'CASE', 
+                              'DEFAULT', 'ENDSWITCH', 'ARRAY', 'CONST', 'PRINT'];
+    
+    return reservedKeywords.includes(this.peek().type) && 
+           this.current + 1 < this.tokens.length && 
+           this.tokens[this.current + 1].type === 'EQUALS';
   }
 
   block(terminators) {
@@ -904,7 +912,7 @@ class Parser {
 }
 
 // ============================================================================
-// INTERPRETER
+// INTERPRETER (unchanged from original)
 // ============================================================================
 
 export class ASTInterpreter {
@@ -939,7 +947,7 @@ export class ASTInterpreter {
       const lexer = new Lexer(code);
       const tokens = lexer.tokenize();
       
-      // Parse
+      // Parse (with reserved keyword checking)
       const parser = new Parser(tokens);
       const ast = parser.parse();
       
