@@ -9,8 +9,7 @@ class SiteNavigation {
         this.navToggle = null;
         this.navDropdown = null;
         this.navMenu = null;
-        
-        // Navigation menu data
+
         this.navMenuData = [
             {
                 title: "1.2 - Data Units",
@@ -47,7 +46,6 @@ class SiteNavigation {
                 id: "programming-practice",
                 keywords: ["input-output-practice", "programming"]
             },
-
             {
                 title: "2.4 - Boolean Algebra",
                 description: "Logic gates and Boolean expressions",
@@ -59,125 +57,144 @@ class SiteNavigation {
     }
 
     init() {
-        this.generateNavMenu();
-        this.setupElements();
+        this.renderNavMarkup();
+        this.cacheElements();
+        this.populateNavItems();
         this.setupEventListeners();
     }
 
     /**
-     * Auto-detect current page based on URL and keywords
+     * Render the static structure of the nav dropdown
      */
-    detectCurrentPage() {
-        const currentUrl = window.location.href.toLowerCase();
-        const currentHostname = window.location.hostname.toLowerCase();
-        
-        // Try to match by URL or keywords
-        for (const item of this.navMenuData) {
-            // Check if current URL matches item URL
-            if (currentUrl.includes(item.url.toLowerCase())) {
-                return item.id;
-            }
-            
-            // Check keywords against current hostname/URL
-            if (item.keywords) {
-                for (const keyword of item.keywords) {
-                    if (currentHostname.includes(keyword.toLowerCase()) || 
-                        currentUrl.includes(keyword.toLowerCase())) {
-                        return item.id;
-                    }
-                }
-            }
+    renderNavMarkup() {
+        const siteNav = document.getElementById('siteNav');
+        if (!siteNav) {
+            console.warn('siteNav element not found');
+            return;
         }
-        
-        return null;
+
+        siteNav.innerHTML = `
+            <div id="siteNavDropdown" class="nav-dropdown" role="navigation">
+                <button id="navToggle" class="nav-toggle" aria-haspopup="true" aria-expanded="false">
+                    🎓 GCSE CS Tools
+                </button>
+                <div id="navMenu" class="nav-menu">
+                    <div class="nav-menu-header">Computer Science Practice</div>
+                </div>
+            </div>
+        `;
     }
 
     /**
-     * Generate the navigation menu from data
+     * Cache essential DOM elements
      */
-    generateNavMenu() {
-        const navMenu = document.getElementById('navMenu');
-        if (!navMenu) {
-            console.warn('navMenu element not found');
-            return;
-        }
-        
-        // Clear existing content
-        navMenu.innerHTML = '';
-        
-        // Add header
-        const header = document.createElement('div');
-        header.className = 'nav-menu-header';
-        header.textContent = 'Computer Science Practice';
-        navMenu.appendChild(header);
-        
-        // Detect current page
-        const currentPageId = this.detectCurrentPage();
-        
-        // Generate nav items
-        this.navMenuData.forEach(item => {
-            const navItem = document.createElement('a');
-            navItem.href = item.url;
-            navItem.className = item.id === currentPageId ? 'nav-item current' : 'nav-item';
-            
-            const title = document.createElement('span');
-            title.className = 'nav-item-title';
-            title.textContent = item.title;
-            
-            const description = document.createElement('span');
-            description.className = 'nav-item-desc';
-            description.textContent = item.description;
-            
-            navItem.appendChild(title);
-            navItem.appendChild(description);
-            navMenu.appendChild(navItem);
-        });
-    }
-
-    setupElements() {
+    cacheElements() {
         this.navToggle = document.getElementById('navToggle');
         this.navDropdown = document.getElementById('siteNavDropdown');
         this.navMenu = document.getElementById('navMenu');
 
         if (!this.navToggle || !this.navDropdown || !this.navMenu) {
-            console.warn('Navigation elements not found. Make sure the HTML includes the proper navigation structure.');
-            return;
+            console.warn('Navigation elements missing in DOM.');
         }
     }
 
-    setupEventListeners() {
-        if (!this.navToggle) return;
+    /**
+     * Detect current page based on URL
+     */
+    detectCurrentPage() {
+        const currentUrl = window.location.href.toLowerCase();
+        const currentHostname = window.location.hostname.toLowerCase();
 
-        // Toggle dropdown on button click
+        for (const item of this.navMenuData) {
+            if (currentUrl.includes(item.url.toLowerCase())) return item.id;
+
+            if (item.keywords) {
+                for (const keyword of item.keywords) {
+                    if (
+                        currentHostname.includes(keyword.toLowerCase()) ||
+                        currentUrl.includes(keyword.toLowerCase())
+                    ) {
+                        return item.id;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Populate nav items from data
+     */
+    populateNavItems() {
+        if (!this.navMenu) return;
+
+        const currentPageId = this.detectCurrentPage();
+
+        this.navMenuData.forEach(item => {
+            const navItem = document.createElement('a');
+            navItem.href = item.url;
+            navItem.className = item.id === currentPageId ? 'nav-item current' : 'nav-item';
+
+            const title = document.createElement('span');
+            title.className = 'nav-item-title';
+            title.textContent = item.title;
+
+            const desc = document.createElement('span');
+            desc.className = 'nav-item-desc';
+            desc.textContent = item.description;
+
+            navItem.appendChild(title);
+            navItem.appendChild(desc);
+            this.navMenu.appendChild(navItem);
+        });
+    }
+
+    /**
+     * Setup event listeners for nav interaction
+     */
+    setupEventListeners() {
+        if (!this.navToggle || !this.navDropdown || !this.navMenu) return;
+
+        // Toggle dropdown open/closed
         this.navToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.navDropdown.classList.toggle('active');
+            const isOpen = this.navDropdown.classList.toggle('open');
+            this.navToggle.setAttribute('aria-expanded', isOpen);
         });
 
-        // Close dropdown when clicking outside
+        // Close dropdown if click outside
         document.addEventListener('click', (e) => {
             if (!this.navDropdown.contains(e.target)) {
-            this.navDropdown.classList.remove('active');
+                this.closeDropdown();
             }
         });
 
-        // Close dropdown when pressing Escape
+        // Escape key closes dropdown
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-            this.navDropdown.classList.remove('active');
+                this.closeDropdown();
             }
         });
 
-        // Close dropdown when clicking on a link
+        // Close dropdown on nav item click (including children)
         this.navMenu.addEventListener('click', (e) => {
-            if (e.target.classList.contains('nav-item')) {
-            this.navDropdown.classList.remove('active');
+            if (e.target.closest('.nav-item')) {
+                this.closeDropdown();
             }
         });
     }
 
     /**
-     * Get current page info
+     * Close dropdown and update ARIA
+     */
+    closeDropdown() {
+        this.navDropdown.classList.remove('open');
+        this.navToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    /**
+     * Get info on current page (optional utility)
      */
     getCurrentPageInfo() {
         const currentId = this.detectCurrentPage();
@@ -185,8 +202,8 @@ class SiteNavigation {
     }
 }
 
-// Initialize navigation when DOM is loaded
+// Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    const navigation = new SiteNavigation();
-    navigation.init();
-})
+    const nav = new SiteNavigation();
+    nav.init();
+});

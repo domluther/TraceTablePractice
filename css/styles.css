@@ -165,7 +165,7 @@ body {
     transition: var(--transition-fast);
 }
 
-.nav-dropdown.active .nav-toggle::after {
+.nav-dropdown.open .nav-toggle::after {
     transform: rotate(180deg);
 }
 
@@ -186,7 +186,7 @@ body {
     margin-top: 8px;
 }
 
-.nav-dropdown.active .nav-menu {
+.nav-dropdown.open .nav-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -1195,7 +1195,7 @@ kbd {
         overflow-y: auto;
     }
     
-    .nav-dropdown.active .nav-menu {
+    .nav-dropdown.open .nav-menu {
         transform: translateY(0);
     }
 }
