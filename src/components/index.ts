@@ -7,6 +7,7 @@ export { Footer } from "./Footer";
 export { Header } from "./Header";
 export type { HintItem } from "./HintPanel";
 export { HintPanel } from "./HintPanel";
+export { ProgramSelector } from "./ProgramSelector";
 export type {
 	QuizButtonProps,
 	QuizButtonSize,
@@ -23,6 +24,7 @@ export { SimpleQuizBody } from "./SimpleQuizBody";
 export { SiteNavigation } from "./SiteNavigation";
 // Modal Components
 export { StatsModal } from "./StatsModal";
+export { TraceTableBody } from "./TraceTableBody";
 
 /**
  * Usage Example:

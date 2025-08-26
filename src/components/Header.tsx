@@ -16,7 +16,7 @@ export function Header({ scoreButton, title, subtitle }: HeaderProps) {
 	const currentSiteId = detectCurrentSite();
 
 	return (
-		<header className="bg-gradient-to-r from-gray-700 to-gray-900 text-white p-6 text-center relative">
+		<header className="bg-gradient-to-br from-gray-800 to-gray-900 text-white px-8 py-6 text-center relative">
 			<SiteNavigation
 				menuItems={GCSE_NAVIGATION_MENU}
 				currentSiteId={currentSiteId}
@@ -24,14 +24,12 @@ export function Header({ scoreButton, title, subtitle }: HeaderProps) {
 				icon="🎓"
 			/>
 			{scoreButton && (
-				<div className="absolute top-3 right-3 xl:top-5 xl:right-8">
-					{scoreButton}
-				</div>
+				<div className="absolute top-4 right-6">{scoreButton}</div>
 			)}
-			<h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold mb-2 text-shadow">
-				{title}
-			</h1>
-			<p className="text-indigo-100 text-base xl:text-lg">{subtitle}</p>
+			<h1 className="text-4xl font-bold mb-3 drop-shadow-lg">{title}</h1>
+			<p className="text-blue-200 text-lg font-light">
+				Master tracing OCR ERL algorithms thanks to instant feedback.
+			</p>
 		</header>
 	);
 }

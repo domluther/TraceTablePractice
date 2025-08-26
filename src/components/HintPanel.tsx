@@ -39,27 +39,29 @@ export function HintPanel({
 				"mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-6",
 				"transition-all duration-300 ease-in-out",
 				isVisible
-					? "opacity-100 max-h-96"
+					? "opacity-100 max-h-none overflow-visible"
 					: "opacity-0 max-h-0 overflow-hidden",
 			)}
 		>
 			<h3 className="text-lg font-bold text-yellow-800 mb-4">{title}</h3>
-			<ul className="space-y-4 text-gray-700">
-				{items.map((item) => (
-					<li key={item.title} className="flex flex-col gap-1">
-						<div className={colorClasses[item.color]}>{item.title}:</div>
-						<div className="text-sm">{item.description}</div>
-						{item.examples.map((example) => (
-							<div
-								key={example}
-								className="text-sm text-gray-600 bg-gray-100 rounded px-2 py-1 font-mono"
-							>
-								{example}
-							</div>
-						))}
-					</li>
-				))}
-			</ul>
+			<div className="max-h-64 overflow-y-auto">
+				<ul className="space-y-4 text-gray-700">
+					{items.map((item) => (
+						<li key={item.title} className="flex flex-col gap-1">
+							<div className={colorClasses[item.color]}>{item.title}:</div>
+							<div className="text-sm">{item.description}</div>
+							{item.examples.map((example) => (
+								<div
+									key={example}
+									className="text-sm text-gray-600 bg-gray-100 rounded px-2 py-1 font-mono"
+								>
+									{example}
+								</div>
+							))}
+						</li>
+					))}
+				</ul>
+			</div>
 		</div>
 	);
 }
