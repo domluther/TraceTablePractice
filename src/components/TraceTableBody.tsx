@@ -190,7 +190,7 @@ export function TraceTableBody({
 
 				// Check output
 				total++;
-				const expectedOutput = expectedStep.output.join("");
+				const expectedOutput = expectedStep.output;
 				const userOutput = userEntry.output.trim();
 				const outputCorrect = userOutput === expectedOutput;
 				newCellResults[`${actualUserIndex}-output`] = outputCorrect;

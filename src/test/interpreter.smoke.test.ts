@@ -4,7 +4,7 @@ import type { Program } from "@/lib/astInterpreter";
 
 /**
  * Basic Smoke Tests for AST Interpreter
- * 
+ *
  * These are simple tests to verify the interpreter works for basic cases
  * without getting stuck in infinite loops or complex scenarios.
  */
@@ -12,7 +12,7 @@ import type { Program } from "@/lib/astInterpreter";
 function executeSimpleProgram(code: string, inputs: string[] = []): any {
 	const interpreter = new ASTInterpreter();
 	const program: Program = { code, description: "test", inputs };
-	
+
 	try {
 		const result = interpreter.executeProgram(code, program);
 		const lastStep = result.trace[result.trace.length - 1];
@@ -20,7 +20,7 @@ function executeSimpleProgram(code: string, inputs: string[] = []): any {
 			variables: lastStep?.variables || {},
 			outputs: result.outputs,
 			trace: result.trace,
-			success: true
+			success: true,
 		};
 	} catch (error) {
 		return {
@@ -28,7 +28,7 @@ function executeSimpleProgram(code: string, inputs: string[] = []): any {
 			outputs: [],
 			trace: [],
 			success: false,
-			error: error
+			error: error,
 		};
 	}
 }
@@ -70,10 +70,13 @@ describe("AST Interpreter - Smoke Tests", () => {
 	});
 
 	it("should handle input operations", () => {
-		const result = executeSimpleProgram(`
+		const result = executeSimpleProgram(
+			`
 			name = input("Name?")
 			print("Hello " + name)
-		`, ["Alice"]);
+		`,
+			["Alice"],
+		);
 		expect(result.success).toBe(true);
 		expect(result.outputs).toContain("Hello Alice");
 	});

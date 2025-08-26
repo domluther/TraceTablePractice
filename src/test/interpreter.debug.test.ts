@@ -4,31 +4,31 @@ import type { Program } from "@/lib/astInterpreter";
 
 /**
  * Debug Tests for AST Interpreter
- * 
+ *
  * These tests help debug specific issues with the interpreter
  */
 
 function debugProgram(code: string, inputs: string[] = []): any {
 	const interpreter = new ASTInterpreter();
 	const program: Program = { code, description: "debug", inputs };
-	
+
 	console.log("=== DEBUG PROGRAM ===");
 	console.log("Code:", code);
 	console.log("Inputs:", inputs);
-	
+
 	try {
 		const result = interpreter.executeProgram(code, program);
 		console.log("Result:", result);
-		
+
 		const lastStep = result.trace[result.trace.length - 1];
 		console.log("Final variables:", lastStep?.variables);
 		console.log("Outputs:", result.outputs);
-		
+
 		return {
 			variables: lastStep?.variables || {},
 			outputs: result.outputs,
 			trace: result.trace,
-			success: true
+			success: true,
 		};
 	} catch (error) {
 		console.log("Error:", error);
@@ -37,7 +37,7 @@ function debugProgram(code: string, inputs: string[] = []): any {
 			outputs: [],
 			trace: [],
 			success: false,
-			error: error
+			error: error,
 		};
 	}
 }
@@ -49,18 +49,21 @@ describe("AST Interpreter - Debug Tests", () => {
 			message = "Hello " + name
 			print(message)
 		`);
-		
+
 		// Let's see what actually happens
 		console.log("Variables:", result.variables);
 		console.log("Outputs:", result.outputs);
 	});
 
 	it("should debug input handling", () => {
-		const result = debugProgram(`
+		const result = debugProgram(
+			`
 			name = input("Name?")
 			print("Hello " + name)
-		`, ["Alice"]);
-		
+		`,
+			["Alice"],
+		);
+
 		console.log("Variables:", result.variables);
 		console.log("Outputs:", result.outputs);
 	});
@@ -70,7 +73,7 @@ describe("AST Interpreter - Debug Tests", () => {
 			x = 5
 			y = x + 3
 		`);
-		
+
 		console.log("Variables:", result.variables);
 	});
 });

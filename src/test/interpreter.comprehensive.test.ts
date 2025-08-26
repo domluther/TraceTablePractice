@@ -5,11 +5,11 @@ import type { Program } from "@/lib/astInterpreter";
 
 /**
  * AST Interpreter Test Suite
- * 
+ *
  * This comprehensive test suite validates the AST interpreter functionality
  * that is working correctly. It tests the core features needed for trace table
  * practice while documenting known limitations.
- * 
+ *
  * ✅ WORKING FEATURES:
  * - Basic arithmetic operations (+, -, *, /, MOD, DIV, ^)
  * - Variable assignments and retrieval
@@ -21,12 +21,12 @@ import type { Program } from "@/lib/astInterpreter";
  * - Trace step generation
  * - Array access and operations
  * - Mathematical expressions with variables
- * 
+ *
  * 🐛 KNOWN ISSUES (to be fixed):
  * - String concatenation with variables doesn't work correctly
  * - Mixed string/number expressions may not evaluate properly
  * - String methods (.upper, .lower, etc.) not implemented
- * 
+ *
  * The working functionality is sufficient for most GCSE Computer Science
  * trace table exercises that focus on mathematical computation.
  */
@@ -34,34 +34,34 @@ import type { Program } from "@/lib/astInterpreter";
 // Helper functions
 function runProgram(programDef: any, inputs: string[] = []) {
 	const interpreter = new ASTInterpreter();
-	const program: Program = { 
-		code: programDef.code, 
+	const program: Program = {
+		code: programDef.code,
 		description: programDef.description,
-		inputs: inputs.length > 0 ? inputs : programDef.inputs
+		inputs: inputs.length > 0 ? inputs : programDef.inputs,
 	};
-	
+
 	const result = interpreter.executeProgram(programDef.code, program);
 	const lastStep = result.trace[result.trace.length - 1];
-	
+
 	return {
 		variables: lastStep?.variables || {},
 		outputs: result.outputs,
 		trace: result.trace,
-		allVariables: result.variables
+		allVariables: result.variables,
 	};
 }
 
 function executeCode(code: string, inputs: string[] = []) {
 	const interpreter = new ASTInterpreter();
 	const program: Program = { code, description: "test", inputs };
-	
+
 	const result = interpreter.executeProgram(code, program);
 	const lastStep = result.trace[result.trace.length - 1];
-	
+
 	return {
 		variables: lastStep?.variables || {},
 		outputs: result.outputs,
-		trace: result.trace
+		trace: result.trace,
 	};
 }
 
@@ -73,17 +73,17 @@ describe("AST Interpreter - Core Arithmetic", () => {
 			add = a + b
 			sub = a - b
 			mul = a * b
-			div = a / b
-			mod = a MOD b
+			division = a / b
+			modulo = a MOD b
 			intDiv = a DIV b
 			pow = b ^ 2
 		`);
-		
+
 		expect(result.variables.add).toBe(13);
 		expect(result.variables.sub).toBe(7);
 		expect(result.variables.mul).toBe(30);
-		expect(result.variables.div).toBeCloseTo(3.333, 2);
-		expect(result.variables.mod).toBe(1);
+		expect(result.variables.division).toBeCloseTo(3.333, 2);
+		expect(result.variables.modulo).toBe(1);
 		expect(result.variables.intDiv).toBe(3);
 		expect(result.variables.pow).toBe(9);
 	});
@@ -95,10 +95,10 @@ describe("AST Interpreter - Core Arithmetic", () => {
 			result3 = 10 - 6 / 2
 			result4 = 2 ^ 3 * 4
 		`);
-		
+
 		expect(result.variables.result1).toBe(14); // 2 + (3 * 4) = 14
 		expect(result.variables.result2).toBe(10); // (2 * 3) + 4 = 10
-		expect(result.variables.result3).toBe(7);  // 10 - (6 / 2) = 7
+		expect(result.variables.result3).toBe(7); // 10 - (6 / 2) = 7
 		expect(result.variables.result4).toBe(32); // (2 ^ 3) * 4 = 32
 	});
 
@@ -109,10 +109,10 @@ describe("AST Interpreter - Core Arithmetic", () => {
 			result3 = (10 - 6) / 2
 			result4 = 2 ^ (3 + 1)
 		`);
-		
+
 		expect(result.variables.result1).toBe(20); // (2 + 3) * 4 = 20
 		expect(result.variables.result2).toBe(14); // 2 * (3 + 4) = 14
-		expect(result.variables.result3).toBe(2);  // (10 - 6) / 2 = 2
+		expect(result.variables.result3).toBe(2); // (10 - 6) / 2 = 2
 		expect(result.variables.result4).toBe(16); // 2 ^ (3 + 1) = 16
 	});
 
@@ -123,7 +123,7 @@ describe("AST Interpreter - Core Arithmetic", () => {
 			c = 2
 			result = ((a + b) * c) / (a - c)
 		`);
-		
+
 		expect(result.variables.result).toBeCloseTo(5.333, 2); // ((5+3)*2)/(5-2) = 16/3
 	});
 
@@ -133,7 +133,7 @@ describe("AST Interpreter - Core Arithmetic", () => {
 			width = 5
 			perimeter = 2 * (length + width)
 		`);
-		
+
 		expect(result.variables.perimeter).toBe(30);
 	});
 });
@@ -146,7 +146,7 @@ describe("AST Interpreter - Variables and Assignments", () => {
 			x = x * 2
 			z = x + y
 		`);
-		
+
 		expect(result.variables.x).toBe(20); // 10 * 2
 		expect(result.variables.y).toBe(15); // 10 + 5
 		expect(result.variables.z).toBe(35); // 20 + 15
@@ -160,7 +160,7 @@ describe("AST Interpreter - Variables and Assignments", () => {
 			a = b
 			b = temp
 		`);
-		
+
 		expect(result.variables.a).toBe(200);
 		expect(result.variables.b).toBe(100);
 		expect(result.variables.temp).toBe(100);
@@ -174,21 +174,24 @@ describe("AST Interpreter - Variables and Assignments", () => {
 			discountedPrice = price * (1 - discount)
 			finalPrice = discountedPrice * (1 + tax)
 		`);
-		
-		expect(result.variables.discountedPrice).toBe(90);  // 100 * 0.9
-		expect(result.variables.finalPrice).toBe(108);      // 90 * 1.2
+
+		expect(result.variables.discountedPrice).toBe(90); // 100 * 0.9
+		expect(result.variables.finalPrice).toBe(108); // 90 * 1.2
 	});
 });
 
 describe("AST Interpreter - Type Conversions", () => {
 	it("should handle int() conversions", () => {
-		const result = executeCode(`
+		const result = executeCode(
+			`
 			floatNum = 3.7
 			result1 = int(floatNum)
 			result2 = int("42")
 			result3 = int(5.9)
-		`, []);
-		
+		`,
+			[],
+		);
+
 		expect(result.variables.result1).toBe(3);
 		expect(result.variables.result2).toBe(42);
 		expect(result.variables.result3).toBe(5);
@@ -199,7 +202,7 @@ describe("AST Interpreter - Type Conversions", () => {
 			number = 42
 			result = str(number)
 		`);
-		
+
 		expect(result.variables.result).toBe("42");
 	});
 
@@ -209,7 +212,7 @@ describe("AST Interpreter - Type Conversions", () => {
 			result1 = float(intNum)
 			result2 = float("3.14")
 		`);
-		
+
 		expect(result.variables.result1).toBe(5.0);
 		expect(result.variables.result2).toBe(3.14);
 	});
@@ -223,7 +226,7 @@ describe("AST Interpreter - Arrays", () => {
 			third = numbers[2]
 			last = numbers[4]
 		`);
-		
+
 		expect(result.variables.first).toBe(10);
 		expect(result.variables.third).toBe(30);
 		expect(result.variables.last).toBe(50);
@@ -237,7 +240,7 @@ describe("AST Interpreter - Arrays", () => {
 			value1 = data[index1]
 			value2 = data[index2]
 		`);
-		
+
 		expect(result.variables.value1).toBe(100);
 		expect(result.variables.value2).toBe(300);
 	});
@@ -249,20 +252,23 @@ describe("AST Interpreter - Arrays", () => {
 			product = values[0] * values[1]
 			average = sum / 3
 		`);
-		
-		expect(result.variables.sum).toBe(30);      // 5 + 10 + 15
-		expect(result.variables.product).toBe(50);   // 5 * 10
-		expect(result.variables.average).toBe(10);   // 30 / 3
+
+		expect(result.variables.sum).toBe(30); // 5 + 10 + 15
+		expect(result.variables.product).toBe(50); // 5 * 10
+		expect(result.variables.average).toBe(10); // 30 / 3
 	});
 });
 
 describe("AST Interpreter - Input and Output", () => {
 	it("should handle input() function correctly", () => {
-		const result = executeCode(`
+		const result = executeCode(
+			`
 			value1 = input("Enter number:")
 			value2 = int(input("Enter integer:"))
-		`, ["42", "100"]);
-		
+		`,
+			["42", "100"],
+		);
+
 		expect(result.variables.value1).toBe("42");
 		expect(result.variables.value2).toBe(100);
 	});
@@ -275,7 +281,7 @@ describe("AST Interpreter - Input and Output", () => {
 			print(b)
 			print(a + b)
 		`);
-		
+
 		expect(result.outputs).toContain("42");
 		expect(result.outputs).toContain("3.14");
 		expect(result.outputs).toContain("45.14");
@@ -288,9 +294,9 @@ describe("AST Interpreter - Input and Output", () => {
 			print(x * y)
 			print(x + y * 2)
 		`);
-		
-		expect(result.outputs).toContain("15");  // 5 * 3
-		expect(result.outputs).toContain("11");  // 5 + (3 * 2)
+
+		expect(result.outputs).toContain("15"); // 5 * 3
+		expect(result.outputs).toContain("11"); // 5 + (3 * 2)
 	});
 });
 
@@ -302,9 +308,9 @@ describe("AST Interpreter - Trace Generation", () => {
 			c = a + b
 			print(c)
 		`);
-		
+
 		expect(result.trace.length).toBe(4); // One step for each line
-		
+
 		// Check that variables accumulate correctly through trace
 		expect(result.trace[0].variables.a).toBe(5);
 		expect(result.trace[1].variables.b).toBe(10);
@@ -317,7 +323,7 @@ describe("AST Interpreter - Trace Generation", () => {
 			y = 2
 			z = x + y
 		`);
-		
+
 		expect(result.trace[0].lineNumber).toBe(1);
 		expect(result.trace[1].lineNumber).toBe(2);
 		expect(result.trace[2].lineNumber).toBe(3);
@@ -329,7 +335,7 @@ describe("AST Interpreter - Trace Generation", () => {
 			counter = counter + 1
 			counter = counter * 2
 		`);
-		
+
 		expect(result.trace[0].variables.counter).toBe(0);
 		expect(result.trace[1].variables.counter).toBe(1);
 		expect(result.trace[2].variables.counter).toBe(2);
@@ -340,7 +346,7 @@ describe("AST Interpreter - Real Programs", () => {
 	it("should handle the basic addition program from programs.ts", () => {
 		const program = programs.easy[0];
 		const result = runProgram(program);
-		
+
 		expect(result.variables.a).toBe(5);
 		expect(result.variables.b).toBe(3);
 		expect(result.variables.c).toBe(8);
@@ -349,13 +355,16 @@ describe("AST Interpreter - Real Programs", () => {
 
 	it("should handle arithmetic programs without string concatenation", () => {
 		// Test programs that do pure arithmetic
-		const arithmeticPrograms = programs.easy.filter(p => 
-			!p.code.includes('"') &&  // No strings
-			(p.code.includes('+') || p.code.includes('*') || p.code.includes('-')) &&
-			!p.code.includes('for ') && 
-			!p.code.includes('while ')
+		const arithmeticPrograms = programs.easy.filter(
+			(p) =>
+				!p.code.includes('"') && // No strings
+				(p.code.includes("+") ||
+					p.code.includes("*") ||
+					p.code.includes("-")) &&
+				!p.code.includes("for ") &&
+				!p.code.includes("while "),
 		);
-		
+
 		arithmeticPrograms.slice(0, 3).forEach((program) => {
 			const result = runProgram(program);
 			expect(result.trace.length).toBeGreaterThan(0);
@@ -365,19 +374,20 @@ describe("AST Interpreter - Real Programs", () => {
 
 	it("should handle programs with numeric input and calculation", () => {
 		// Find programs that use int(input()) for calculations
-		const calcPrograms = programs.easy.filter(p => 
-			p.code.includes('int(input(') && 
-			!p.code.includes('for ') && 
-			!p.code.includes('while ')
+		const calcPrograms = programs.easy.filter(
+			(p) =>
+				p.code.includes("int(input(") &&
+				!p.code.includes("for ") &&
+				!p.code.includes("while "),
 		);
-		
+
 		if (calcPrograms.length > 0) {
 			const program = calcPrograms[0];
 			const inputs = program.inputSets ? program.inputSets[0] : ["10", "20"];
 			const result = runProgram(program, inputs);
-			
+
 			expect(result.trace.length).toBeGreaterThan(0);
-			if (program.code.includes('print')) {
+			if (program.code.includes("print")) {
 				expect(result.outputs.length).toBeGreaterThan(0);
 			}
 		}
@@ -393,7 +403,7 @@ describe("AST Interpreter - Edge Cases", () => {
 			product = a * b
 			quotient = b / (a + 1)
 		`);
-		
+
 		expect(result.variables.sum).toBe(5);
 		expect(result.variables.product).toBe(0);
 		expect(result.variables.quotient).toBe(5);
@@ -407,7 +417,7 @@ describe("AST Interpreter - Edge Cases", () => {
 			product = a * b
 			absolute = a * -1
 		`);
-		
+
 		expect(result.variables.sum).toBe(-2);
 		expect(result.variables.product).toBe(-15);
 		expect(result.variables.absolute).toBe(5);
@@ -420,7 +430,7 @@ describe("AST Interpreter - Edge Cases", () => {
 			sum = a + b
 			product = a * b
 		`);
-		
+
 		expect(result.variables.sum).toBeCloseTo(5.7, 1);
 		expect(result.variables.product).toBeCloseTo(7.7, 1);
 	});
@@ -433,22 +443,25 @@ describe("AST Interpreter - Known Limitations", () => {
 			name = "World"
 			greeting = "Hello " + name
 		`);
-		
+
 		// Currently this produces "Hello 0" instead of "Hello World"
 		expect(result.variables.greeting).toBe("Hello 0");
-		
+
 		// TODO: Fix string concatenation to make this pass:
 		// expect(result.variables.greeting).toBe("Hello World");
 	});
 
 	it("should show that input values are received correctly", () => {
 		// Input values are received properly, the issue is in string operations
-		const result = executeCode(`
+		const result = executeCode(
+			`
 			name = input("Name?")
 			age = int(input("Age?"))
-		`, ["Alice", "25"]);
-		
-		expect(result.variables.name).toBe("Alice");  // This works
-		expect(result.variables.age).toBe(25);         // This works
+		`,
+			["Alice", "25"],
+		);
+
+		expect(result.variables.name).toBe("Alice"); // This works
+		expect(result.variables.age).toBe(25); // This works
 	});
 });
