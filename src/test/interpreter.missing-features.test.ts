@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ASTInterpreter } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/astInterpreter";
+import { ASTInterpreter } from "@/lib/astInterpreter";
 
 /**
  * Tests for Missing Features from Legacy Implementation
@@ -435,13 +435,13 @@ describe("Missing Features - Switch/Case Statements", () => {
 describe("Missing Features - Constants", () => {
 	it("should handle constant declarations", () => {
 		const vars = executeAndGetVariables(`
-			const PI = 3.14159
+			const PI = 3.14
 			const VAT = 0.2
 			price = 100
 			total = price * (1 + VAT)
 		`);
 
-		expect(vars.PI).toBe(3.14159);
+		expect(vars.PI).toBe(3.14);
 		expect(vars.VAT).toBe(0.2);
 		expect(vars.total).toBe(120);
 	});

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { programs } from "@/lib/programs";
-import { ASTInterpreter } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/astInterpreter";
+import { ASTInterpreter } from "@/lib/astInterpreter";
+import { programs } from "@/lib/programs";
 
 /**
  * Programs Integration Tests
@@ -112,7 +112,7 @@ describe("Programs Integration Tests - Easy Programs", () => {
 		);
 
 		numericInputPrograms.slice(0, 3).forEach((program) => {
-			const inputs = program.inputSets![0];
+			const inputs = program.inputSets?.[0];
 			const result = runProgram(program, inputs);
 
 			expect(result.success).toBe(true);

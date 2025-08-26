@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { ASTInterpreter } from "@/lib/astInterpreter";
-import { programs } from "@/lib/programs";
-import type { Program as ProgramDefinition } from "@/lib/programs";
 import type { Program } from "@/lib/astInterpreter";
+import { ASTInterpreter } from "@/lib/astInterpreter";
+import type { Program as ProgramDefinition } from "@/lib/programs";
+import { programs } from "@/lib/programs";
 
 /**
  * Integration Tests for AST Interpreter
@@ -154,7 +154,7 @@ describe("Integration Tests - Specific Program Validations", () => {
 		const inputProgram = programs.easy.find(
 			(p) => p.inputSets && p.inputSets.length > 0,
 		);
-		if (inputProgram && inputProgram.inputSets) {
+		if (inputProgram?.inputSets) {
 			const result = executeProgram(inputProgram, inputProgram.inputSets[0]);
 
 			// Should have executed without errors and produced outputs
@@ -221,7 +221,7 @@ describe("Integration Tests - Program Output Validation", () => {
 				p.code.includes("Hello"),
 		);
 
-		if (greetingProgram && greetingProgram.inputSets) {
+		if (greetingProgram?.inputSets) {
 			const result = executeProgram(
 				greetingProgram,
 				greetingProgram.inputSets[0],

@@ -1,11 +1,36 @@
 // Comprehensive Interpreter for OCR ERL Trace Table Practice
 // Converted from the legacy JavaScript interpreter with TypeScript types added
 
+// Define the possible types that ERL variables can hold
+export type VariableValue =
+	| number
+	| string
+	| boolean
+	| Array<number | string | boolean>
+	| undefined;
+
+// Helper functions for safe type conversion
+function safeParseInt(value: VariableValue, radix?: number): number {
+	const stringValue = value !== undefined ? String(value) : "0";
+	const result = parseInt(stringValue, radix);
+	return Number.isNaN(result) ? 0 : result;
+}
+
+function safeParseFloat(value: VariableValue): number {
+	const stringValue = value !== undefined ? String(value) : "0";
+	const result = parseFloat(stringValue);
+	return Number.isNaN(result) ? 0 : result;
+}
+
+function safeToString(value: VariableValue): string {
+	return value !== undefined ? String(value) : "";
+}
+
 export interface TraceStep {
 	lineNumber: number;
-	variables: Record<string, any>;
+	variables: Record<string, VariableValue>;
 	output: string;
-	changedVariables: Record<string, any>;
+	changedVariables: Record<string, VariableValue>;
 }
 
 export interface ExecutionResult {
@@ -26,14 +51,12 @@ export interface Program {
  * Converted from the battle-tested legacy JavaScript interpreter
  */
 export class ASTInterpreter {
-	private variables: Record<string, any> = {};
+	private variables: Record<string, VariableValue> = {};
 	private constants: Record<string, boolean> = {}; // Track which variables are constants
 	private outputs: string[] = [];
 	private trace: TraceStep[] = [];
 	private inputs: string[] = [];
 	private inputIndex = 0;
-	private currentProgram: Program | null = null;
-	private programLines: string[] = [];
 	private randomValue?: number | string;
 
 	reset(): void {
@@ -43,7 +66,6 @@ export class ASTInterpreter {
 		this.trace = [];
 		this.inputs = [];
 		this.inputIndex = 0;
-		this.currentProgram = null;
 	}
 
 	// Convenience method for executing code without a program object
@@ -62,7 +84,6 @@ export class ASTInterpreter {
 			.split("\n")
 			.map((l) => l.trim())
 			.filter((l) => l.length > 0);
-		this.programLines = lines;
 
 		this.executeBlock(lines, 0, lines.length);
 
@@ -83,7 +104,6 @@ export class ASTInterpreter {
 			.split("\n")
 			.map((line) => line.trim())
 			.filter((line) => line.length > 0);
-		this.programLines = lines;
 
 		this.executeBlock(lines, 0, lines.length);
 
@@ -114,9 +134,9 @@ export class ASTInterpreter {
 
 	private addTraceEntry(
 		lineNum: number,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 		output = "",
-		changedVariables: Record<string, any> = {},
+		changedVariables: Record<string, VariableValue> = {},
 	): void {
 		this.trace.push({
 			lineNumber: lineNum,
@@ -128,16 +148,15 @@ export class ASTInterpreter {
 
 	private executeStatement(
 		line: string,
-		lineNum: number,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): {
 		output: string;
 		shouldTrace: boolean;
-		changedVariables: Record<string, any>;
+		changedVariables: Record<string, VariableValue>;
 	} {
 		let output = "";
 		const shouldTrace = true;
-		const changeRecord: Record<string, any> = {}; // Track which variables actually change
+		const changeRecord: Record<string, VariableValue> = {}; // Track which variables actually change
 
 		if (line.startsWith("array ")) {
 			// Array declaration with initialization like "array scores = [85, 92, 78, 90]"
@@ -146,7 +165,7 @@ export class ASTInterpreter {
 				const arrayName = initMatch[1];
 				const arrayElements = initMatch[2].split(",").map((s) => {
 					const trimmed = s.trim();
-					return !isNaN(parseFloat(trimmed))
+					return !Number.isNaN(parseFloat(trimmed))
 						? parseFloat(trimmed)
 						: trimmed.replace(/"/g, "");
 				});
@@ -163,7 +182,7 @@ export class ASTInterpreter {
 				const match = line.match(/array\s+(\w+)\[(\d+)\]/);
 				if (match) {
 					const arrayName = match[1];
-					const size = parseInt(match[2]);
+					const size = parseInt(match[2], 10);
 					vars[arrayName] = new Array(size).fill(0);
 					// Don't add to changeRecord - empty array declarations shouldn't be traced
 				}
@@ -200,7 +219,7 @@ export class ASTInterpreter {
 			) {
 				// Handle type conversion functions and special functions
 				const result = this.evaluateExpression(content, vars);
-				output = result.toString();
+				output = safeToString(result);
 			} else if (
 				content.includes(".upper") ||
 				content.includes(".lower") ||
@@ -216,11 +235,6 @@ export class ASTInterpreter {
 				output = this.evaluateArithmeticExpression(content, vars).toString();
 			} else if (vars[content] !== undefined) {
 				output = vars[content].toString();
-			} else if (content.startsWith("str(") && content.endsWith(")")) {
-				const varName = content.substring(4, content.length - 1);
-				if (vars[varName] !== undefined) {
-					output = vars[varName].toString();
-				}
 			} else {
 				// Fallback: if nothing else matches, treat as string concatenation
 				output = this.evaluateStringConcatenation(content, vars);
@@ -293,25 +307,30 @@ export class ASTInterpreter {
 
 					let index: number;
 					if (/^\d+$/.test(indexStr)) {
-						index = parseInt(indexStr);
+						index = parseInt(indexStr, 10);
 					} else if (vars[indexStr] !== undefined) {
-						index = parseInt(vars[indexStr]);
+						const indexValue = vars[indexStr];
+						index = parseInt(String(indexValue), 10);
 					} else {
 						index = 0;
 					}
-
 					const newValue = this.evaluateExpression(value, vars);
 
 					// Only record as changed if the value actually changed
-					const oldValue = vars[arrayName] && vars[arrayName][index];
+					const oldValue = vars[arrayName]?.[index];
 					if (oldValue !== newValue) {
 						changeRecord[`${arrayName}[${index}]`] = newValue;
 					}
-					vars[arrayName][index] = newValue;
+					// Ensure we have a valid value for array assignment
+					const validValue = newValue !== undefined ? newValue : 0;
+					if (Array.isArray(vars[arrayName])) {
+						(vars[arrayName] as Array<number | string | boolean>)[index] =
+							validValue as number | string | boolean;
+					}
 				}
 			} else {
 				// Regular assignment - handle different expression types
-				let newValue: any;
+				let newValue: VariableValue;
 
 				// Check for type conversion functions first (they can contain string concatenation)
 				if (
@@ -355,7 +374,10 @@ export class ASTInterpreter {
 	}
 
 	// Helper function to get value from variable or array access
-	private getVariableValue(operand: string, vars: Record<string, any>): any {
+	private getVariableValue(
+		operand: string,
+		vars: Record<string, VariableValue>,
+	): VariableValue {
 		if (operand.includes("[") && operand.includes("]")) {
 			// Array access like nums[i] or nums[0]
 			const arrayMatch = operand.match(/(\w+)\[(\w+|\d+)\]/);
@@ -368,16 +390,16 @@ export class ASTInterpreter {
 					// Check if index is a literal number or a variable
 					if (/^\d+$/.test(indexStr)) {
 						// Literal index like [0], [1], etc.
-						index = parseInt(indexStr);
+						index = parseInt(indexStr, 10);
 					} else {
 						// Variable index like [i], [counter], etc.
 						if (vars[indexStr] !== undefined) {
-							index = parseInt(vars[indexStr]);
+							const indexValue = vars[indexStr];
+							index = parseInt(String(indexValue), 10);
 						} else {
 							return undefined;
 						}
 					}
-
 					if (index >= 0 && index < vars[arrayName].length) {
 						return vars[arrayName][index];
 					} else {
@@ -397,7 +419,7 @@ export class ASTInterpreter {
 
 	private isStringConcatenation(
 		value: string,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): boolean {
 		// Check if the expression is a string concatenation
 
@@ -491,7 +513,7 @@ export class ASTInterpreter {
 
 	private evaluateStringConcatenation(
 		value: string,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): string {
 		// Handle single function calls that aren't part of concatenation
 		if (value.startsWith("ASC(") && value.endsWith(")")) {
@@ -514,7 +536,7 @@ export class ASTInterpreter {
 				const argument = part.slice(4, -1).trim();
 				if (vars[argument] !== undefined) {
 					result += vars[argument].toString();
-				} else if (!isNaN(parseFloat(argument))) {
+				} else if (!Number.isNaN(parseFloat(argument))) {
 					result += argument.toString();
 				} else {
 					// Could be an expression
@@ -631,7 +653,7 @@ export class ASTInterpreter {
 	 */
 	private evaluateASCFunction(
 		argument: string,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): number {
 		argument = argument.trim();
 		let charValue: string;
@@ -641,13 +663,13 @@ export class ASTInterpreter {
 			charValue = argument.slice(1, -1);
 		} else if (vars[argument] !== undefined) {
 			// Variable like ASC(letter)
-			charValue = vars[argument].toString();
+			const varValue = vars[argument];
+			charValue = varValue !== undefined ? varValue.toString() : "";
 		} else {
 			// Could be an expression or method call
 			const result = this.evaluateExpressionOrVariable(argument, vars);
-			charValue = result.toString();
+			charValue = safeToString(result);
 		}
-
 		if (charValue && charValue.length > 0) {
 			return charValue.charCodeAt(0);
 		}
@@ -659,23 +681,23 @@ export class ASTInterpreter {
 	 */
 	private evaluateCHRFunction(
 		argument: string,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): string {
 		argument = argument.trim();
 		let asciiValue: number;
 
-		if (!isNaN(parseFloat(argument))) {
+		if (!Number.isNaN(parseFloat(argument))) {
 			// Numeric literal like CHR(65)
-			asciiValue = parseInt(argument);
+			asciiValue = parseInt(argument, 10);
 		} else if (vars[argument] !== undefined) {
 			// Variable like CHR(ascii_val)
-			asciiValue = parseInt(vars[argument]);
+			const varValue = vars[argument];
+			asciiValue = parseInt(String(varValue), 10);
 		} else {
 			// Could be an expression like CHR(ascii_value + 1)
 			asciiValue = this.evaluateArithmeticExpression(argument, vars);
 		}
-
-		if (!isNaN(asciiValue)) {
+		if (!Number.isNaN(asciiValue)) {
 			return String.fromCharCode(asciiValue);
 		}
 		return "";
@@ -686,7 +708,7 @@ export class ASTInterpreter {
 	 */
 	private evaluateStringMethod(
 		expression: string,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): string | number {
 		if (expression.includes(".left(")) {
 			const match = expression.match(/(\w+)\.left\(([^)]+)\)/);
@@ -695,13 +717,17 @@ export class ASTInterpreter {
 				const lengthParam = match[2].trim();
 				let length: number;
 				if (vars[lengthParam] !== undefined) {
-					length = parseInt(vars[lengthParam]);
-				} else if (!isNaN(parseInt(lengthParam))) {
-					length = parseInt(lengthParam);
+					const lengthValue = vars[lengthParam];
+					length = parseInt(String(lengthValue), 10);
+				} else if (!Number.isNaN(parseInt(lengthParam, 10))) {
+					length = parseInt(lengthParam, 10);
 				} else {
 					length = 1;
 				}
-				return vars[varName].toString().substring(0, length);
+				const varValue = vars[varName];
+				return varValue !== undefined
+					? varValue.toString().substring(0, length)
+					: "";
 			}
 		} else if (expression.includes(".right(")) {
 			const match = expression.match(/(\w+)\.right\(([^)]+)\)/);
@@ -710,14 +736,18 @@ export class ASTInterpreter {
 				const lengthParam = match[2].trim();
 				let length: number;
 				if (vars[lengthParam] !== undefined) {
-					length = parseInt(vars[lengthParam]);
-				} else if (!isNaN(parseInt(lengthParam))) {
-					length = parseInt(lengthParam);
+					const lengthValue = vars[lengthParam];
+					length = parseInt(String(lengthValue), 10);
+				} else if (!Number.isNaN(parseInt(lengthParam, 10))) {
+					length = parseInt(lengthParam, 10);
 				} else {
 					length = 1;
 				}
-				const str = vars[varName].toString();
-				return str.substring(str.length - length);
+				const varValue = vars[varName];
+				if (varValue !== undefined) {
+					const str = varValue.toString();
+					return str.substring(str.length - length);
+				}
 			}
 		} else if (expression.includes(".substring(")) {
 			const match = expression.match(/(\w+)\.substring\(([^,]+),\s*([^)]+)\)/);
@@ -729,25 +759,31 @@ export class ASTInterpreter {
 				// Parse start parameter (could be variable or literal)
 				let start = 0;
 				if (vars[startParam] !== undefined) {
-					start = parseInt(vars[startParam]);
-				} else if (!isNaN(parseInt(startParam))) {
-					start = parseInt(startParam);
+					const startValue = vars[startParam];
+					start = parseInt(String(startValue), 10);
+				} else if (!Number.isNaN(parseInt(startParam, 10))) {
+					start = parseInt(startParam, 10);
 				}
 
 				// Parse length parameter (could be variable or literal)
 				let length = 1;
 				if (vars[lengthParam] !== undefined) {
-					length = parseInt(vars[lengthParam]);
-				} else if (!isNaN(parseInt(lengthParam))) {
-					length = parseInt(lengthParam);
+					const lengthValue = vars[lengthParam];
+					length = parseInt(String(lengthValue), 10);
+				} else if (!Number.isNaN(parseInt(lengthParam, 10))) {
+					length = parseInt(lengthParam, 10);
 				}
 
-				return vars[sourceVar].toString().substring(start, start + length);
+				const sourceValue = vars[sourceVar];
+				return sourceValue !== undefined
+					? sourceValue.toString().substring(start, start + length)
+					: "";
 			}
 		} else if (expression.includes(".upper")) {
 			const varName = expression.split(".")[0];
 			if (vars[varName] !== undefined) {
-				return vars[varName].toString().toUpperCase();
+				const varValue = vars[varName];
+				return varValue !== undefined ? varValue.toString().toUpperCase() : "";
 			}
 		} else if (expression.includes(".lower")) {
 			const varName = expression.split(".")[0];
@@ -769,8 +805,8 @@ export class ASTInterpreter {
 
 	private evaluateExpression(
 		expression: string,
-		vars: Record<string, any>,
-	): any {
+		vars: Record<string, VariableValue>,
+	): VariableValue {
 		// Handle type conversions and simple expressions
 		expression = expression.trim();
 
@@ -793,7 +829,7 @@ export class ASTInterpreter {
 				} else {
 					return false;
 				}
-			} else if (!isNaN(parseFloat(inner))) {
+			} else if (!Number.isNaN(parseFloat(inner))) {
 				// Numeric literal
 				return parseFloat(inner) !== 0;
 			} else {
@@ -807,19 +843,19 @@ export class ASTInterpreter {
 			if (inner.startsWith("input(")) {
 				// Handle int(input()) case
 				const inputValue = this.evaluateExpression(inner, vars);
-				return parseInt(inputValue);
+				return safeParseInt(inputValue, 10);
 			} else if (inner.startsWith('"') && inner.endsWith('"')) {
 				// String literal
 				const strValue = inner.slice(1, -1);
-				return parseInt(strValue);
+				return parseInt(strValue, 10);
 			} else if (vars[inner] !== undefined) {
-				return parseInt(vars[inner]);
-			} else if (!isNaN(parseFloat(inner))) {
-				return parseInt(inner);
+				return safeParseInt(vars[inner], 10);
+			} else if (!Number.isNaN(parseFloat(inner))) {
+				return parseInt(inner, 10);
 			} else {
 				// Handle complex expressions like int(a + b + 0.5)
 				const value = this.evaluateExpression(inner, vars);
-				return parseInt(String(value));
+				return parseInt(String(value), 10);
 			}
 		}
 
@@ -835,14 +871,14 @@ export class ASTInterpreter {
 			if (inner.startsWith("input(")) {
 				// Handle float(input()) case
 				const inputValue = this.evaluateExpression(inner, vars);
-				return parseFloat(inputValue);
+				return safeParseFloat(inputValue);
 			} else if (inner.startsWith('"') && inner.endsWith('"')) {
 				// Handle string literals like float("3.14")
 				const stringValue = inner.slice(1, -1);
 				return parseFloat(stringValue);
 			} else if (vars[inner] !== undefined) {
-				return parseFloat(vars[inner]);
-			} else if (!isNaN(parseFloat(inner))) {
+				return safeParseFloat(vars[inner]);
+			} else if (!Number.isNaN(parseFloat(inner))) {
 				return parseFloat(inner);
 			} else {
 				// Handle complex expressions like float(a + b)
@@ -856,10 +892,10 @@ export class ASTInterpreter {
 			if (inner.startsWith("input(")) {
 				// Handle real(input()) case
 				const inputValue = this.evaluateExpression(inner, vars);
-				return parseFloat(inputValue);
+				return safeParseFloat(inputValue);
 			} else if (vars[inner] !== undefined) {
-				return parseFloat(vars[inner]);
-			} else if (!isNaN(parseFloat(inner))) {
+				return safeParseFloat(vars[inner]);
+			} else if (!Number.isNaN(parseFloat(inner))) {
 				return parseFloat(inner);
 			} else {
 				// Handle complex expressions like real(a + b)
@@ -910,8 +946,8 @@ export class ASTInterpreter {
 				// Parse range and generate random number
 				const parts = args.split(",").map((s) => s.trim());
 				if (parts.length === 2) {
-					const min = parseInt(parts[0]);
-					const max = parseInt(parts[1]);
+					const min = parseInt(parts[0], 10);
+					const max = parseInt(parts[1], 10);
 					return Math.floor(Math.random() * (max - min + 1)) + min;
 				}
 				return 0;
@@ -972,7 +1008,7 @@ export class ASTInterpreter {
 
 	private getExpressionValue(
 		operand: string,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): number {
 		// Handle ASC() function
 		if (operand.startsWith("ASC(") && operand.endsWith(")")) {
@@ -998,18 +1034,20 @@ export class ASTInterpreter {
 					// Check if index is a literal number or a variable
 					if (/^\d+$/.test(indexStr)) {
 						// Literal index like [0], [1], etc.
-						index = parseInt(indexStr);
+						index = parseInt(indexStr, 10);
 					} else {
 						// Variable index like [i], [counter], etc.
 						if (vars[indexStr] !== undefined) {
-							index = parseInt(vars[indexStr]);
+							const indexValue = vars[indexStr];
+							index = parseInt(String(indexValue), 10);
 						} else {
 							return 0;
 						}
 					}
 
 					if (index >= 0 && index < vars[arrayName].length) {
-						return parseFloat(vars[arrayName][index]);
+						const arrayValue = vars[arrayName][index];
+						return parseFloat(String(arrayValue));
 					}
 				}
 			}
@@ -1018,11 +1056,12 @@ export class ASTInterpreter {
 
 		// Handle regular variables
 		if (vars[operand] !== undefined) {
-			return parseFloat(vars[operand]);
+			const varValue = vars[operand];
+			return parseFloat(String(varValue));
 		}
 
 		// Handle numeric literals
-		if (!isNaN(parseFloat(operand))) {
+		if (!Number.isNaN(parseFloat(operand))) {
 			return parseFloat(operand);
 		}
 
@@ -1031,7 +1070,7 @@ export class ASTInterpreter {
 
 	private evaluateArithmeticExpression(
 		expression: string,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): number {
 		// Normalize whitespace around word operators
 		expression = expression.replace(/\s*\bMOD\b\s*/g, " MOD ");
@@ -1129,7 +1168,7 @@ export class ASTInterpreter {
 	private handleLeftToRightOperators(
 		expression: string,
 		operators: string[],
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 	): string {
 		let changed = true;
 		while (changed) {
@@ -1261,7 +1300,7 @@ export class ASTInterpreter {
 
 	private evaluateCondition(
 		condition: string,
-		vars: Record<string, any>,
+		vars: Record<string, VariableValue>,
 		recursionDepth: number = 0,
 	): boolean {
 		// Prevent infinite recursion in condition evaluation
@@ -1312,19 +1351,22 @@ export class ASTInterpreter {
 				const leftVal = this.evaluateExpressionOrVariable(left, vars);
 				const rightVal = this.evaluateExpressionOrVariable(right, vars);
 
+				const leftNum = leftVal !== undefined ? Number(leftVal) : 0;
+				const rightNum = rightVal !== undefined ? Number(rightVal) : 0;
+
 				switch (operator) {
 					case ">=":
-						return leftVal >= rightVal;
+						return leftNum >= rightNum;
 					case "<=":
-						return leftVal <= rightVal;
+						return leftNum <= rightNum;
 					case "==":
 						return leftVal === rightVal;
 					case "!=":
 						return leftVal !== rightVal;
 					case ">":
-						return leftVal > rightVal;
+						return leftNum > rightNum;
 					case "<":
-						return leftVal < rightVal;
+						return leftNum < rightNum;
 				}
 			}
 		}
@@ -1334,8 +1376,8 @@ export class ASTInterpreter {
 
 	private evaluateExpressionOrVariable(
 		expression: string,
-		vars: Record<string, any>,
-	): any {
+		vars: Record<string, VariableValue>,
+	): VariableValue {
 		// Helper function to evaluate expressions or variables in conditions
 		expression = expression.trim();
 
@@ -1398,7 +1440,7 @@ export class ASTInterpreter {
 		}
 
 		// Check if it's a number
-		if (!isNaN(parseFloat(expression))) {
+		if (!Number.isNaN(parseFloat(expression))) {
 			return parseFloat(expression);
 		}
 
@@ -1471,11 +1513,7 @@ export class ASTInterpreter {
 				bodyLine++;
 			} else {
 				// Regular statement
-				const result = this.executeStatement(
-					bodyLineCode,
-					bodyLineNum,
-					this.variables,
-				);
+				const result = this.executeStatement(bodyLineCode, this.variables);
 				if (
 					result.shouldTrace &&
 					(Object.keys(result.changedVariables || {}).length > 0 ||
@@ -1629,6 +1667,7 @@ export class ASTInterpreter {
 		// Execute the do-until loop (execute body at least once, then check condition)
 		let loopIterations = 0;
 		const maxLoopIterations = 1000;
+		let shouldContinue = true;
 
 		do {
 			loopIterations++;
@@ -1647,9 +1686,9 @@ export class ASTInterpreter {
 
 			// Check if condition is met to exit the loop
 			if (this.evaluateCondition(condition, this.variables, 0)) {
-				break;
+				shouldContinue = false;
 			}
-		} while (true);
+		} while (shouldContinue);
 
 		// Return the position after until
 		return untilIndex + 1;
@@ -1667,7 +1706,7 @@ export class ASTInterpreter {
 
 		if (forMatch) {
 			// Pattern with step found
-			stepValue = parseInt(forMatch[4]);
+			stepValue = parseInt(forMatch[4], 10);
 		} else {
 			// Try pattern without step: "for var = start to end"
 			forMatch = line.match(/for\s+(\w+)\s*=\s*(-?\d+)\s+to\s+(-?\d+)/);
@@ -1678,8 +1717,8 @@ export class ASTInterpreter {
 		}
 
 		const loopVar = forMatch[1];
-		const startVal = parseInt(forMatch[2]);
-		const endVal = parseInt(forMatch[3]);
+		const startVal = parseInt(forMatch[2], 10);
+		const endVal = parseInt(forMatch[3], 10);
 
 		// Find the matching next statement
 		let nextLineIndex = -1;
@@ -1716,7 +1755,7 @@ export class ASTInterpreter {
 
 			// Set the loop variable - trace this as if it's an assignment on the for line
 			this.variables[loopVar] = loopVal;
-			const forLineChanges: Record<string, any> = {};
+			const forLineChanges: Record<string, VariableValue> = {};
 			forLineChanges[loopVar] = loopVal;
 			this.addTraceEntry(i + 1, this.variables, "", forLineChanges);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ASTInterpreter } from "../lib/astInterpreter";
 import type { Program } from "../lib/astInterpreter";
+import { ASTInterpreter } from "../lib/astInterpreter";
 
 /**
  * Copy of the first test from the original unit test file to debug the issue

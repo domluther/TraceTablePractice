@@ -16,10 +16,6 @@ export interface ScoreDisplay {
 export class TraceTableScoreManager {
 	private storageKey = "traceTableScores";
 
-	constructor() {
-		// Initialize if needed
-	}
-
 	// Get all scores from localStorage
 	getAllScores(): Record<string, ScoreAttempt[]> {
 		try {

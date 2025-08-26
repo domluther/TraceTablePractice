@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ASTInterpreter } from "../lib/astInterpreter";
 import type { Program } from "../lib/astInterpreter";
+import { ASTInterpreter } from "../lib/astInterpreter";
 
 /**
  * Minimal Unit Tests for AST Interpreter - Debugging Version

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ASTInterpreter, TraceStep } from "@/lib/astInterpreter";
+import type {
+	ASTInterpreter,
+	TraceStep,
+	VariableValue,
+} from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
 
 interface TraceTableBodyProps {
@@ -110,11 +114,10 @@ export function TraceTableBody({
 		const newCellResults: { [key: string]: boolean } = {};
 
 		// Track variable values throughout execution to know when they change
-		const currentValues: Record<string, any> = {};
+		const currentValues: Record<string, VariableValue> = {};
 		programVariables.forEach((varName) => {
 			currentValues[varName] = undefined;
 		});
-
 		let userIndex = 0;
 		const errors: string[] = [];
 
@@ -139,12 +142,10 @@ export function TraceTableBody({
 			// Check if user has an entry for this line
 			if (
 				userIndex < validUserEntries.length &&
-				parseInt(validUserEntries[userIndex].lineNumber) === lineNum
+				parseInt(validUserEntries[userIndex].lineNumber, 10) === lineNum
 			) {
 				const userEntry = validUserEntries[userIndex];
-				const actualUserIndex = userEntries.findIndex(
-					(entry) => entry === userEntry,
-				);
+				const actualUserIndex = userEntries.indexOf(userEntry);
 
 				// Check line number (already correct since we matched it)
 				total++;
@@ -160,7 +161,7 @@ export function TraceTableBody({
 						// Variable should have a value (it changed)
 						// For array elements, get the value from changedVariables
 						// For regular variables, get from currentValues
-						let expectedValue;
+						let expectedValue: VariableValue;
 						if (
 							expectedStep.changedVariables &&
 							expectedStep.changedVariables[varName] !== undefined
@@ -233,9 +234,7 @@ export function TraceTableBody({
 		// Check for extra user entries
 		while (userIndex < validUserEntries.length) {
 			const userEntry = validUserEntries[userIndex];
-			const actualUserIndex = userEntries.findIndex(
-				(entry) => entry === userEntry,
-			);
+			const actualUserIndex = userEntries.indexOf(userEntry);
 
 			errors.push(`Unexpected entry for line ${userEntry.lineNumber}`);
 
@@ -302,15 +301,11 @@ export function TraceTableBody({
 			if (isCorrect) {
 				// Legacy correct styling: --success-bg: #c6f6d5, --success-text: #22543d, --success-border: #9ae6b4
 				baseClass += " !important";
-				return (
-					baseClass + " focus:outline-2 focus:outline-blue-500 focus:bg-blue-50"
-				);
+				return `z${baseClass} focus:outline-2 focus:outline-blue-500 focus:bg-blue-50`;
 			} else {
 				// Legacy incorrect styling: --error-bg: #fed7d7, --error-text: #c53030, --error-border: #feb2b2
 				baseClass += " !important";
-				return (
-					baseClass + " focus:outline-2 focus:outline-blue-500 focus:bg-blue-50"
-				);
+				return `${baseClass} focus:outline-2 focus:outline-blue-500 focus:bg-blue-50`;
 			}
 		} else {
 			baseClass += " focus:outline-2 focus:outline-blue-500 focus:bg-blue-50";
@@ -710,7 +705,7 @@ export function TraceTableBody({
 							>
 								<strong>{feedback.message.split("You got")[0].trim()}</strong>{" "}
 								{feedback.message.includes("You got")
-									? "You got" + feedback.message.split("You got")[1]
+									? `You got ${feedback.message.split("You got")[1]}`
 									: ""}
 							</p>
 							{feedback.details && feedback.details.length > 0 && (

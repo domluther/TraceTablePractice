@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { programs } from "@/lib/programs";
-import { ASTInterpreter } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/astInterpreter";
+import { ASTInterpreter } from "@/lib/astInterpreter";
+import { programs } from "@/lib/programs";
 
 /**
  * Simple Program Tests
@@ -74,7 +74,7 @@ describe("Simple Program Tests", () => {
 			(p) => p.code.includes("input") && p.code.includes("name"),
 		);
 
-		if (nameProgram && nameProgram.inputSets) {
+		if (nameProgram?.inputSets) {
 			const result = runProgram(nameProgram, nameProgram.inputSets[0]);
 			expect(result.success).toBe(true);
 			expect(result.outputs.length).toBeGreaterThan(0);
@@ -96,7 +96,7 @@ describe("Simple Program Tests", () => {
 				!p.code.includes("if "),
 		);
 
-		simplePrograms.slice(0, 3).forEach((program, index) => {
+		simplePrograms.slice(0, 3).forEach((program) => {
 			const result = runProgram(program, program.inputSets?.[0] || []);
 			expect(result.success).toBe(true);
 			expect(result.trace.length).toBeGreaterThan(0);
@@ -114,7 +114,7 @@ describe("Simple Program Tests", () => {
 				!p.code.includes("while "),
 		);
 
-		arithmeticPrograms.slice(0, 2).forEach((program, index) => {
+		arithmeticPrograms.slice(0, 2).forEach((program) => {
 			const result = runProgram(program, program.inputSets?.[0] || []);
 			expect(result.success).toBe(true);
 			if (program.code.includes("print")) {
@@ -132,7 +132,7 @@ describe("Simple Program Tests", () => {
 				!p.code.includes("while "),
 		);
 
-		conversionPrograms.slice(0, 2).forEach((program, index) => {
+		conversionPrograms.slice(0, 2).forEach((program) => {
 			const inputs = program.inputSets?.[0] || [];
 			const result = runProgram(program, inputs);
 			expect(result.success).toBe(true);

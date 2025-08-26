@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { programs } from "@/lib/programs";
-import { ASTInterpreter } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/astInterpreter";
+import { ASTInterpreter } from "@/lib/astInterpreter";
+import { programs } from "@/lib/programs";
 
 /**
  * AST Interpreter Working Functionality Test Suite

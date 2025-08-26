@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { ASTInterpreter } from "@/lib/astInterpreter";
+import { describe, it } from "vitest";
 import type { Program } from "@/lib/astInterpreter";
+import { ASTInterpreter } from "@/lib/astInterpreter";
 
 /**
  * Debug Tests for AST Interpreter
