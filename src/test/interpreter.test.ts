@@ -450,6 +450,6 @@ describe("AST Interpreter - Test Summary", () => {
 		expect(result.variables.z).toBe(20); // 10 + (5 * 2) = 20
 		expect(result.variables.result).toBe(2); // 10 / 5 = 2
 		expect(result.outputs).toContain("2");
-		expect(result.trace.length).toBe(6); // 5 assignments + 1 print
+		expect(result.trace.length).toBe(5); // 4 assignments that change values + 1 print (x = z - x is not traced since x doesn't change)
 	});
 });

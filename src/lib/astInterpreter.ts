@@ -301,8 +301,13 @@ export class ASTInterpreter {
 					}
 
 					const newValue = this.evaluateExpression(value, vars);
+					
+					// Only record as changed if the value actually changed
+					const oldValue = vars[arrayName] && vars[arrayName][index];
+					if (oldValue !== newValue) {
+						changeRecord[`${arrayName}[${index}]`] = newValue;
+					}
 					vars[arrayName][index] = newValue;
-					changeRecord[`${arrayName}[${index}]`] = newValue;
 				}
 			} else {
 				// Regular assignment - handle different expression types
@@ -336,8 +341,13 @@ export class ASTInterpreter {
 				} else {
 					newValue = this.evaluateExpression(value, vars);
 				}
+				
+				// Only record as changed if the value actually changed
+				const oldValue = vars[varName];
+				if (oldValue !== newValue) {
+					changeRecord[varName] = newValue;
+				}
 				vars[varName] = newValue;
-				changeRecord[varName] = newValue;
 			}
 		}
 
@@ -1252,7 +1262,19 @@ export class ASTInterpreter {
 	private evaluateCondition(
 		condition: string,
 		vars: Record<string, any>,
+		recursionDepth: number = 0,
 	): boolean {
+		// Prevent infinite recursion in condition evaluation
+		const maxRecursionDepth = 50;
+		if (recursionDepth > maxRecursionDepth) {
+			console.error(
+				`Maximum recursion depth exceeded in evaluateCondition: ${condition}`,
+			);
+			throw new Error(
+				`Maximum recursion depth exceeded in condition evaluation`,
+			);
+		}
+
 		// Enhanced condition evaluation that handles arithmetic expressions
 
 		// Handle AND operator
@@ -1260,7 +1282,7 @@ export class ASTInterpreter {
 			const parts = condition.split(" AND ");
 			let result = true;
 			for (const part of parts) {
-				if (!this.evaluateCondition(part.trim(), vars)) {
+				if (!this.evaluateCondition(part.trim(), vars, recursionDepth + 1)) {
 					result = false;
 					break;
 				}
@@ -1273,7 +1295,7 @@ export class ASTInterpreter {
 			const parts = condition.split(" OR ");
 			let result = false;
 			for (const part of parts) {
-				if (this.evaluateCondition(part.trim(), vars)) {
+				if (this.evaluateCondition(part.trim(), vars, recursionDepth + 1)) {
 					result = true;
 					break;
 				}
@@ -1499,7 +1521,7 @@ export class ASTInterpreter {
 		}
 
 		// Evaluate conditions and execute the appropriate block
-		let conditionMet = this.evaluateCondition(condition, this.variables);
+		let conditionMet = this.evaluateCondition(condition, this.variables, 0);
 		let executionStart = i + 1;
 		let executionEnd =
 			elseifIndices.length > 0
@@ -1516,7 +1538,7 @@ export class ASTInterpreter {
 					.substring(7, elseifLine.indexOf(" then"))
 					.trim();
 
-				if (this.evaluateCondition(elseifCondition, this.variables)) {
+				if (this.evaluateCondition(elseifCondition, this.variables, 0)) {
 					conditionMet = true;
 					executionStart = elseifIndices[k] + 1;
 					executionEnd =
@@ -1569,7 +1591,7 @@ export class ASTInterpreter {
 		let loopIterations = 0;
 		const maxLoopIterations = 1000;
 
-		while (this.evaluateCondition(condition, this.variables)) {
+		while (this.evaluateCondition(condition, this.variables, 0)) {
 			loopIterations++;
 			if (loopIterations > maxLoopIterations) {
 				console.error(
@@ -1624,7 +1646,7 @@ export class ASTInterpreter {
 			const condition = untilLine.substring(6).trim(); // Remove "until "
 
 			// Check if condition is met to exit the loop
-			if (this.evaluateCondition(condition, this.variables)) {
+			if (this.evaluateCondition(condition, this.variables, 0)) {
 				break;
 			}
 		} while (true);
@@ -1675,12 +1697,25 @@ export class ASTInterpreter {
 
 		// Execute the loop with proper step handling
 		let loopVal = startVal;
+		let loopIterations = 0;
+		const maxLoopIterations = 10000; // Safety limit to prevent infinite loops
 
 		// Determine loop condition based on step direction
 		const shouldContinue =
 			stepValue > 0 ? () => loopVal <= endVal : () => loopVal >= endVal;
 
 		while (shouldContinue()) {
+			loopIterations++;
+			if (loopIterations > maxLoopIterations) {
+				console.error(
+					`Infinite for loop detected! Loop: "${line}"`,
+				);
+				console.error(`Variables at loop start:`, this.variables);
+				throw new Error(
+					`Infinite for loop detected after ${maxLoopIterations} iterations`,
+				);
+			}
+
 			// Set the loop variable - trace this as if it's an assignment on the for line
 			this.variables[loopVar] = loopVal;
 			const forLineChanges: Record<string, any> = {};

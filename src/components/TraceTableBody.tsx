@@ -123,14 +123,14 @@ export function TraceTableBody({
 
 			// Use the interpreter's changedVariables which correctly tracks what changed
 			const changedVariables = new Set<string>();
-			
+
 			// First, add variables that the interpreter explicitly marked as changed
 			if (expectedStep.changedVariables) {
 				Object.keys(expectedStep.changedVariables).forEach((varName) => {
 					changedVariables.add(varName);
 				});
 			}
-			
+
 			// Update current values based on the full variable state
 			Object.keys(expectedStep.variables).forEach((varName) => {
 				currentValues[varName] = expectedStep.variables[varName];
@@ -161,12 +161,15 @@ export function TraceTableBody({
 						// For array elements, get the value from changedVariables
 						// For regular variables, get from currentValues
 						let expectedValue;
-						if (expectedStep.changedVariables && expectedStep.changedVariables[varName] !== undefined) {
+						if (
+							expectedStep.changedVariables &&
+							expectedStep.changedVariables[varName] !== undefined
+						) {
 							expectedValue = expectedStep.changedVariables[varName];
 						} else {
 							expectedValue = currentValues[varName];
 						}
-						
+
 						let expectedStr = "";
 						if (expectedValue !== undefined) {
 							if (Array.isArray(expectedValue)) {
