@@ -325,16 +325,13 @@ describe("Integration Tests - Error Handling", () => {
 			...programs.hard,
 		].filter((p) => p.code.includes("/") || p.code.includes("DIV"));
 
-		divisionPrograms.forEach((program, index) => {
-			const testName = `Division program ${index + 1}: ${program.description}`;
-
-			it(testName, () => {
-				// Should not crash, even if division by zero occurs
-				expect(() => {
-					const inputs = program.inputSets ? program.inputSets[0] : [];
-					executeProgram(program, inputs);
-				}).not.toThrow();
-			});
+		// Test each division program to ensure they don't crash
+		divisionPrograms.forEach((program) => {
+			// Should not crash, even if division by zero occurs
+			expect(() => {
+				const inputs = program.inputSets ? program.inputSets[0] : [];
+				executeProgram(program, inputs);
+			}).not.toThrow();
 		});
 	});
 
@@ -346,17 +343,14 @@ describe("Integration Tests - Error Handling", () => {
 			...programs.hard,
 		].filter((p) => p.code.includes("[") && p.code.includes("]"));
 
-		arrayPrograms.forEach((program, index) => {
-			const testName = `Array program ${index + 1}: ${program.description}`;
-
-			it(testName, () => {
-				// Should handle array operations correctly
-				expect(() => {
-					const inputs = program.inputSets ? program.inputSets[0] : [];
-					const result = executeProgram(program, inputs);
-					expect(result.trace.length).toBeGreaterThan(0);
-				}).not.toThrow();
-			});
+		// Test each array program to ensure they work correctly
+		arrayPrograms.forEach((program) => {
+			// Should handle array operations correctly
+			expect(() => {
+				const inputs = program.inputSets ? program.inputSets[0] : [];
+				const result = executeProgram(program, inputs);
+				expect(result.trace.length).toBeGreaterThan(0);
+			}).not.toThrow();
 		});
 	});
 
@@ -368,17 +362,14 @@ describe("Integration Tests - Error Handling", () => {
 			...programs.hard,
 		].filter((p) => p.code.includes('"') && p.code.includes("+"));
 
-		stringPrograms.forEach((program, index) => {
-			const testName = `String program ${index + 1}: ${program.description}`;
-
-			it(testName, () => {
-				// Should handle string operations correctly
-				expect(() => {
-					const inputs = program.inputSets ? program.inputSets[0] : [];
-					const result = executeProgram(program, inputs);
-					expect(result.trace.length).toBeGreaterThan(0);
-				}).not.toThrow();
-			});
+		// Test each string program to ensure they work correctly
+		stringPrograms.forEach((program) => {
+			// Should handle string operations correctly
+			expect(() => {
+				const inputs = program.inputSets ? program.inputSets[0] : [];
+				const result = executeProgram(program, inputs);
+				expect(result.trace.length).toBeGreaterThan(0);
+			}).not.toThrow();
 		});
 	});
 });

@@ -221,7 +221,7 @@ describe("AST Interpreter - Type Conversions", () => {
 describe("AST Interpreter - Arrays", () => {
 	it("should handle array creation and access", () => {
 		const result = executeCode(`
-			numbers = [10, 20, 30, 40, 50]
+			array numbers = [10, 20, 30, 40, 50]
 			first = numbers[0]
 			third = numbers[2]
 			last = numbers[4]
@@ -234,7 +234,7 @@ describe("AST Interpreter - Arrays", () => {
 
 	it("should handle array access with variables", () => {
 		const result = executeCode(`
-			data = [100, 200, 300]
+			array data = [100, 200, 300]
 			index1 = 0
 			index2 = 2
 			value1 = data[index1]
@@ -247,7 +247,7 @@ describe("AST Interpreter - Arrays", () => {
 
 	it("should handle arrays in arithmetic operations", () => {
 		const result = executeCode(`
-			values = [5, 10, 15]
+			array values = [5, 10, 15]
 			sum = values[0] + values[1] + values[2]
 			product = values[0] * values[1]
 			average = sum / 3
@@ -437,18 +437,15 @@ describe("AST Interpreter - Edge Cases", () => {
 });
 
 describe("AST Interpreter - Known Limitations", () => {
-	it("should document string concatenation issue", () => {
-		// This test documents the known issue with string concatenation
+	it("should handle string concatenation correctly", () => {
+		// String concatenation works correctly
 		const result = executeCode(`
 			name = "World"
 			greeting = "Hello " + name
 		`);
 
-		// Currently this produces "Hello 0" instead of "Hello World"
-		expect(result.variables.greeting).toBe("Hello 0");
-
-		// TODO: Fix string concatenation to make this pass:
-		// expect(result.variables.greeting).toBe("Hello World");
+		// String concatenation should work properly
+		expect(result.variables.greeting).toBe("Hello World");
 	});
 
 	it("should show that input values are received correctly", () => {

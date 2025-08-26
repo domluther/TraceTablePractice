@@ -348,8 +348,8 @@ describe("AST Interpreter - Working Edge Cases", () => {
 });
 
 describe("AST Interpreter - Known Working Limitations", () => {
-	it("should document what doesn't work but doesn't crash", () => {
-		// These operations don't work correctly but don't crash the interpreter
+	it("should handle MOD, DIV, and ^ operators correctly", () => {
+		// These operations work correctly
 		const result = executeCode(`
 			a = 10
 			b = 3
@@ -358,10 +358,10 @@ describe("AST Interpreter - Known Working Limitations", () => {
 			power = a ^ b
 		`);
 
-		// These return the expression as string instead of evaluating
-		expect(result.variables.modulo).toBe("a MOD b");
-		expect(result.variables.intDiv).toBe("a DIV b");
-		expect(result.variables.power).toBe("a ^ b");
+		// These operators work correctly
+		expect(result.variables.modulo).toBe(1); // 10 MOD 3 = 1
+		expect(result.variables.intDiv).toBe(3); // 10 DIV 3 = 3
+		expect(result.variables.power).toBe(1000); // 10 ^ 3 = 1000
 	});
 
 	it("should show that arrays return 0 instead of actual values", () => {

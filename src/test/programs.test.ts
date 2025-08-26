@@ -217,18 +217,18 @@ describe("Programs Integration Tests - Feature Coverage", () => {
 			{
 				name: "Variable assignment and arithmetic",
 				code: `x = 10\ny = 5\nz = x + y`,
-				expectVars: { x: "10", y: "5", z: "15" }, // All interpreter values are strings
+				expectVars: { x: 10, y: 5, z: 15 }, // Variables have correct types
 			},
 			{
 				name: "Sequential calculations",
 				code: `price = 100\ndiscount = 10\nfinal = price - discount`,
-				expectVars: { price: "100", discount: "10", final: "90" },
+				expectVars: { price: 100, discount: 10, final: 90 },
 			},
 			{
 				name: "Input processing",
-				code: `age = int(input("Age:"))\nnext = age + 1`,
+				code: `age = int(input("Age:"))\nafter = age + 1`,
 				inputs: ["16"],
-				expectVars: { age: "16", next: "17" },
+				expectVars: { age: 16, after: 17 },
 			},
 		];
 

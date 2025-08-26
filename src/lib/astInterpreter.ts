@@ -301,7 +301,7 @@ export class ASTInterpreter {
 					}
 
 					const newValue = this.evaluateExpression(value, vars);
-					
+
 					// Only record as changed if the value actually changed
 					const oldValue = vars[arrayName] && vars[arrayName][index];
 					if (oldValue !== newValue) {
@@ -341,7 +341,7 @@ export class ASTInterpreter {
 				} else {
 					newValue = this.evaluateExpression(value, vars);
 				}
-				
+
 				// Only record as changed if the value actually changed
 				const oldValue = vars[varName];
 				if (oldValue !== newValue) {
@@ -1707,9 +1707,7 @@ export class ASTInterpreter {
 		while (shouldContinue()) {
 			loopIterations++;
 			if (loopIterations > maxLoopIterations) {
-				console.error(
-					`Infinite for loop detected! Loop: "${line}"`,
-				);
+				console.error(`Infinite for loop detected! Loop: "${line}"`);
 				console.error(`Variables at loop start:`, this.variables);
 				throw new Error(
 					`Infinite for loop detected after ${maxLoopIterations} iterations`,
