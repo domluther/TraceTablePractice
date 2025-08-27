@@ -485,7 +485,7 @@ next i`,
 			],
 		},
 		{
-			code: `const PI = 3.14159
+			code: `const PI = 3.14
 radius = float(input("Enter radius"))
 area = PI * radius * radius
 circumference = 2 * PI * radius
@@ -501,17 +501,17 @@ total = 0
 count = 0
 for i = 1 to 3
     score = int(input("Enter test score"))
+	if score >= PASS_MARK then
+    	print("PASS")
+	else
+    	print("FAIL")
+	endif
     total = total + score
     count = count + 1
 next i
 average = total / count
 print("Total: " + str(total))
-print("Average: " + str(average))
-if average >= PASS_MARK then
-    print("PASS")
-else
-    print("FAIL")
-endif`,
+print("Average: " + str(average))`,
 			description: "Grade calculator with constants and averaging",
 			inputSets: [
 				["60", "70", "80"],

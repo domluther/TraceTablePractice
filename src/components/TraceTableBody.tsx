@@ -17,6 +17,7 @@ interface TraceTableBodyProps {
 }
 
 interface UserTraceEntry {
+	id: string;
 	lineNumber: string;
 	variables: Record<string, string>;
 	output: string;
@@ -57,6 +58,7 @@ export function TraceTableBody({
 				const emptyEntries: UserTraceEntry[] = [];
 				for (let i = 0; i < result.trace.length + 3; i++) {
 					const entry: UserTraceEntry = {
+						id: `entry-${Date.now()}-${i}`,
 						lineNumber: "",
 						variables: {},
 						output: "",
@@ -276,7 +278,8 @@ export function TraceTableBody({
 	}, [expectedTrace, userEntries, programVariables, onScoreUpdate]);
 
 	const clearTable = useCallback(() => {
-		const clearedEntries = userEntries.map(() => ({
+		const clearedEntries = userEntries.map((entry) => ({
+			id: entry.id, // Preserve the original ID
 			lineNumber: "",
 			variables: Object.fromEntries(
 				programVariables.map((varName) => [varName, ""]),
@@ -601,7 +604,7 @@ export function TraceTableBody({
 							<tbody>
 								{userEntries.map((entry, rowIndex) => (
 									<tr
-										key={`entry-${rowIndex}-${entry.lineNumber || "empty"}`}
+										key={entry.id}
 										className="hover:bg-gray-50 transition-colors"
 									>
 										<td
