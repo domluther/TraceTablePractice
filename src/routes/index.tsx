@@ -117,7 +117,7 @@ function Index() {
 			<div className="flex items-center justify-between mb-3">
 				<h2 className="text-lg font-semibold text-gray-800">Need Help?</h2>
 				<QuizButton
-					variant="secondary"
+					variant="primary"
 					size="sm"
 					onClick={() => setShowHints(!showHints)}
 				>

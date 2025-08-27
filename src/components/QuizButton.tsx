@@ -12,7 +12,8 @@ export type QuizButtonVariant =
 	| "mode-active" // Active tab/mode
 	| "selection" // Program/item selection buttons
 	| "primary" // Main call-to-action
-	| "secondary"; // Secondary actions
+	| "secondary" // Secondary actions
+	| "destructive" // Destructive actions
 
 export type QuizButtonSize = "sm" | "md" | "lg" | "xl";
 
@@ -91,8 +92,14 @@ const buttonVariants = {
   `,
 	secondary: `
     px-6 py-3 font-medium rounded-lg transition-all duration-200
-    bg-gradient-to-r from-yellow-500 to-orange-500
-    hover:from-yellow-600 hover:to-orange-600
+    bg-gradient-to-r from-orange-500 to-orange-600
+    hover:from-orange-600 hover:to-orange-700
+    text-white shadow-md hover:shadow-lg
+  `,
+  	destructive: `
+    px-6 py-3 font-medium rounded-lg transition-all duration-200
+    bg-gradient-to-r from-red-500 to-red-600
+    hover:from-red-600 hover:to-red-700
     text-white shadow-md hover:shadow-lg
   `,
 };

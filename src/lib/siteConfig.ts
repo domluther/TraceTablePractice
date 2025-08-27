@@ -90,21 +90,21 @@ export const SITE_CONFIG: SiteConfig = {
 	},
 	hints: [
 		{
+			title: "Line Numbers",
+			description: "Record which line of code is being executed for each step",
+			examples: [
+				"Start with line 1",
+				"Skip lines with no execution or changing variables",
+				"Track conditional jumps",
+			],
+			color: "green",
+		},
+		{
 			title: "Variables",
 			description:
 				"Track the values of variables as they change during execution",
 			examples: ["a = 5", "name = 'Alice'", "result = a + b"],
 			color: "blue",
-		},
-		{
-			title: "Line Numbers",
-			description: "Record which line of code is being executed for each step",
-			examples: [
-				"Start with line 1",
-				"Skip lines with no execution",
-				"Track conditional jumps",
-			],
-			color: "green",
 		},
 		{
 			title: "Output",

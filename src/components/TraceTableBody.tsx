@@ -7,6 +7,7 @@ import type {
 	VariableValue,
 } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
+import { QuizButton } from './QuizButton';
 
 interface TraceTableBodyProps {
 	currentProgram: Program | null;
@@ -347,22 +348,60 @@ export function TraceTableBody({
 	};
 
 	const shuffleInputs = useCallback(() => {
-		if (currentProgram?.inputSets && currentProgram.inputSets.length > 0) {
-			const randomInputSet =
-				currentProgram.inputSets[
-					Math.floor(Math.random() * currentProgram.inputSets.length)
-				];
+		if (currentProgram?.inputSets && currentProgram.inputSets.length > 1) {
+			// Get all input sets except the current one
+			const availableInputSets = currentProgram.inputSets.filter(
+				(inputSet) => JSON.stringify(inputSet) !== JSON.stringify(currentProgram.inputs)
+			);
+			
+			// If no different input sets available, use any random one
+			const inputSetsToChooseFrom = availableInputSets.length > 0 
+				? availableInputSets 
+				: currentProgram.inputSets;
+			
+			const randomInputSet = inputSetsToChooseFrom[
+				Math.floor(Math.random() * inputSetsToChooseFrom.length)
+			];
+			
 			const shuffledProgram = { ...currentProgram, inputs: randomInputSet };
 
 			// Re-execute with new inputs
-			const result = interpreter.executeProgram(
-				shuffledProgram.code,
-				shuffledProgram,
-			);
-			setExpectedTrace(result.trace);
-			clearTable();
+			try {
+				const result = interpreter.executeProgram(
+					shuffledProgram.code,
+					shuffledProgram,
+				);
+				setExpectedTrace(result.trace);
+				setProgramVariables(result.variables);
+
+				// Update the current program inputs to show the new values
+				// This is a bit of a hack since we're mutating the prop, but it's needed
+				// to update the displayed input values
+				currentProgram.inputs = randomInputSet;
+
+				// Clear user entries
+				const emptyEntries: UserTraceEntry[] = [];
+				for (let i = 0; i < result.trace.length + 3; i++) {
+					const entry: UserTraceEntry = {
+						id: `entry-${Date.now()}-${i}`,
+						lineNumber: "",
+						variables: {},
+						output: "",
+					};
+					result.variables.forEach((varName) => {
+						entry.variables[varName] = "";
+					});
+					emptyEntries.push(entry);
+				}
+				setUserEntries(emptyEntries);
+				setFeedback(null);
+				setCellResults({});
+				setIsMarked(false);
+			} catch (error) {
+				console.error("Error shuffling inputs:", error);
+			}
 		}
-	}, [currentProgram, interpreter, clearTable]);
+	}, [currentProgram, interpreter]);
 
 	// Helper function to encode code for ERL IDE URL
 	const encodeForERL = useCallback((code: string): string => {
@@ -531,6 +570,7 @@ export function TraceTableBody({
 								</div>
 							</div>
 						)}
+						
 						{currentProgram.randomValue !== undefined && (
 							<div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
 								<div className="flex items-start gap-2">
@@ -678,20 +718,21 @@ export function TraceTableBody({
 
 			{/* Action Buttons */}
 			<div className="flex flex-wrap gap-2 justify-center">
-				<Button
+				<QuizButton
 					onClick={markAnswer}
-					className="bg-green-600 hover:bg-green-700"
+					variant="action"
 				>
 					✅ Mark My Answer
-				</Button>
-				<Button onClick={clearTable} variant="destructive">
-					🗑️ Clear Table
-				</Button>
+				</QuizButton>
 				{currentProgram.inputSets && currentProgram.inputSets.length > 1 && (
-					<Button onClick={shuffleInputs} variant="secondary">
+					<QuizButton onClick={shuffleInputs} variant="secondary">
 						🔄 Shuffle Inputs
-					</Button>
+					</QuizButton>
 				)}
+				<QuizButton onClick={clearTable} variant="destructive">
+					🗑️ Clear Table
+				</QuizButton>
+
 			</div>
 
 			{/* Feedback */}
