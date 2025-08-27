@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { type Program, programs } from "@/lib/programs";
 import type { TraceTableScoreManager } from "@/lib/traceTableScoreManager";
+import { QuizButton } from "./QuizButton";
 
 interface ProgramSelectorProps {
 	onProgramSelect: (
@@ -107,14 +108,9 @@ export function ProgramSelector({
 					</select>
 				</div>
 
-				<button
-					onClick={generateRandomProgram}
-					className="px-4 py-1.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-sm font-medium rounded-md hover:from-orange-500 hover:to-orange-600 transition-all duration-200 shadow-sm"
-					title="Pick a random program from current difficulty"
-					type="button"
-				>
+				<QuizButton onClick={generateRandomProgram} size="sm">
 					🎲 Random
-				</button>
+				</QuizButton>
 			</div>
 
 			{/* Program Table */}
@@ -218,13 +214,13 @@ export function ProgramSelector({
 											padding: "15px 20px",
 										}}
 									>
-										<button
+										<QuizButton
 											onClick={() => handleProgramSelect(program, index)}
-											className="px-4 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-sm"
-											type="button"
+											size="xs"
+											variant="selection"
 										>
 											Select
-										</button>
+										</QuizButton>
 									</td>
 								</tr>
 							);

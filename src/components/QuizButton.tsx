@@ -15,7 +15,7 @@ export type QuizButtonVariant =
 	| "secondary" // Secondary actions
 	| "destructive"; // Destructive actions
 
-export type QuizButtonSize = "sm" | "md" | "lg" | "xl";
+export type QuizButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface QuizButtonProps {
 	variant?: QuizButtonVariant;
@@ -105,6 +105,7 @@ const buttonVariants = {
 };
 
 const sizeVariants = {
+	xs: "min-h-[30px] text-xs",
 	sm: "min-h-[40px] text-sm",
 	md: "min-h-[48px] text-base",
 	lg: "min-h-[60px] text-lg",

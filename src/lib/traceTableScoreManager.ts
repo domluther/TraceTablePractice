@@ -71,7 +71,7 @@ export class TraceTableScoreManager {
 
 		if (!attempts || attempts.length === 0) {
 			return {
-				text: "Not attempted",
+				text: "N/A",
 				className: "score-none",
 			};
 		}
@@ -87,19 +87,19 @@ export class TraceTableScoreManager {
 
 		if (percentage === 100) {
 			className = "score-perfect";
-			text = `${percentage}% ⭐`;
+			text = `${bestAttempt.correct}/${bestAttempt.total} ⭐`;
 		} else if (percentage >= 80) {
 			className = "score-good";
-			text = `${percentage}% 👍`;
+			text = `${bestAttempt.correct}/${bestAttempt.total} 👍`;
 		} else if (percentage >= 60) {
 			className = "score-okay";
-			text = `${percentage}% 👌`;
+			text = `${bestAttempt.correct}/${bestAttempt.total} 👌`;
 		} else if (percentage >= 40) {
 			className = "score-poor";
-			text = `${percentage}% 😐`;
+			text = `${bestAttempt.correct}/${bestAttempt.total} 😐`;
 		} else {
 			className = "score-bad";
-			text = `${percentage}% 😞`;
+			text = `${bestAttempt.correct}/${bestAttempt.total} 😞`;
 		}
 
 		return { text, className };
