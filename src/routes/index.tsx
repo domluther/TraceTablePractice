@@ -1,4 +1,8 @@
-import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useNavigate,
+	useSearch,
+} from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import {
 	ProgramSelector,
@@ -26,7 +30,10 @@ export const Route = createFileRoute("/")({
 		return {
 			difficulty: (() => {
 				const diff = search.difficulty;
-				if (typeof diff === "string" && ["easy", "medium", "hard"].includes(diff)) {
+				if (
+					typeof diff === "string" &&
+					["easy", "medium", "hard"].includes(diff)
+				) {
 					return diff as "easy" | "medium" | "hard";
 				}
 				return undefined;
@@ -36,7 +43,7 @@ export const Route = createFileRoute("/")({
 				// Handle both string and number types
 				if (typeof prog === "string") {
 					const num = parseInt(prog, 10);
-					return isNaN(num) || num < 0 ? undefined : num;
+					return Number.isNaN(num) || num < 0 ? undefined : num;
 				} else if (typeof prog === "number") {
 					return prog < 0 ? undefined : prog;
 				}
@@ -121,17 +128,17 @@ function Index() {
 	// Load program from URL using Tanstack Router search
 	useEffect(() => {
 		const { difficulty, program: programIndex } = search;
-		
+
 		// Set difficulty from URL or default to "easy"
 		const selectedDifficulty = difficulty || "easy";
 		setCurrentDifficulty(selectedDifficulty);
-		
+
 		if (typeof programIndex === "number" && programIndex >= 0) {
 			const programList = programs[selectedDifficulty];
-			
+
 			if (programList && programIndex < programList.length) {
 				const program = { ...programList[programIndex] };
-				
+
 				// Apply random selections as in ProgramSelector
 				if (program.inputSets && program.inputSets.length > 0) {
 					const randomInputSet =
@@ -164,7 +171,7 @@ function Index() {
 			setCurrentProgram(program);
 			setCurrentDifficulty(difficulty);
 			setCurrentProgramIndex(index);
-			
+
 			// Update URL using Tanstack Router navigation
 			navigate({
 				search: {
@@ -182,7 +189,7 @@ function Index() {
 			// Clear current program when difficulty changes
 			setCurrentProgram(null);
 			setCurrentProgramIndex(-1);
-			
+
 			// Update URL using Tanstack Router navigation
 			navigate({
 				search: {

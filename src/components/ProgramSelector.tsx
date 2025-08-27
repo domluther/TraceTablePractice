@@ -1,4 +1,4 @@
-import { useCallback, useId, useState, useEffect } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { type Program, programs } from "@/lib/programs";
 import type { TraceTableScoreManager } from "@/lib/traceTableScoreManager";
 
@@ -26,7 +26,10 @@ export function ProgramSelector({
 
 	// Sync with parent difficulty
 	useEffect(() => {
-		if (currentDifficulty && ["easy", "medium", "hard"].includes(currentDifficulty)) {
+		if (
+			currentDifficulty &&
+			["easy", "medium", "hard"].includes(currentDifficulty)
+		) {
 			setSelectedDifficulty(currentDifficulty as "easy" | "medium" | "hard");
 		}
 	}, [currentDifficulty]);
@@ -89,7 +92,10 @@ export function ProgramSelector({
 						id={difficultySelectId}
 						value={selectedDifficulty}
 						onChange={(e) => {
-							const newDifficulty = e.target.value as "easy" | "medium" | "hard";
+							const newDifficulty = e.target.value as
+								| "easy"
+								| "medium"
+								| "hard";
 							setSelectedDifficulty(newDifficulty);
 							onDifficultyChange?.(newDifficulty);
 						}}
