@@ -200,6 +200,80 @@ function Index() {
 		[navigate],
 	);
 
+	const handlePreviousProgram = useCallback(() => {
+		if (currentProgramIndex > 0) {
+			const newIndex = currentProgramIndex - 1;
+			const programList =
+				programs[currentDifficulty as "easy" | "medium" | "hard"] ||
+				programs.easy;
+			const program = { ...programList[newIndex] };
+
+			// Apply random selections as in ProgramSelector
+			if (program.inputSets && program.inputSets.length > 0) {
+				const randomInputSet =
+					program.inputSets[
+						Math.floor(Math.random() * program.inputSets.length)
+					];
+				program.inputs = randomInputSet;
+			}
+
+			if (program.randomValues && program.randomValues.length > 0) {
+				const randomValue =
+					program.randomValues[
+						Math.floor(Math.random() * program.randomValues.length)
+					];
+				program.randomValue = randomValue;
+			}
+
+			setCurrentProgram(program);
+			setCurrentProgramIndex(newIndex);
+
+			navigate({
+				search: {
+					difficulty: currentDifficulty as "easy" | "medium" | "hard",
+					program: newIndex,
+				},
+			});
+		}
+	}, [currentProgramIndex, currentDifficulty, navigate]);
+
+	const handleNextProgram = useCallback(() => {
+		const programList =
+			programs[currentDifficulty as "easy" | "medium" | "hard"] ||
+			programs.easy;
+		if (currentProgramIndex < programList.length - 1) {
+			const newIndex = currentProgramIndex + 1;
+			const program = { ...programList[newIndex] };
+
+			// Apply random selections as in ProgramSelector
+			if (program.inputSets && program.inputSets.length > 0) {
+				const randomInputSet =
+					program.inputSets[
+						Math.floor(Math.random() * program.inputSets.length)
+					];
+				program.inputs = randomInputSet;
+			}
+
+			if (program.randomValues && program.randomValues.length > 0) {
+				const randomValue =
+					program.randomValues[
+						Math.floor(Math.random() * program.randomValues.length)
+					];
+				program.randomValue = randomValue;
+			}
+
+			setCurrentProgram(program);
+			setCurrentProgramIndex(newIndex);
+
+			navigate({
+				search: {
+					difficulty: currentDifficulty as "easy" | "medium" | "hard",
+					program: newIndex,
+				},
+			});
+		}
+	}, [currentProgramIndex, currentDifficulty, navigate]);
+
 	const handleScoreUpdate = useCallback(
 		(correct: number, total: number) => {
 			if (currentDifficulty && currentProgramIndex >= 0) {
@@ -266,6 +340,17 @@ function Index() {
 						onScoreUpdate={handleScoreUpdate}
 						difficulty={currentDifficulty}
 						programIndex={currentProgramIndex}
+						onPreviousProgram={handlePreviousProgram}
+						onNextProgram={handleNextProgram}
+						canGoPrevious={currentProgramIndex > 0}
+						canGoNext={
+							currentProgramIndex <
+							(
+								programs[currentDifficulty as "easy" | "medium" | "hard"] ||
+								programs.easy
+							).length -
+								1
+						}
 					/>
 				)}
 

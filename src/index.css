@@ -133,3 +133,13 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+/* Keyboard shortcuts arrow rotation */
+details summary .arrow-icon {
+	transition: transform 0.2s ease;
+	transform: rotate(0deg);
+}
+
+details[open] summary .arrow-icon {
+	transform: rotate(90deg);
+}

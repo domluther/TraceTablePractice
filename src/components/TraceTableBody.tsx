@@ -15,6 +15,10 @@ interface TraceTableBodyProps {
 	onScoreUpdate: (correct: number, total: number) => void;
 	difficulty: string;
 	programIndex: number;
+	onPreviousProgram?: () => void;
+	onNextProgram?: () => void;
+	canGoPrevious?: boolean;
+	canGoNext?: boolean;
 }
 
 interface UserTraceEntry {
@@ -30,6 +34,10 @@ export function TraceTableBody({
 	onScoreUpdate,
 	difficulty,
 	programIndex,
+	onPreviousProgram,
+	onNextProgram,
+	canGoPrevious = false,
+	canGoNext = false,
 }: TraceTableBodyProps) {
 	const [expectedTrace, setExpectedTrace] = useState<TraceStep[]>([]);
 	const [programVariables, setProgramVariables] = useState<string[]>([]);
@@ -478,12 +486,34 @@ export function TraceTableBody({
 					e.preventDefault();
 					shuffleInputs();
 					break;
+				case "n":
+				case "N":
+					e.preventDefault();
+					if (onNextProgram && canGoNext) {
+						onNextProgram();
+					}
+					break;
+				case "p":
+				case "P":
+					e.preventDefault();
+					if (onPreviousProgram && canGoPrevious) {
+						onPreviousProgram();
+					}
+					break;
 			}
 		};
 
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [markAnswer, clearTable, shuffleInputs]);
+	}, [
+		markAnswer,
+		clearTable,
+		shuffleInputs,
+		onNextProgram,
+		onPreviousProgram,
+		canGoNext,
+		canGoPrevious,
+	]);
 
 	if (!currentProgram) {
 		return (
@@ -721,6 +751,15 @@ export function TraceTableBody({
 
 			{/* Action Buttons */}
 			<div className="flex flex-wrap gap-2 justify-center">
+				{onPreviousProgram && (
+					<QuizButton
+						onClick={onPreviousProgram}
+						variant="selection"
+						disabled={!canGoPrevious}
+					>
+						← Previous
+					</QuizButton>
+				)}
 				<QuizButton onClick={markAnswer} variant="action">
 					✅ Mark My Answer
 				</QuizButton>
@@ -732,6 +771,15 @@ export function TraceTableBody({
 				<QuizButton onClick={clearTable} variant="destructive">
 					🗑️ Clear Table
 				</QuizButton>
+				{onNextProgram && (
+					<QuizButton
+						onClick={onNextProgram}
+						variant="selection"
+						disabled={!canGoNext}
+					>
+						Next →
+					</QuizButton>
+				)}{" "}
 			</div>
 
 			{/* Feedback */}
@@ -776,25 +824,128 @@ export function TraceTableBody({
 			)}
 
 			{/* Keyboard Shortcuts Help */}
-			<Card>
-				<CardContent className="p-4">
-					<details>
-						<summary className="cursor-pointer text-sm font-medium">
-							⌨️ Keyboard Shortcuts
-						</summary>
-						<div className="mt-2 space-y-1 text-sm text-gray-600">
-							<div>
-								<kbd className="px-2 py-1 bg-gray-100 rounded">Enter</kbd> Mark
-								Answer
-							</div>
-							<div>
-								<kbd className="px-2 py-1 bg-gray-100 rounded">Esc</kbd> Clear
-								Table
-							</div>
-						</div>
-					</details>
-				</CardContent>
-			</Card>
+			<div
+				className="mx-auto bg-blue-50 rounded-lg border border-blue-100"
+				style={{ margin: "15px 0" }}
+			>
+				<details open>
+					<summary
+						className="cursor-pointer font-semibold text-gray-600 select-none list-none flex items-center gap-2 relative"
+						style={{
+							padding: "12px 15px",
+							userSelect: "none",
+						}}
+					>
+						<span
+							className="text-xs transition-transform duration-200 inline-block arrow-icon"
+							style={{
+								fontSize: "0.8em",
+							}}
+						>
+							▶
+						</span>
+						⌨️ Keyboard Shortcuts
+					</summary>
+					<div
+						className="grid gap-2 border-t border-blue-100"
+						style={{
+							padding: "15px",
+							paddingTop: "0",
+							gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+						}}
+					>
+						<span className="flex items-center gap-2 text-sm text-gray-600">
+							<kbd
+								className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
+								style={{
+									background: "#2d3748",
+									padding: "4px 8px",
+									borderRadius: "4px",
+									fontSize: "0.8em",
+									minWidth: "24px",
+									border: "1px solid #4a5568",
+									boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+								}}
+							>
+								Enter
+							</kbd>
+							Mark Answer
+						</span>
+						{onNextProgram && (
+							<span className="flex items-center gap-2 text-sm text-gray-600">
+								<kbd
+									className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
+									style={{
+										background: "#2d3748",
+										padding: "4px 8px",
+										borderRadius: "4px",
+										fontSize: "0.8em",
+										minWidth: "24px",
+										border: "1px solid #4a5568",
+										boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+									}}
+								>
+									N
+								</kbd>
+								Next Program
+							</span>
+						)}
+						{onPreviousProgram && (
+							<span className="flex items-center gap-2 text-sm text-gray-600">
+								<kbd
+									className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
+									style={{
+										background: "#2d3748",
+										padding: "4px 8px",
+										borderRadius: "4px",
+										fontSize: "0.8em",
+										minWidth: "24px",
+										border: "1px solid #4a5568",
+										boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+									}}
+								>
+									P
+								</kbd>
+								Previous Program
+							</span>
+						)}
+						<span className="flex items-center gap-2 text-sm text-gray-600">
+							<kbd
+								className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
+								style={{
+									background: "#2d3748",
+									padding: "4px 8px",
+									borderRadius: "4px",
+									fontSize: "0.8em",
+									minWidth: "24px",
+									border: "1px solid #4a5568",
+									boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+								}}
+							>
+								S
+							</kbd>
+							Shuffle Inputs
+						</span>
+						<span className="flex items-center gap-2 text-sm text-gray-600">
+							<kbd
+								className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
+								style={{
+									background: "#2d3748",
+									padding: "4px 8px",
+									borderRadius: "4px",
+									fontSize: "0.8em",
+									minWidth: "24px",
+									border: "1px solid #4a5568",
+									boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+								}}
+							>
+								Esc
+							</kbd>
+							Clear Table
+						</span>
+					</div>
+				</details>
+			</div>
 		</div>
 	);
 }
