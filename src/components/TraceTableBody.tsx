@@ -601,7 +601,7 @@ export function TraceTableBody({
 							<tbody>
 								{userEntries.map((entry, rowIndex) => (
 									<tr
-										key={`line-${entry.lineNumber}-${entry.output}`}
+										key={rowIndex}
 										className="hover:bg-gray-50 transition-colors"
 									>
 										<td
