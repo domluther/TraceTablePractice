@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import {
 	ProgramSelector,
@@ -16,12 +16,41 @@ import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
 import { TraceTableScoreManager } from "@/lib/traceTableScoreManager";
 
+type SearchParams = {
+	difficulty?: "easy" | "medium" | "hard";
+	program?: number;
+};
+
 export const Route = createFileRoute("/")({
+	validateSearch: (search: Record<string, unknown>): SearchParams => {
+		return {
+			difficulty: (() => {
+				const diff = search.difficulty;
+				if (typeof diff === "string" && ["easy", "medium", "hard"].includes(diff)) {
+					return diff as "easy" | "medium" | "hard";
+				}
+				return undefined;
+			})(),
+			program: (() => {
+				const prog = search.program;
+				// Handle both string and number types
+				if (typeof prog === "string") {
+					const num = parseInt(prog, 10);
+					return isNaN(num) || num < 0 ? undefined : num;
+				} else if (typeof prog === "number") {
+					return prog < 0 ? undefined : prog;
+				}
+				return undefined;
+			})(),
+		};
+	},
 	component: Index,
 });
 
 function Index() {
 	const siteConfig = SITE_CONFIG;
+	const search = useSearch({ from: "/" });
+	const navigate = useNavigate({ from: "/" });
 
 	// Score managers
 	const [traceTableScoreManager] = useState(() => new TraceTableScoreManager());
@@ -89,19 +118,15 @@ function Index() {
 		return () => clearInterval(interval);
 	}, [traceTableScoreManager, siteConfig.scoring.customLevels]);
 
-	// Load program from URL on mount
+	// Load program from URL using Tanstack Router search
 	useEffect(() => {
-		// Access raw search parameters from window location
-		const urlParams = new URLSearchParams(window.location.search);
-		const difficulty = urlParams.get('difficulty') as "easy" | "medium" | "hard" | null;
-		const programParam = urlParams.get('program');
-		const programIndex = programParam ? parseInt(programParam, 10) : null;
+		const { difficulty, program: programIndex } = search;
 		
 		// Set difficulty from URL or default to "easy"
-		const selectedDifficulty = (difficulty && ["easy", "medium", "hard"].includes(difficulty)) ? difficulty : "easy";
+		const selectedDifficulty = difficulty || "easy";
 		setCurrentDifficulty(selectedDifficulty);
 		
-		if (typeof programIndex === "number" && programIndex >= 0 && !isNaN(programIndex)) {
+		if (typeof programIndex === "number" && programIndex >= 0) {
 			const programList = programs[selectedDifficulty];
 			
 			if (programList && programIndex < programList.length) {
@@ -132,7 +157,7 @@ function Index() {
 			setCurrentProgram(null);
 			setCurrentProgramIndex(-1);
 		}
-	}, []);  // Only run on mount
+	}, [search]);
 
 	const handleProgramSelect = useCallback(
 		(program: Program, difficulty: string, index: number) => {
@@ -140,13 +165,15 @@ function Index() {
 			setCurrentDifficulty(difficulty);
 			setCurrentProgramIndex(index);
 			
-			// Update URL with new selection using window.history
-			const url = new URL(window.location.href);
-			url.searchParams.set('difficulty', difficulty);
-			url.searchParams.set('program', index.toString());
-			window.history.replaceState({}, '', url.toString());
+			// Update URL using Tanstack Router navigation
+			navigate({
+				search: {
+					difficulty: difficulty as "easy" | "medium" | "hard",
+					program: index,
+				},
+			});
 		},
-		[],
+		[navigate],
 	);
 
 	const handleDifficultyChange = useCallback(
@@ -156,13 +183,14 @@ function Index() {
 			setCurrentProgram(null);
 			setCurrentProgramIndex(-1);
 			
-			// Update URL with new difficulty only
-			const url = new URL(window.location.href);
-			url.searchParams.set('difficulty', difficulty);
-			url.searchParams.delete('program'); // Remove program parameter
-			window.history.replaceState({}, '', url.toString());
+			// Update URL using Tanstack Router navigation
+			navigate({
+				search: {
+					difficulty,
+				},
+			});
 		},
-		[],
+		[navigate],
 	);
 
 	const handleScoreUpdate = useCallback(
