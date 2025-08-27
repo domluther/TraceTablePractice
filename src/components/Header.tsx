@@ -24,7 +24,7 @@ export function Header({ scoreButton, title, subtitle }: HeaderProps) {
 				icon="🎓"
 			/>
 			{scoreButton && (
-				<div className="absolute top-4 right-6">{scoreButton}</div>
+				<div className="absolute top-4 right-6 z-50">{scoreButton}</div>
 			)}
 			<h1 className="text-4xl font-bold mb-3 drop-shadow-lg">{title}</h1>
 			<p className="text-blue-200 text-lg font-light">{subtitle}</p>

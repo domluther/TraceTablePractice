@@ -37,7 +37,7 @@ export interface Level {
 /** OCR ERL Trace Table Practice site configuration */
 export const SITE_CONFIG: SiteConfig = {
 	siteKey: "trace-table",
-	title: "OCR ERL Trace Table Practice",
+	title: "OCR ERL Trace Tables",
 	subtitle: "Master tracing OCR ERL algorithms thanks to instant feedback",
 	icon: "🦆",
 	scoring: {
