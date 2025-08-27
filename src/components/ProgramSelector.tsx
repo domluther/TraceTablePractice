@@ -1,4 +1,4 @@
-import { useCallback, useId, useState } from "react";
+import { useCallback, useId, useState, useEffect } from "react";
 import { type Program, programs } from "@/lib/programs";
 import type { TraceTableScoreManager } from "@/lib/traceTableScoreManager";
 
@@ -8,17 +8,28 @@ interface ProgramSelectorProps {
 		difficulty: string,
 		index: number,
 	) => void;
+	onDifficultyChange?: (difficulty: "easy" | "medium" | "hard") => void;
 	scoreManager: TraceTableScoreManager;
+	currentDifficulty?: string;
 }
 
 export function ProgramSelector({
 	onProgramSelect,
+	onDifficultyChange,
 	scoreManager,
+	currentDifficulty,
 }: ProgramSelectorProps) {
 	const [selectedDifficulty, setSelectedDifficulty] = useState<
 		"easy" | "medium" | "hard"
 	>("easy");
 	const difficultySelectId = useId();
+
+	// Sync with parent difficulty
+	useEffect(() => {
+		if (currentDifficulty && ["easy", "medium", "hard"].includes(currentDifficulty)) {
+			setSelectedDifficulty(currentDifficulty as "easy" | "medium" | "hard");
+		}
+	}, [currentDifficulty]);
 
 	const handleProgramSelect = useCallback(
 		(program: Program, index: number) => {
@@ -77,11 +88,11 @@ export function ProgramSelector({
 					<select
 						id={difficultySelectId}
 						value={selectedDifficulty}
-						onChange={(e) =>
-							setSelectedDifficulty(
-								e.target.value as "easy" | "medium" | "hard",
-							)
-						}
+						onChange={(e) => {
+							const newDifficulty = e.target.value as "easy" | "medium" | "hard";
+							setSelectedDifficulty(newDifficulty);
+							onDifficultyChange?.(newDifficulty);
+						}}
 						className="px-3 py-1.5 border border-gray-400 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					>
 						<option value="easy">Easy</option>

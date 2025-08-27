@@ -11,6 +11,7 @@ import { HintPanel } from "@/components/HintPanel";
 import { QuizButton } from "@/components/QuizButton";
 import { ASTInterpreter } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
+import { programs } from "@/lib/programs";
 import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
 import { TraceTableScoreManager } from "@/lib/traceTableScoreManager";
@@ -88,11 +89,78 @@ function Index() {
 		return () => clearInterval(interval);
 	}, [traceTableScoreManager, siteConfig.scoring.customLevels]);
 
+	// Load program from URL on mount
+	useEffect(() => {
+		// Access raw search parameters from window location
+		const urlParams = new URLSearchParams(window.location.search);
+		const difficulty = urlParams.get('difficulty') as "easy" | "medium" | "hard" | null;
+		const programParam = urlParams.get('program');
+		const programIndex = programParam ? parseInt(programParam, 10) : null;
+		
+		// Set difficulty from URL or default to "easy"
+		const selectedDifficulty = (difficulty && ["easy", "medium", "hard"].includes(difficulty)) ? difficulty : "easy";
+		setCurrentDifficulty(selectedDifficulty);
+		
+		if (typeof programIndex === "number" && programIndex >= 0 && !isNaN(programIndex)) {
+			const programList = programs[selectedDifficulty];
+			
+			if (programList && programIndex < programList.length) {
+				const program = { ...programList[programIndex] };
+				
+				// Apply random selections as in ProgramSelector
+				if (program.inputSets && program.inputSets.length > 0) {
+					const randomInputSet =
+						program.inputSets[
+							Math.floor(Math.random() * program.inputSets.length)
+						];
+					program.inputs = randomInputSet;
+				}
+
+				if (program.randomValues && program.randomValues.length > 0) {
+					const randomValue =
+						program.randomValues[
+							Math.floor(Math.random() * program.randomValues.length)
+						];
+					program.randomValue = randomValue;
+				}
+
+				setCurrentProgram(program);
+				setCurrentProgramIndex(programIndex);
+			}
+		} else {
+			// Clear program if no valid program index in URL
+			setCurrentProgram(null);
+			setCurrentProgramIndex(-1);
+		}
+	}, []);  // Only run on mount
+
 	const handleProgramSelect = useCallback(
 		(program: Program, difficulty: string, index: number) => {
 			setCurrentProgram(program);
 			setCurrentDifficulty(difficulty);
 			setCurrentProgramIndex(index);
+			
+			// Update URL with new selection using window.history
+			const url = new URL(window.location.href);
+			url.searchParams.set('difficulty', difficulty);
+			url.searchParams.set('program', index.toString());
+			window.history.replaceState({}, '', url.toString());
+		},
+		[],
+	);
+
+	const handleDifficultyChange = useCallback(
+		(difficulty: "easy" | "medium" | "hard") => {
+			setCurrentDifficulty(difficulty);
+			// Clear current program when difficulty changes
+			setCurrentProgram(null);
+			setCurrentProgramIndex(-1);
+			
+			// Update URL with new difficulty only
+			const url = new URL(window.location.href);
+			url.searchParams.set('difficulty', difficulty);
+			url.searchParams.delete('program'); // Remove program parameter
+			window.history.replaceState({}, '', url.toString());
 		},
 		[],
 	);
@@ -150,7 +218,9 @@ function Index() {
 				{/* Program Selection */}
 				<ProgramSelector
 					onProgramSelect={handleProgramSelect}
+					onDifficultyChange={handleDifficultyChange}
 					scoreManager={traceTableScoreManager}
+					currentDifficulty={currentDifficulty}
 				/>
 
 				{/* Trace Table Interface */}
