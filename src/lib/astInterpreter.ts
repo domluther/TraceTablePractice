@@ -514,31 +514,33 @@ export class ASTInterpreter {
 		// If so, it's numeric addition, not string concatenation
 		const allPartsNumeric = parts.every((part) => {
 			// Check if it's a number literal
-			if (!Number.isNaN(parseFloat(part)) && isFinite(Number(part))) {
+			if (!Number.isNaN(parseFloat(part)) && Number.isFinite(Number(part))) {
 				return true;
 			}
-			
+
 			// Check if it's a numeric variable
 			if (vars[part] !== undefined && typeof vars[part] === "number") {
 				return true;
 			}
-			
+
 			// Check if it's array access (like nums[0])
 			if (part.includes("[") && part.includes("]")) {
 				const arrayValue = this.getVariableValue(part, vars);
 				return arrayValue !== undefined && typeof arrayValue === "number";
 			}
-			
+
 			// Check if it's a simple arithmetic expression without strings
 			if (this.isArithmeticExpression(part)) {
 				// Remove function calls and check for arithmetic operators
 				const withoutFunctions = part.replace(/\w+\([^)]*\)/g, "FUNC");
-				return !withoutFunctions.includes('"') && !withoutFunctions.includes("'");
+				return (
+					!withoutFunctions.includes('"') && !withoutFunctions.includes("'")
+				);
 			}
-			
+
 			return false;
 		});
-		
+
 		// If all parts are numeric, it's numeric addition
 		if (allPartsNumeric) {
 			return false;
