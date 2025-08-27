@@ -7,7 +7,7 @@ import type {
 	VariableValue,
 } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
-import { QuizButton } from './QuizButton';
+import { QuizButton } from "./QuizButton";
 
 interface TraceTableBodyProps {
 	currentProgram: Program | null;
@@ -351,18 +351,21 @@ export function TraceTableBody({
 		if (currentProgram?.inputSets && currentProgram.inputSets.length > 1) {
 			// Get all input sets except the current one
 			const availableInputSets = currentProgram.inputSets.filter(
-				(inputSet) => JSON.stringify(inputSet) !== JSON.stringify(currentProgram.inputs)
+				(inputSet) =>
+					JSON.stringify(inputSet) !== JSON.stringify(currentProgram.inputs),
 			);
-			
+
 			// If no different input sets available, use any random one
-			const inputSetsToChooseFrom = availableInputSets.length > 0 
-				? availableInputSets 
-				: currentProgram.inputSets;
-			
-			const randomInputSet = inputSetsToChooseFrom[
-				Math.floor(Math.random() * inputSetsToChooseFrom.length)
-			];
-			
+			const inputSetsToChooseFrom =
+				availableInputSets.length > 0
+					? availableInputSets
+					: currentProgram.inputSets;
+
+			const randomInputSet =
+				inputSetsToChooseFrom[
+					Math.floor(Math.random() * inputSetsToChooseFrom.length)
+				];
+
 			const shuffledProgram = { ...currentProgram, inputs: randomInputSet };
 
 			// Re-execute with new inputs
@@ -570,7 +573,7 @@ export function TraceTableBody({
 								</div>
 							</div>
 						)}
-						
+
 						{currentProgram.randomValue !== undefined && (
 							<div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
 								<div className="flex items-start gap-2">
@@ -718,10 +721,7 @@ export function TraceTableBody({
 
 			{/* Action Buttons */}
 			<div className="flex flex-wrap gap-2 justify-center">
-				<QuizButton
-					onClick={markAnswer}
-					variant="action"
-				>
+				<QuizButton onClick={markAnswer} variant="action">
 					✅ Mark My Answer
 				</QuizButton>
 				{currentProgram.inputSets && currentProgram.inputSets.length > 1 && (
@@ -732,7 +732,6 @@ export function TraceTableBody({
 				<QuizButton onClick={clearTable} variant="destructive">
 					🗑️ Clear Table
 				</QuizButton>
-
 			</div>
 
 			{/* Feedback */}

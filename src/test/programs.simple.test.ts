@@ -46,9 +46,13 @@ describe("Simple Program Tests", () => {
 		const result = runProgram(program);
 
 		expect(result.success).toBe(true);
-		expect(result.variables.a).toBe(5);
-		expect(result.variables.b).toBe(3);
-		expect(result.variables.c).toBe(8);
+		expect(result.success).toBe(true);
+		
+		// Type-safe approach: cast to Record type since we know success is true
+		const variables = result.variables as Record<string, any>;
+		expect(variables.a).toBe(5);
+		expect(variables.b).toBe(3);
+		expect(variables.c).toBe(8);
 		expect(result.outputs).toContain("8");
 	});
 

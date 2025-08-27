@@ -1,5 +1,4 @@
 import { describe, it } from 'vitest';
-import { ASTInterpreter, type Program } from '../lib/astInterpreter';
 
 describe('Debug Indexing Issue', () => {
   it('should show exact array indices', () => {
