@@ -6,6 +6,19 @@ export interface LevelInfo {
 	minAccuracy: number;
 }
 
+export interface ScoreDisplay {
+	text: string;
+	className: string;
+}
+
+export interface ProgramScore {
+	programName: string;
+	attempts: number;
+	bestScore: string;
+	lastAttempt: string;
+	accuracy: number;
+}
+
 export interface ScoreData {
 	attempts: number;
 	correct: number;
@@ -190,6 +203,64 @@ export class ScoreManager {
 		this.saveScores();
 	}
 
+	// Add trace table specific methods for compatibility
+	saveScore(
+		difficulty: string,
+		programIndex: number,
+		correct: number,
+		total: number,
+	): boolean {
+		try {
+			const itemKey = `${difficulty}-${programIndex}`;
+
+			if (!this.scores[itemKey]) {
+				this.scores[itemKey] = {
+					attempts: 0,
+					correct: 0,
+					totalScore: 0,
+					byType: {
+						IPv4: { attempts: 0, correct: 0 },
+						IPv6: { attempts: 0, correct: 0 },
+						MAC: { attempts: 0, correct: 0 },
+						none: { attempts: 0, correct: 0 },
+					},
+					history: [],
+				};
+			}
+
+			const scoreData = this.scores[itemKey];
+			scoreData.attempts++;
+
+			// For trace tables, we want to track the actual correct answers, not just pass/fail
+			// Update the "correct" field to be the best score achieved so far
+			if (correct > scoreData.correct) {
+				scoreData.correct = correct;
+			}
+
+			// Add to total score (sum of all attempts)
+			const percentage = Math.round((correct / total) * 100);
+			scoreData.totalScore += percentage;
+
+			// Add to history (keep last 50 entries)
+			scoreData.history.unshift({
+				timestamp: Date.now(),
+				correct: correct === total, // Only mark as fully correct if perfect
+				addressType: "trace-table",
+				address: `${correct}/${total}`,
+			});
+
+			if (scoreData.history.length > 50) {
+				scoreData.history = scoreData.history.slice(0, 50);
+			}
+
+			this.saveScores();
+			return true;
+		} catch (error) {
+			console.error("Error saving score:", error);
+			return false;
+		}
+	}
+
 	getOverallStats(): {
 		totalAttempts: number;
 		totalCorrect: number;
@@ -256,6 +327,93 @@ export class ScoreManager {
 		};
 	}
 
+	// Trace table compatible version of getOverallStats
+	getTraceTableStats(): {
+		totalCorrect: number;
+		totalQuestions: number;
+		totalAttempts: number;
+		percentage: number;
+	} {
+		let totalBestPoints = 0;
+		let totalPossiblePoints = 0;
+		let programsAttempted = 0;
+
+		for (const [key, scoreData] of Object.entries(this.scores)) {
+			// Only count trace table programs (those with the difficulty-index pattern)
+			if (key.match(/^(easy|medium|hard)-\d+$/)) {
+				if (scoreData.attempts > 0) {
+					programsAttempted++;
+					// The "correct" field stores the best score achieved
+					totalBestPoints += scoreData.correct;
+
+					// Get the total questions from the most recent attempt
+					if (scoreData.history.length > 0) {
+						const mostRecentAttempt = scoreData.history[0];
+						const [, totalStr] = mostRecentAttempt.address.split("/");
+						totalPossiblePoints += parseInt(totalStr, 10) || 0;
+					}
+				}
+			}
+		}
+
+		return {
+			totalCorrect: totalBestPoints,
+			totalQuestions: totalPossiblePoints,
+			totalAttempts: programsAttempted,
+			percentage:
+				totalPossiblePoints > 0
+					? Math.round((totalBestPoints / totalPossiblePoints) * 100)
+					: 0,
+		};
+	}
+
+	// Get display text and styling for a program's score (trace table compatibility)
+	getScoreDisplay(difficulty: string, programIndex: number): ScoreDisplay {
+		const key = `${difficulty}-${programIndex}`;
+		const scoreData = this.scores[key];
+
+		if (!scoreData || scoreData.attempts === 0) {
+			return {
+				text: "N/A",
+				className: "score-none",
+			};
+		}
+
+		// Get the total questions from the most recent attempt
+		let totalQuestions = 0;
+		if (scoreData.history.length > 0) {
+			const mostRecentAttempt = scoreData.history[0];
+			const [, totalStr] = mostRecentAttempt.address.split("/");
+			totalQuestions = parseInt(totalStr, 10) || 0;
+		}
+
+		const bestScore = scoreData.correct; // This stores the best score achieved
+		const percentage =
+			totalQuestions > 0 ? Math.round((bestScore / totalQuestions) * 100) : 0;
+
+		let className = "";
+		let text = "";
+
+		if (percentage === 100) {
+			className = "score-perfect";
+			text = `${bestScore}/${totalQuestions} ⭐`;
+		} else if (percentage >= 80) {
+			className = "score-good";
+			text = `${bestScore}/${totalQuestions} 👍`;
+		} else if (percentage >= 60) {
+			className = "score-okay";
+			text = `${bestScore}/${totalQuestions} 👌`;
+		} else if (percentage >= 40) {
+			className = "score-poor";
+			text = `${bestScore}/${totalQuestions} 😐`;
+		} else {
+			className = "score-bad";
+			text = `${bestScore}/${totalQuestions} 😞`;
+		}
+
+		return { text, className };
+	}
+
 	getScoresByType(): Record<
 		string,
 		{ attempts: number; correct: number; accuracy: number }
@@ -265,24 +423,111 @@ export class ScoreManager {
 			{ attempts: number; correct: number; accuracy: number }
 		> = {};
 
-		Object.values(this.scores).forEach((score) => {
-			Object.entries(score.byType).forEach(([type, stats]) => {
-				if (!typeStats[type]) {
-					typeStats[type] = { attempts: 0, correct: 0, accuracy: 0 };
-				}
-				typeStats[type].attempts += stats.attempts;
-				typeStats[type].correct += stats.correct;
-			});
-		});
+		// For trace tables, we want to show scores by individual programs
+		for (const [key, scoreData] of Object.entries(this.scores)) {
+			// Only include trace table programs
+			if (key.match(/^(easy|medium|hard)-\d+$/)) {
+				const [difficulty, indexStr] = key.split("-");
+				const programIndex = parseInt(indexStr, 10);
+				const displayName = `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Program ${programIndex + 1}`;
 
-		// Calculate accuracy for each type
-		Object.keys(typeStats).forEach((type) => {
-			const stats = typeStats[type];
-			stats.accuracy =
-				stats.attempts > 0 ? (stats.correct / stats.attempts) * 100 : 0;
-		});
+				let totalQuestions = 0;
+				if (scoreData.history.length > 0) {
+					const mostRecentAttempt = scoreData.history[0];
+					const [, totalStr] = mostRecentAttempt.address.split("/");
+					totalQuestions = parseInt(totalStr, 10) || 0;
+				}
+
+				const bestScore = scoreData.correct;
+				const accuracy =
+					totalQuestions > 0 ? (bestScore / totalQuestions) * 100 : 0;
+
+				typeStats[displayName] = {
+					attempts: scoreData.attempts,
+					correct: bestScore,
+					accuracy: Math.round(accuracy),
+				};
+			}
+		}
+
+		// If no trace table scores, fall back to original behavior for backward compatibility
+		if (Object.keys(typeStats).length === 0) {
+			Object.values(this.scores).forEach((score) => {
+				Object.entries(score.byType).forEach(([type, stats]) => {
+					if (!typeStats[type]) {
+						typeStats[type] = { attempts: 0, correct: 0, accuracy: 0 };
+					}
+					typeStats[type].attempts += stats.attempts;
+					typeStats[type].correct += stats.correct;
+				});
+			});
+
+			// Calculate accuracy for each type
+			Object.keys(typeStats).forEach((type) => {
+				const stats = typeStats[type];
+				stats.accuracy =
+					stats.attempts > 0 ? (stats.correct / stats.attempts) * 100 : 0;
+			});
+		}
 
 		return typeStats;
+	}
+
+	// Get detailed program scores with timestamps for display
+	getProgramScores(): ProgramScore[] {
+		const programScores: ProgramScore[] = [];
+
+		for (const [key, scoreData] of Object.entries(this.scores)) {
+			// Only include trace table programs
+			if (key.match(/^(easy|medium|hard)-\d+$/) && scoreData.attempts > 0) {
+				const [difficulty, indexStr] = key.split("-");
+				const programIndex = parseInt(indexStr, 10);
+				const programName = `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Program ${programIndex + 1}`;
+
+				let totalQuestions = 0;
+				let lastAttemptDate = "";
+
+				if (scoreData.history.length > 0) {
+					const mostRecentAttempt = scoreData.history[0];
+					const [, totalStr] = mostRecentAttempt.address.split("/");
+					totalQuestions = parseInt(totalStr, 10) || 0;
+					lastAttemptDate = new Date(
+						mostRecentAttempt.timestamp,
+					).toLocaleDateString("en-GB");
+				}
+
+				const bestScore = scoreData.correct;
+				const accuracy =
+					totalQuestions > 0 ? (bestScore / totalQuestions) * 100 : 0;
+
+				programScores.push({
+					programName,
+					attempts: scoreData.attempts,
+					bestScore: `${bestScore}/${totalQuestions}`,
+					lastAttempt: lastAttemptDate,
+					accuracy: Math.round(accuracy),
+				});
+			}
+		}
+
+		// Sort by difficulty and then by program number
+		programScores.sort((a, b) => {
+			const difficultyOrder = ["Easy", "Medium", "Hard"];
+			const aDifficulty = a.programName.split(" ")[0];
+			const bDifficulty = b.programName.split(" ")[0];
+
+			const diffCompare =
+				difficultyOrder.indexOf(aDifficulty) -
+				difficultyOrder.indexOf(bDifficulty);
+			if (diffCompare !== 0) return diffCompare;
+
+			// If same difficulty, sort by program number
+			const aNumber = parseInt(a.programName.split(" ")[2], 10);
+			const bNumber = parseInt(b.programName.split(" ")[2], 10);
+			return aNumber - bNumber;
+		});
+
+		return programScores;
 	}
 
 	resetAllScores(): void {

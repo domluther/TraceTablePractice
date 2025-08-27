@@ -3,7 +3,7 @@ import { useEffect, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import type { ScoreManager } from "@/lib/scoreManager";
+import type { ProgramScore, ScoreManager } from "@/lib/scoreManager";
 import { cn } from "@/lib/utils";
 
 interface StatsModalProps {
@@ -44,7 +44,13 @@ export function StatsModal({
 	if (!isOpen) return null;
 
 	const overallStats = scoreManager.getOverallStats();
+	const traceTableStats = (scoreManager as any).getTraceTableStats
+		? (scoreManager as any).getTraceTableStats()
+		: null;
 	const typeStats = scoreManager.getScoresByType();
+	const programScores = (scoreManager as any).getProgramScores
+		? ((scoreManager as any).getProgramScores() as ProgramScore[])
+		: [];
 
 	const handleResetScores = () => {
 		if (
@@ -96,7 +102,8 @@ export function StatsModal({
 
 				{/* Content */}
 				<div className="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
-					{overallStats.totalAttempts > 0 ? (
+					{(traceTableStats && traceTableStats.totalAttempts > 0) ||
+					overallStats.totalAttempts > 0 ? (
 						<div className="space-y-6 ">
 							{/* Level Info Card */}
 							<Card className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
@@ -175,23 +182,34 @@ export function StatsModal({
 									<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 										<div className="bg-blue-50 rounded-lg p-4 text-center border-l-4 border-blue-500">
 											<div className="text-2xl font-bold text-blue-600">
-												{overallStats.totalAttempts}
+												{traceTableStats
+													? traceTableStats.totalCorrect
+													: overallStats.totalCorrect}
 											</div>
 											<div className="text-sm text-gray-600">
-												Total Attempts
+												Best Points Total
 											</div>
 										</div>
 										<div className="bg-green-50 rounded-lg p-4 text-center border-l-4 border-green-500">
 											<div className="text-2xl font-bold text-green-600">
-												{overallStats.totalCorrect}
+												{traceTableStats
+													? traceTableStats.totalAttempts
+													: overallStats.totalAttempts}
 											</div>
-											<div className="text-sm text-gray-600">Correct</div>
+											<div className="text-sm text-gray-600">
+												Programs Attempted
+											</div>
 										</div>
 										<div className="bg-purple-50 rounded-lg p-4 text-center border-l-4 border-purple-500">
 											<div className="text-2xl font-bold text-purple-600">
-												{Math.round(overallStats.accuracy)}%
+												{traceTableStats
+													? Math.round(traceTableStats.percentage)
+													: Math.round(overallStats.accuracy)}
+												%
 											</div>
-											<div className="text-sm text-gray-600">Accuracy</div>
+											<div className="text-sm text-gray-600">
+												Overall Accuracy
+											</div>
 										</div>
 									</div>
 								</CardContent>
@@ -201,47 +219,83 @@ export function StatsModal({
 							<Card>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
-										📋 Breakdown by Category
+										📋{" "}
+										{programScores.length > 0
+											? "Program Scores"
+											: "Breakdown by Category"}
 									</CardTitle>
 								</CardHeader>
 								<CardContent>
 									<div className="space-y-3">
-										{Object.entries(typeStats).map(
-											([type, stats]) =>
-												stats.attempts > 0 && (
+										{programScores.length > 0
+											? // Show program scores for trace tables
+												programScores.map((program) => (
 													<div
-														key={type}
-														className="bg-gray-50 rounded-lg p-4 flex items-center justify-between"
+														key={program.programName}
+														className="bg-gray-50 rounded-lg p-4"
 													>
-														<div>
+														<div className="flex items-center justify-between mb-2">
 															<div className="font-semibold text-lg">
-																{type === "none" ? "Invalid Items" : type}
+																{program.programName}
 															</div>
-															<div className="text-sm text-gray-600">
-																{stats.correct} correct out of {stats.attempts}{" "}
-																attempts
-															</div>
-														</div>
-														<div className="text-right">
 															<div
 																className={cn(
-																	"text-2xl font-bold",
-																	stats.accuracy >= 80
-																		? "text-green-600"
-																		: stats.accuracy >= 60
-																			? "text-yellow-600"
-																			: "text-red-600",
+																	"text-xl font-bold px-3 py-1 rounded-full text-white",
+																	program.accuracy >= 90
+																		? "bg-green-500"
+																		: program.accuracy >= 70
+																			? "bg-blue-500"
+																			: program.accuracy >= 50
+																				? "bg-yellow-500"
+																				: "bg-red-500",
 																)}
 															>
-																{Math.round(stats.accuracy)}%
-															</div>
-															<div className="text-xs text-gray-500">
-																accuracy
+																{program.bestScore}
 															</div>
 														</div>
+														<div className="text-sm text-gray-600">
+															Attempts: {program.attempts} • Last:{" "}
+															{program.lastAttempt}
+														</div>
 													</div>
-												),
-										)}
+												))
+											: // Fallback to original category breakdown
+												Object.entries(typeStats).map(
+													([type, stats]) =>
+														stats.attempts > 0 && (
+															<div
+																key={type}
+																className="bg-gray-50 rounded-lg p-4 flex items-center justify-between"
+															>
+																<div>
+																	<div className="font-semibold text-lg">
+																		{type === "none" ? "Invalid Items" : type}
+																	</div>
+																	<div className="text-sm text-gray-600">
+																		{stats.correct} correct out of{" "}
+																		{stats.attempts} attempts
+																	</div>
+																</div>
+																<div className="text-right">
+																	<div
+																		className={cn(
+																			"text-2xl font-bold",
+																			stats.accuracy >= 80
+																				? "text-green-600"
+																				: stats.accuracy >= 60
+																					? "text-yellow-600"
+																					: "text-red-600",
+																		)}
+																	>
+																		{Math.round(stats.accuracy)}%
+																	</div>
+																	<div className="text-xs text-gray-500">
+																		accuracy
+																	</div>
+																</div>
+															</div>
+														),
+												)}
 									</div>
 								</CardContent>
 							</Card>

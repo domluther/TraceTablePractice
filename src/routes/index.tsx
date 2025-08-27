@@ -18,7 +18,6 @@ import type { Program } from "@/lib/programs";
 import { programs } from "@/lib/programs";
 import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
-import { TraceTableScoreManager } from "@/lib/traceTableScoreManager";
 
 type SearchParams = {
 	difficulty?: "easy" | "medium" | "hard";
@@ -59,8 +58,7 @@ function Index() {
 	const search = useSearch({ from: "/" });
 	const navigate = useNavigate({ from: "/" });
 
-	// Score managers
-	const [traceTableScoreManager] = useState(() => new TraceTableScoreManager());
+	// Score manager
 	const [scoreManager] = useState(
 		() => new ScoreManager(siteConfig.siteKey, siteConfig.scoring.customLevels),
 	);
@@ -91,7 +89,7 @@ function Index() {
 	// Update overall stats periodically
 	useEffect(() => {
 		const updateStats = () => {
-			const stats = traceTableScoreManager.getOverallStats();
+			const stats = scoreManager.getTraceTableStats();
 
 			// Calculate level based on performance
 			let currentLevel = siteConfig.scoring.customLevels?.[0];
@@ -123,7 +121,7 @@ function Index() {
 		// Update stats every few seconds to reflect changes
 		const interval = setInterval(updateStats, 5000);
 		return () => clearInterval(interval);
-	}, [traceTableScoreManager, siteConfig.scoring.customLevels]);
+	}, [scoreManager, siteConfig.scoring.customLevels]);
 
 	// Load program from URL using Tanstack Router search
 	useEffect(() => {
@@ -277,7 +275,7 @@ function Index() {
 	const handleScoreUpdate = useCallback(
 		(correct: number, total: number) => {
 			if (currentDifficulty && currentProgramIndex >= 0) {
-				traceTableScoreManager.saveScore(
+				scoreManager.saveScore(
 					currentDifficulty,
 					currentProgramIndex,
 					correct,
@@ -285,7 +283,7 @@ function Index() {
 				);
 			}
 		},
-		[currentDifficulty, currentProgramIndex, traceTableScoreManager],
+		[currentDifficulty, currentProgramIndex, scoreManager],
 	);
 
 	// Help section
@@ -328,7 +326,7 @@ function Index() {
 				<ProgramSelector
 					onProgramSelect={handleProgramSelect}
 					onDifficultyChange={handleDifficultyChange}
-					scoreManager={traceTableScoreManager}
+					scoreManager={scoreManager}
 					currentDifficulty={currentDifficulty}
 				/>
 

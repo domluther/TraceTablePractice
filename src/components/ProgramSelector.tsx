@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { type Program, programs } from "@/lib/programs";
-import type { TraceTableScoreManager } from "@/lib/traceTableScoreManager";
+import type { ScoreManager } from "@/lib/scoreManager";
 import { QuizButton } from "./QuizButton";
 
 interface ProgramSelectorProps {
@@ -10,7 +10,7 @@ interface ProgramSelectorProps {
 		index: number,
 	) => void;
 	onDifficultyChange?: (difficulty: "easy" | "medium" | "hard") => void;
-	scoreManager: TraceTableScoreManager;
+	scoreManager: ScoreManager;
 	currentDifficulty?: string;
 }
 
