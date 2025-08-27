@@ -499,7 +499,7 @@ export function TraceTableBody({
 						<pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed">
 							{currentProgram.code.split("\n").map((line, index) => (
 								<div
-									key={index}
+									key={`line-${index}-${line}`}
 									className="flex hover:bg-slate-100 px-1 py-0.5 rounded"
 								>
 									<span className="text-slate-400 mr-4 select-none w-8 text-right font-medium text-xs">
@@ -601,7 +601,7 @@ export function TraceTableBody({
 							<tbody>
 								{userEntries.map((entry, rowIndex) => (
 									<tr
-										key={rowIndex}
+										key={`line-${entry.lineNumber}-${entry.output}`}
 										className="hover:bg-gray-50 transition-colors"
 									>
 										<td
@@ -716,9 +716,9 @@ export function TraceTableBody({
 										<strong>Details:</strong>
 									</p>
 									<div className="space-y-2">
-										{feedback.details.map((error, index) => (
+										{feedback.details.map((error) => (
 											<div
-												key={index}
+												key={error}
 												className="feedback-item incorrect bg-red-100 p-2 rounded text-sm font-mono text-red-800 leading-relaxed"
 											>
 												{error}

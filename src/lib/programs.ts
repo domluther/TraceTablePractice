@@ -278,9 +278,9 @@ next x`,
 			description: "Name length multiplier",
 			inputSets: [
 				["Alice", "Bob", "Kate"],
-				["Sam", "Ann", "Alex"],
-				["Jo", "Max", "Eve"],
-				["Tom", "Sue", "Dan"],
+				["Tami", "Ann", "Alex"],
+				["Jo", "Maxi", "Eve"],
+				["Tommy", "Suzy", "Dan"],
 			],
 		},
 		{
