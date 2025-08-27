@@ -574,13 +574,13 @@ print("Average: " + str(average))`,
 		{
 			code: `array temps[4]
 total = 0
-const hot = 25
+const HOT = 25
 hot_days = 0
 for day = 0 to 3
     temp = int(input("Day " + str(day + 1) + " temperature"))
     temps[day] = temp
     total = total + temp
-    if temp >= hot then
+    if temp >= HOT then
         hot_days = hot_days + 1
     endif
 next day
