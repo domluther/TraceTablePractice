@@ -465,25 +465,16 @@ export class ASTInterpreter {
 			return true;
 		}
 
-		// Additional check: if we have numeric arrays and arithmetic operations, it's NOT string concatenation
-		if (
-			value.includes("*") ||
-			value.includes("/") ||
-			value.includes("MOD") ||
-			value.includes("DIV")
-		) {
-			return false;
-		}
-
 		// Check if expression contains + and any string indicators
 		if (!value.includes("+")) {
 			return false;
 		}
 
-		const parts = value.split("+").map((p) => p.trim());
+		// Parse the expression to find top-level + operators (not inside function calls or parentheses)
+		const parts = this.parseStringConcatenation(value);
 
-		// For it to be string concatenation, at least one part must be string-like
-		return parts.some((part) => {
+		// Check if any part is a string indicator
+		const hasStringIndicators = parts.some((part) => {
 			// Check for string literals (both single and double quotes)
 			if (
 				(part.startsWith('"') && part.endsWith('"')) ||
@@ -492,7 +483,7 @@ export class ASTInterpreter {
 				return true;
 			}
 
-			// Check for string methods
+			// Check for string methods and functions that return strings
 			if (
 				part.includes(".left(") ||
 				part.includes(".right(") ||
@@ -513,6 +504,48 @@ export class ASTInterpreter {
 
 			return false;
 		});
+
+		// If we have string indicators, it's definitely string concatenation
+		if (hasStringIndicators) {
+			return true;
+		}
+
+		// If we don't have string indicators, check if all parts are numeric
+		// If so, it's numeric addition, not string concatenation
+		const allPartsNumeric = parts.every((part) => {
+			// Check if it's a number literal
+			if (!Number.isNaN(parseFloat(part)) && isFinite(Number(part))) {
+				return true;
+			}
+			
+			// Check if it's a numeric variable
+			if (vars[part] !== undefined && typeof vars[part] === "number") {
+				return true;
+			}
+			
+			// Check if it's array access (like nums[0])
+			if (part.includes("[") && part.includes("]")) {
+				const arrayValue = this.getVariableValue(part, vars);
+				return arrayValue !== undefined && typeof arrayValue === "number";
+			}
+			
+			// Check if it's a simple arithmetic expression without strings
+			if (this.isArithmeticExpression(part)) {
+				// Remove function calls and check for arithmetic operators
+				const withoutFunctions = part.replace(/\w+\([^)]*\)/g, "FUNC");
+				return !withoutFunctions.includes('"') && !withoutFunctions.includes("'");
+			}
+			
+			return false;
+		});
+		
+		// If all parts are numeric, it's numeric addition
+		if (allPartsNumeric) {
+			return false;
+		}
+
+		// Default to string concatenation if we can't determine otherwise
+		return true;
 	}
 
 	private isArithmeticExpression(value: string): boolean {
