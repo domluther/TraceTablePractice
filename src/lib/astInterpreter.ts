@@ -200,17 +200,20 @@ export class ASTInterpreter {
 		} else if (line.startsWith("print(")) {
 			// Print statement
 			const content = line.substring(6, line.length - 1);
-			
+
 			// Check for comma-separated arguments like print("The score is", score)
 			// But be careful not to break function calls like print(substring(x, 1))
-			const hasComma = content.includes(',');
-			const hasParens = content.includes('(') && content.includes(')');
-			
-			if (hasComma && (!hasParens || content.indexOf(',') < content.indexOf('('))) {
+			const hasComma = content.includes(",");
+			const hasParens = content.includes("(") && content.includes(")");
+
+			if (
+				hasComma &&
+				(!hasParens || content.indexOf(",") < content.indexOf("("))
+			) {
 				// This looks like comma-separated arguments, not function arguments
-				const parts = content.split(',').map(part => part.trim());
-				let outputParts: string[] = [];
-				
+				const parts = content.split(",").map((part) => part.trim());
+				const outputParts: string[] = [];
+
 				for (const part of parts) {
 					if (
 						part.startsWith('"') &&
@@ -232,8 +235,8 @@ export class ASTInterpreter {
 						}
 					}
 				}
-				
-				output = outputParts.join(' ');
+
+				output = outputParts.join(" ");
 			} else if (
 				content.startsWith('"') &&
 				content.endsWith('"') &&
@@ -1548,7 +1551,7 @@ export class ASTInterpreter {
 			} else {
 				// Regular statement
 				const result = this.executeStatement(bodyLineCode, this.variables);
-				
+
 				if (
 					result.shouldTrace &&
 					(Object.keys(result.changedVariables || {}).length > 0 ||
