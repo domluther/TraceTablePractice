@@ -81,7 +81,7 @@ export function ProgramSelector({
 			</summary>
 
 			{/* Controls */}
-			<div className="flex items-center mb-6 gap-6">
+			<div className="flex items-center gap-6 mb-6">
 				<div className="flex items-center gap-3">
 					<label
 						htmlFor={difficultySelectId}
@@ -132,7 +132,7 @@ export function ProgramSelector({
 							return (
 								<tr
 									key={`${selectedDifficulty}-${index}-${program.description}`}
-									className="border-b transition-colors duration-150 hover:bg-gray-50"
+									className="transition-colors duration-150 border-b hover:bg-gray-50"
 								>
 									<td className="px-4 py-3 align-middle">
 										<div>
@@ -148,7 +148,7 @@ export function ProgramSelector({
 									</td>
 									<td className="px-4 py-3 align-middle">
 										<span
-											className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+											className={`inline-block min-w-24 text-center px-2 py-1 rounded-full text-xs font-semibold ${
 												scoreDisplay.className === "score-perfect"
 													? "bg-green-100 text-green-800"
 													: scoreDisplay.className === "score-good"
