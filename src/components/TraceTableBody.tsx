@@ -452,10 +452,8 @@ export function TraceTableBody({
 	// Keyboard shortcuts
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			// Only respond to keyboard shortcuts when not focused on an input
-			if (e.target && (e.target as HTMLElement).tagName === "INPUT") {
-				return;
-			}
+			const isInputFocused =
+				e.target && (e.target as HTMLElement).tagName === "INPUT";
 
 			switch (e.key) {
 				case "Enter":
@@ -468,11 +466,15 @@ export function TraceTableBody({
 					break;
 				case "s":
 				case "S":
+					// Only respond to letter shortcuts when not focused on an input
+					if (isInputFocused) return;
 					e.preventDefault();
 					shuffleInputs();
 					break;
 				case "n":
 				case "N":
+					// Only respond to letter shortcuts when not focused on an input
+					if (isInputFocused) return;
 					e.preventDefault();
 					if (onNextProgram && canGoNext) {
 						onNextProgram();
@@ -480,6 +482,8 @@ export function TraceTableBody({
 					break;
 				case "p":
 				case "P":
+					// Only respond to letter shortcuts when not focused on an input
+					if (isInputFocused) return;
 					e.preventDefault();
 					if (onPreviousProgram && canGoPrevious) {
 						onPreviousProgram();
