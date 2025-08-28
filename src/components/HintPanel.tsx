@@ -15,7 +15,6 @@ interface HintPanelProps {
 /**
  * Generic help panel component for GCSE CS practice sites
  * Displays format rules, examples, or any educational content
- * Toggleable visibility with smooth transitions and color-coded sections
  */
 export function HintPanel({
 	title = "📝 Help & Rules:",

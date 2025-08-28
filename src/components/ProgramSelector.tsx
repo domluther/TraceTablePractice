@@ -75,13 +75,13 @@ export function ProgramSelector({
 	);
 
 	return (
-		<>
-			<h3 className="mb-6 text-xl font-semibold text-gray-800">
+		<details open>
+			<summary className="my-2 text-xl font-semibold text-gray-800">
 				Select a program
-			</h3>
+			</summary>
 
 			{/* Controls */}
-			<div className="flex items-center mb-6 gap-6">
+			<div className="flex items-center gap-6 mb-6">
 				<div className="flex items-center gap-3">
 					<label
 						htmlFor={difficultySelectId}
@@ -132,7 +132,7 @@ export function ProgramSelector({
 							return (
 								<tr
 									key={`${selectedDifficulty}-${index}-${program.description}`}
-									className="border-b hover:bg-gray-50 transition-colors duration-150"
+									className="transition-colors duration-150 border-b hover:bg-gray-50"
 								>
 									<td className="px-4 py-3 align-middle">
 										<div>
@@ -178,6 +178,6 @@ export function ProgramSelector({
 					</tbody>
 				</table>
 			</div>
-		</>
+		</details>
 	);
 }
