@@ -121,6 +121,34 @@ function Index() {
 		updateStats();
 	}, [updateStats]);
 
+	// Helper function to apply random selections to a program
+	const getProgramInputs = useCallback((program: Program): Program => {
+		const processedProgram = { ...program };
+
+		// Apply random input set if available
+		if (processedProgram.inputSets && processedProgram.inputSets.length > 0) {
+			const randomInputSet =
+				processedProgram.inputSets[
+					Math.floor(Math.random() * processedProgram.inputSets.length)
+				];
+			processedProgram.inputs = randomInputSet;
+		}
+
+		// Apply random value if available
+		if (
+			processedProgram.randomValues &&
+			processedProgram.randomValues.length > 0
+		) {
+			const randomValue =
+				processedProgram.randomValues[
+					Math.floor(Math.random() * processedProgram.randomValues.length)
+				];
+			processedProgram.randomValue = randomValue;
+		}
+
+		return processedProgram;
+	}, []);
+
 	// Load program from URL using Tanstack Router search
 	useEffect(() => {
 		const { difficulty, program: programIndex } = search;
@@ -133,25 +161,7 @@ function Index() {
 			const programList = programs[selectedDifficulty];
 
 			if (programList && programIndex < programList.length) {
-				const program = { ...programList[programIndex] };
-
-				// Apply random selections as in ProgramSelector
-				if (program.inputSets && program.inputSets.length > 0) {
-					const randomInputSet =
-						program.inputSets[
-							Math.floor(Math.random() * program.inputSets.length)
-						];
-					program.inputs = randomInputSet;
-				}
-
-				if (program.randomValues && program.randomValues.length > 0) {
-					const randomValue =
-						program.randomValues[
-							Math.floor(Math.random() * program.randomValues.length)
-						];
-					program.randomValue = randomValue;
-				}
-
+				const program = getProgramInputs(programList[programIndex]);
 				setCurrentProgram(program);
 				setCurrentProgramIndex(programIndex);
 			}
@@ -160,12 +170,14 @@ function Index() {
 			setCurrentProgram(null);
 			setCurrentProgramIndex(-1);
 		}
-	}, [search]);
+	}, [search, getProgramInputs]);
 
 	// Helper function to scroll to program code section
 	const scrollToProgramCode = useCallback(() => {
 		setTimeout(() => {
-			const programCodeSection = document.getElementById("program-code-section");
+			const programCodeSection = document.getElementById(
+				"program-code-section",
+			);
 			if (programCodeSection) {
 				programCodeSection.scrollIntoView({
 					behavior: "smooth",
@@ -175,24 +187,38 @@ function Index() {
 		}, 100);
 	}, []);
 
-	const handleProgramSelect = useCallback(
-		(program: Program, difficulty: string, index: number) => {
-			setCurrentProgram(program);
-			setCurrentDifficulty(difficulty);
-			setCurrentProgramIndex(index);
+	// Central function to navigate to a specific program
+	const navigateToProgram = useCallback(
+		(difficulty: string, index: number) => {
+			const programList =
+				programs[difficulty as "easy" | "medium" | "hard"] || programs.easy;
 
-			// Update URL using Tanstack Router navigation
-			navigate({
-				search: {
-					difficulty: difficulty as "easy" | "medium" | "hard",
-					program: index,
-				},
-			});
+			if (index >= 0 && index < programList.length) {
+				const program = getProgramInputs(programList[index]);
 
-			// Scroll to the Program Code section
-			scrollToProgramCode();
+				setCurrentProgram(program);
+				setCurrentDifficulty(difficulty);
+				setCurrentProgramIndex(index);
+
+				// Update URL using Tanstack Router navigation
+				navigate({
+					search: {
+						difficulty: difficulty as "easy" | "medium" | "hard",
+						program: index,
+					},
+				});
+
+				scrollToProgramCode();
+			}
 		},
-		[navigate, scrollToProgramCode],
+		[navigate, scrollToProgramCode, getProgramInputs],
+	);
+
+	const handleProgramSelect = useCallback(
+		(_program: Program, difficulty: string, index: number) => {
+			navigateToProgram(difficulty, index);
+		},
+		[navigateToProgram],
 	);
 
 	const handleDifficultyChange = useCallback(
@@ -214,83 +240,18 @@ function Index() {
 
 	const handlePreviousProgram = useCallback(() => {
 		if (currentProgramIndex > 0) {
-			const newIndex = currentProgramIndex - 1;
-			const programList =
-				programs[currentDifficulty as "easy" | "medium" | "hard"] ||
-				programs.easy;
-			const program = { ...programList[newIndex] };
-
-			// Apply random selections as in ProgramSelector
-			if (program.inputSets && program.inputSets.length > 0) {
-				const randomInputSet =
-					program.inputSets[
-						Math.floor(Math.random() * program.inputSets.length)
-					];
-				program.inputs = randomInputSet;
-			}
-
-			if (program.randomValues && program.randomValues.length > 0) {
-				const randomValue =
-					program.randomValues[
-						Math.floor(Math.random() * program.randomValues.length)
-					];
-				program.randomValue = randomValue;
-			}
-
-			setCurrentProgram(program);
-			setCurrentProgramIndex(newIndex);
-
-			navigate({
-				search: {
-					difficulty: currentDifficulty as "easy" | "medium" | "hard",
-					program: newIndex,
-				},
-			});
-
-			// Scroll to the Program Code section
-			scrollToProgramCode();
+			navigateToProgram(currentDifficulty, currentProgramIndex - 1);
 		}
-	}, [currentProgramIndex, currentDifficulty, navigate, scrollToProgramCode]);
+	}, [currentProgramIndex, currentDifficulty, navigateToProgram]);
 
 	const handleNextProgram = useCallback(() => {
 		const programList =
 			programs[currentDifficulty as "easy" | "medium" | "hard"] ||
 			programs.easy;
 		if (currentProgramIndex < programList.length - 1) {
-			const newIndex = currentProgramIndex + 1;
-			const program = { ...programList[newIndex] };
-
-			// Apply random selections as in ProgramSelector
-			if (program.inputSets && program.inputSets.length > 0) {
-				const randomInputSet =
-					program.inputSets[
-						Math.floor(Math.random() * program.inputSets.length)
-					];
-				program.inputs = randomInputSet;
-			}
-
-			if (program.randomValues && program.randomValues.length > 0) {
-				const randomValue =
-					program.randomValues[
-						Math.floor(Math.random() * program.randomValues.length)
-					];
-				program.randomValue = randomValue;
-			}
-
-			setCurrentProgram(program);
-			setCurrentProgramIndex(newIndex);
-
-			navigate({
-				search: {
-					difficulty: currentDifficulty as "easy" | "medium" | "hard",
-					program: newIndex,
-				},
-			});
-
-			// Scroll to the Program Code section
-			scrollToProgramCode();
+			navigateToProgram(currentDifficulty, currentProgramIndex + 1);
 		}
-	}, [currentProgramIndex, currentDifficulty, navigate, scrollToProgramCode]);
+	}, [currentProgramIndex, currentDifficulty, navigateToProgram]);
 
 	const handleScoreUpdate = useCallback(
 		(correct: number, total: number) => {
