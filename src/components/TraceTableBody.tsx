@@ -314,6 +314,11 @@ export function TraceTableBody({
 		setFeedback(null);
 		setCellResults({});
 		setIsMarked(false);
+
+		// Focus on the first input cell after clearing
+		setTimeout(() => {
+			firstInputRef.current?.focus();
+		}, 0);
 	}, [userEntries, programVariables]);
 
 	// Helper function to get cell styling based on correctness
