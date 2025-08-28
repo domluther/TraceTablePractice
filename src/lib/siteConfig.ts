@@ -118,7 +118,8 @@ export const SITE_CONFIG: SiteConfig = {
 		},
 		{
 			title: "Loops",
-			description: "Focus on the condition, especially updating the loop variable",
+			description:
+				"Focus on the condition, especially updating the loop variable",
 			examples: [
 				"for i = 1 to 10",
 				"while count < 5",
@@ -129,7 +130,7 @@ export const SITE_CONFIG: SiteConfig = {
 		{
 			title: "Arrays",
 			description: "Track assigning values to elements",
-			examples: ['array colours = ["Blue", "Pink", "Green"]',"myArray[0] = 5", ],
+			examples: ['array colours = ["Blue", "Pink", "Green"]', "myArray[0] = 5"],
 			color: "yellow",
 		},
 	],

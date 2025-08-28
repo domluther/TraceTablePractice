@@ -315,10 +315,8 @@ function Index() {
 								1
 						}
 						siteConfig={siteConfig}
-
 					/>
 				)}
-
 			</div>
 
 			{/* Statistics Modal */}

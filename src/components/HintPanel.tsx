@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 export interface HintItem {
 	title: string;
 	description: string;
@@ -29,15 +27,9 @@ export function HintPanel({
 	};
 
 	return (
-		<details className={cn(
-				"mt-4 bg-slate-100 border-l-teal-500 border-l-4 rounded-lg p-6",
-				"transition-all duration-300 ease-in-out",
-				"max-h-none overflow-visible",
-				"cursor-pointer list-none"
-			)}
-		>
+		<details className="p-6 mt-4 list-none border-l-4 rounded-lg cursor-pointer bg-slate-100 border-l-teal-500">
 			<summary className="mb-0 font-semibold text-md">{title}</summary>
-			<div className="overflow-y-auto max-h-64">
+			<div className="pl-4 overflow-y-auto max-h-64">
 				<ul className="space-y-4 text-gray-700">
 					{items.map((item) => (
 						<li key={item.title} className="flex flex-col gap-1">
@@ -56,6 +48,5 @@ export function HintPanel({
 				</ul>
 			</div>
 		</details>
-
 	);
 }

@@ -6,11 +6,11 @@ import type {
 	VariableValue,
 } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
-import type { Difficulty } from "@/lib/types";
 import type { SITE_CONFIG } from "@/lib/siteConfig";
+import type { Difficulty } from "@/lib/types";
+import { HintPanel } from "./HintPanel";
 import { ProgramCode } from "./ProgramCode";
 import { QuizButton } from "./QuizButton";
-import { HintPanel } from './HintPanel';
 
 interface TraceTableBodyProps {
 	currentProgram: Program | null;
@@ -44,7 +44,7 @@ export function TraceTableBody({
 	canGoPrevious = false,
 	canGoNext = false,
 	onProgramCodeIdReady,
-	siteConfig
+	siteConfig,
 }: TraceTableBodyProps) {
 	const [expectedTrace, setExpectedTrace] = useState<TraceStep[]>([]);
 	const [programVariables, setProgramVariables] = useState<string[]>([]);
@@ -651,45 +651,42 @@ export function TraceTableBody({
 				</Card>
 			)}
 
-				{/* Help Section */}
-				{currentProgram ? (
-					<HintPanel
-						title="📝 Trace Table Tips"
-						items={siteConfig.hints || []}
-					/>
-				) : null}
+			{/* Help Section */}
+			{currentProgram ? (
+				<HintPanel title="📝 Trace Table Tips" items={siteConfig.hints || []} />
+			) : null}
 
 			{/* Keyboard Shortcuts Help */}
 			<div className="mx-auto my-4 border border-l-4 rounded-lg border-l-teal-500 bg-slate-100">
 				<details>
-					<summary className="relative flex items-center gap-2 px-4 py-3 font-semibold list-none cursor-pointer select-none">
+					<summary className="relative flex items-center px-4 py-3 font-semibold list-none cursor-pointer select-none gap-2">
 						<span className="inline-block text-xs transition-transform duration-200 arrow-icon">
 							▶
 						</span>
 						⌨️ Keyboard Shortcuts
 					</summary>
-					<div className="grid grid-cols-1 gap-2 p-4 pt-0 border-t border-blue-100 sm:flex sm:justify-evenly">
-						<span className="flex items-center gap-2 text-sm text-gray-600">
+					<div className="p-4 pt-0 border-t border-blue-100 grid grid-cols-1 gap-2 sm:flex sm:justify-evenly">
+						<span className="flex items-center text-sm text-gray-600 gap-2">
 							<kbd className="kbd-style">Enter</kbd>
 							Mark Answer
 						</span>
 						{onNextProgram && (
-							<span className="flex items-center gap-2 text-sm text-gray-600">
+							<span className="flex items-center text-sm text-gray-600 gap-2">
 								<kbd className="kbd-style">N</kbd>
 								Next Program
 							</span>
 						)}
 						{onPreviousProgram && (
-							<span className="flex items-center gap-2 text-sm text-gray-600">
+							<span className="flex items-center text-sm text-gray-600 gap-2">
 								<kbd className="kbd-style">P</kbd>
 								Previous Program
 							</span>
 						)}
-						<span className="flex items-center gap-2 text-sm text-gray-600">
+						<span className="flex items-center text-sm text-gray-600 gap-2">
 							<kbd className="kbd-style">S</kbd>
 							Shuffle Inputs
 						</span>
-						<span className="flex items-center gap-2 text-sm text-gray-600">
+						<span className="flex items-center text-sm text-gray-600 gap-2">
 							<kbd className="kbd-style">Esc</kbd>
 							Clear Table
 						</span>
