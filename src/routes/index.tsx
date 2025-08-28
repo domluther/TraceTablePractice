@@ -241,19 +241,112 @@ function Index() {
 		[navigate],
 	);
 
+	// Helper functions for difficulty progression
+	const getDifficultyOrder = useCallback((): Difficulty[] => {
+		return ["easy", "medium", "hard"];
+	}, []);
+
+	const getNextDifficultyAndIndex = useCallback(
+		(
+			currentDiff: Difficulty,
+			currentIdx: number,
+		): { difficulty: Difficulty; index: number } | null => {
+			const difficulties = getDifficultyOrder();
+			const currentProgramList = programs[currentDiff] || [];
+
+			// If not at the end of current difficulty, move to next program in same difficulty
+			if (currentIdx < currentProgramList.length - 1) {
+				return { difficulty: currentDiff, index: currentIdx + 1 };
+			}
+
+			// At the end of current difficulty, try to move to next difficulty
+			const currentDiffIndex = difficulties.indexOf(currentDiff);
+			if (currentDiffIndex < difficulties.length - 1) {
+				const nextDifficulty = difficulties[currentDiffIndex + 1];
+				const nextProgramList = programs[nextDifficulty] || [];
+				if (nextProgramList.length > 0) {
+					return { difficulty: nextDifficulty, index: 0 };
+				}
+			}
+
+			return null; // No next program available
+		},
+		[getDifficultyOrder],
+	);
+
+	const getPreviousDifficultyAndIndex = useCallback(
+		(
+			currentDiff: Difficulty,
+			currentIdx: number,
+		): { difficulty: Difficulty; index: number } | null => {
+			const difficulties = getDifficultyOrder();
+
+			// If not at the beginning of current difficulty, move to previous program in same difficulty
+			if (currentIdx > 0) {
+				return { difficulty: currentDiff, index: currentIdx - 1 };
+			}
+
+			// At the beginning of current difficulty, try to move to previous difficulty
+			const currentDiffIndex = difficulties.indexOf(currentDiff);
+			if (currentDiffIndex > 0) {
+				const prevDifficulty = difficulties[currentDiffIndex - 1];
+				const prevProgramList = programs[prevDifficulty] || [];
+				if (prevProgramList.length > 0) {
+					return {
+						difficulty: prevDifficulty,
+						index: prevProgramList.length - 1,
+					};
+				}
+			}
+
+			return null; // No previous program available
+		},
+		[getDifficultyOrder],
+	);
+
 	const handlePreviousProgram = useCallback(() => {
-		if (currentProgramIndex > 0) {
-			navigateToProgram(currentDifficulty, currentProgramIndex - 1);
+		const previousNav = getPreviousDifficultyAndIndex(
+			currentDifficulty,
+			currentProgramIndex,
+		);
+		if (previousNav) {
+			navigateToProgram(previousNav.difficulty, previousNav.index);
 		}
-	}, [currentProgramIndex, currentDifficulty, navigateToProgram]);
+	}, [
+		currentProgramIndex,
+		currentDifficulty,
+		navigateToProgram,
+		getPreviousDifficultyAndIndex,
+	]);
 
 	const handleNextProgram = useCallback(() => {
-		const programList =
-			programs[currentDifficulty as Difficulty] || programs.easy;
-		if (currentProgramIndex < programList.length - 1) {
-			navigateToProgram(currentDifficulty, currentProgramIndex + 1);
+		const nextNav = getNextDifficultyAndIndex(
+			currentDifficulty,
+			currentProgramIndex,
+		);
+		if (nextNav) {
+			navigateToProgram(nextNav.difficulty, nextNav.index);
 		}
-	}, [currentProgramIndex, currentDifficulty, navigateToProgram]);
+	}, [
+		currentProgramIndex,
+		currentDifficulty,
+		navigateToProgram,
+		getNextDifficultyAndIndex,
+	]);
+
+	// Helper functions for determining navigation availability
+	const canNavigatePrevious = useCallback(() => {
+		return (
+			getPreviousDifficultyAndIndex(currentDifficulty, currentProgramIndex) !==
+			null
+		);
+	}, [currentDifficulty, currentProgramIndex, getPreviousDifficultyAndIndex]);
+
+	const canNavigateNext = useCallback(() => {
+		return (
+			getNextDifficultyAndIndex(currentDifficulty, currentProgramIndex) !== null
+		);
+	}, [currentDifficulty, currentProgramIndex, getNextDifficultyAndIndex]);
 
 	const handleScoreUpdate = useCallback(
 		(correct: number, total: number) => {
@@ -307,13 +400,8 @@ function Index() {
 						onPreviousProgram={handlePreviousProgram}
 						onNextProgram={handleNextProgram}
 						onProgramCodeIdReady={handleProgramCodeIdReady}
-						canGoPrevious={currentProgramIndex > 0}
-						canGoNext={
-							currentProgramIndex <
-							(programs[currentDifficulty as Difficulty] || programs.easy)
-								.length -
-								1
-						}
+						canGoPrevious={canNavigatePrevious()}
+						canGoNext={canNavigateNext()}
 						siteConfig={siteConfig}
 					/>
 				)}
