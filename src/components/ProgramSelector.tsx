@@ -3,15 +3,17 @@ import { type Program, programs } from "@/lib/programs";
 import type { ScoreManager } from "@/lib/scoreManager";
 import { QuizButton } from "./QuizButton";
 
+export type Difficulty = "easy" | "medium" | "hard";
+
 interface ProgramSelectorProps {
 	onProgramSelect: (
 		program: Program,
-		difficulty: string,
+		difficulty: Difficulty,
 		index: number,
 	) => void;
-	onDifficultyChange?: (difficulty: "easy" | "medium" | "hard") => void;
+	onDifficultyChange?: (difficulty: Difficulty) => void;
 	scoreManager: ScoreManager;
-	currentDifficulty?: string;
+	currentDifficulty?: Difficulty;
 }
 
 export function ProgramSelector({
@@ -20,9 +22,8 @@ export function ProgramSelector({
 	scoreManager,
 	currentDifficulty,
 }: ProgramSelectorProps) {
-	const [selectedDifficulty, setSelectedDifficulty] = useState<
-		"easy" | "medium" | "hard"
-	>("easy");
+	const [selectedDifficulty, setSelectedDifficulty] =
+		useState<Difficulty>("easy");
 	const difficultySelectId = useId();
 
 	// Sync with parent difficulty
@@ -31,7 +32,7 @@ export function ProgramSelector({
 			currentDifficulty &&
 			["easy", "medium", "hard"].includes(currentDifficulty)
 		) {
-			setSelectedDifficulty(currentDifficulty as "easy" | "medium" | "hard");
+			setSelectedDifficulty(currentDifficulty);
 		}
 	}, [currentDifficulty]);
 
@@ -85,7 +86,7 @@ export function ProgramSelector({
 				<div className="flex items-center gap-3">
 					<label
 						htmlFor={difficultySelectId}
-						className="text-sm font-medium text-gray-700"
+						className="text-md font-bold text-gray-700"
 					>
 						Difficulty:
 					</label>
@@ -93,10 +94,7 @@ export function ProgramSelector({
 						id={difficultySelectId}
 						value={selectedDifficulty}
 						onChange={(e) => {
-							const newDifficulty = e.target.value as
-								| "easy"
-								| "medium"
-								| "hard";
+							const newDifficulty = e.target.value as Difficulty;
 							setSelectedDifficulty(newDifficulty);
 							onDifficultyChange?.(newDifficulty);
 						}}
@@ -114,27 +112,17 @@ export function ProgramSelector({
 			</div>
 
 			{/* Program Table */}
-			<div
-				className="bg-white rounded-lg shadow-sm max-h-96 overflow-scroll"
-			>
+			<div className="bg-white rounded-lg shadow-sm max-h-96 overflow-scroll">
 				<table className="w-full border-collapse bg-white text-sm">
 					<thead>
-						<tr
-							className="sticky top-0 z-10 bg-gradient-to-br from-gray-800 to-gray-900"
-						>
-							<th
-								className="px-4 py-3 text-left font-semibold text-white border-b"
-							>
+						<tr className="sticky top-0 z-10 bg-gradient-to-br from-gray-800 to-gray-900">
+							<th className="px-4 py-3 text-left font-semibold text-white border-b">
 								Program
 							</th>
-							<th
-								className="px-4 py-3 text-left font-semibold text-white border-b"
-							>
+							<th className="px-4 py-3 text-left font-semibold text-white border-b">
 								Best Score
 							</th>
-							<th
-								className="px-4 py-3 text-left font-semibold text-white border-b"
-							>
+							<th className="px-4 py-3 text-left font-semibold text-white border-b">
 								Action
 							</th>
 						</tr>
@@ -147,9 +135,7 @@ export function ProgramSelector({
 									key={`${selectedDifficulty}-${index}-${program.description}`}
 									className="hover:bg-gray-50 transition-colors duration-150 border-b"
 								>
-									<td
-										className="px-4 py-3 align-middle"
-									>
+									<td className="px-4 py-3 align-middle">
 										<div>
 											<div className="font-medium text-gray-800">
 												{program.description}
@@ -161,9 +147,7 @@ export function ProgramSelector({
 											)}
 										</div>
 									</td>
-									<td
-										className="px-4 py-3 align-middle"
-									>
+									<td className="px-4 py-3 align-middle">
 										<span
 											className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
 												scoreDisplay.className === "score-perfect"
@@ -180,9 +164,7 @@ export function ProgramSelector({
 											{scoreDisplay.text}
 										</span>
 									</td>
-									<td
-										className="px-4 py-3 align-middle"
-									>
+									<td className="px-4 py-3 align-middle">
 										<QuizButton
 											onClick={() => handleProgramSelect(program, index)}
 											size="xs"

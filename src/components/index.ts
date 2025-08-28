@@ -18,7 +18,6 @@ export { QuizButton } from "./QuizButton";
 export { QuizLayout } from "./QuizLayout";
 // Utility Components
 export { ScoreButton } from "./ScoreButton";
-export type { QuizAnswer } from "./SimpleQuizBody";
 // Quiz Body Components
 export { SiteNavigation } from "./SiteNavigation";
 // Modal Components

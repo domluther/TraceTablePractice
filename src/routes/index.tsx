@@ -19,8 +19,10 @@ import { programs } from "@/lib/programs";
 import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
 
+export type Difficulty = "easy" | "medium" | "hard";
+
 type SearchParams = {
-	difficulty?: "easy" | "medium" | "hard";
+	difficulty?: Difficulty;
 	program?: number;
 };
 
@@ -33,7 +35,7 @@ export const Route = createFileRoute("/")({
 					typeof diff === "string" &&
 					["easy", "medium", "hard"].includes(diff)
 				) {
-					return diff as "easy" | "medium" | "hard";
+					return diff as Difficulty;
 				}
 				return undefined;
 			})(),
@@ -68,7 +70,8 @@ function Index() {
 
 	// Application state
 	const [currentProgram, setCurrentProgram] = useState<Program | null>(null);
-	const [currentDifficulty, setCurrentDifficulty] = useState<string>("");
+	const [currentDifficulty, setCurrentDifficulty] =
+		useState<Difficulty>("easy");
 	const [currentProgramIndex, setCurrentProgramIndex] = useState<number>(-1);
 	const [showStatsModal, setShowStatsModal] = useState(false);
 	const [showHints, setShowHints] = useState(false);
@@ -188,9 +191,8 @@ function Index() {
 
 	// Central function to navigate to a specific program
 	const navigateToProgram = useCallback(
-		(difficulty: string, index: number) => {
-			const programList =
-				programs[difficulty as "easy" | "medium" | "hard"] || programs.easy;
+		(difficulty: Difficulty, index: number) => {
+			const programList = programs[difficulty as Difficulty] || programs.easy;
 
 			if (index >= 0 && index < programList.length) {
 				const program = getProgramInputs(programList[index]);
@@ -202,7 +204,7 @@ function Index() {
 				// Update URL using Tanstack Router navigation
 				navigate({
 					search: {
-						difficulty: difficulty as "easy" | "medium" | "hard",
+						difficulty: difficulty as Difficulty,
 						program: index,
 					},
 				});
@@ -214,7 +216,7 @@ function Index() {
 	);
 
 	const handleProgramSelect = useCallback(
-		(_program: Program, difficulty: string, index: number) => {
+		(_program: Program, difficulty: Difficulty, index: number) => {
 			navigateToProgram(difficulty, index);
 		},
 		[navigateToProgram],
@@ -226,7 +228,7 @@ function Index() {
 	}, []);
 
 	const handleDifficultyChange = useCallback(
-		(difficulty: "easy" | "medium" | "hard") => {
+		(difficulty: Difficulty) => {
 			setCurrentDifficulty(difficulty);
 			// Clear current program when difficulty changes
 			setCurrentProgram(null);
@@ -250,8 +252,7 @@ function Index() {
 
 	const handleNextProgram = useCallback(() => {
 		const programList =
-			programs[currentDifficulty as "easy" | "medium" | "hard"] ||
-			programs.easy;
+			programs[currentDifficulty as Difficulty] || programs.easy;
 		if (currentProgramIndex < programList.length - 1) {
 			navigateToProgram(currentDifficulty, currentProgramIndex + 1);
 		}
@@ -331,10 +332,8 @@ function Index() {
 						canGoPrevious={currentProgramIndex > 0}
 						canGoNext={
 							currentProgramIndex <
-							(
-								programs[currentDifficulty as "easy" | "medium" | "hard"] ||
-								programs.easy
-							).length -
+							(programs[currentDifficulty as Difficulty] || programs.easy)
+								.length -
 								1
 						}
 					/>
