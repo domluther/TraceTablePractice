@@ -343,14 +343,22 @@ export class ScoreManager {
 			if (key.match(/^(easy|medium|hard)-\d+$/)) {
 				if (scoreData.attempts > 0) {
 					programsAttempted++;
-					// The "correct" field stores the best score achieved
-					totalBestPoints += scoreData.correct;
-
-					// Get the total questions from the most recent attempt
+					// Find the attempt with the highest score to get both score and total
 					if (scoreData.history.length > 0) {
-						const mostRecentAttempt = scoreData.history[0];
-						const [, totalStr] = mostRecentAttempt.address.split("/");
+						const bestAttempt = scoreData.history.reduce((best, current) => {
+							const currentScore =
+								parseInt(current.address.split("/")[0], 10) || 0;
+							const bestScoreFromHistory =
+								parseInt(best.address.split("/")[0], 10) || 0;
+							return currentScore > bestScoreFromHistory ? current : best;
+						});
+
+						const [scoreStr, totalStr] = bestAttempt.address.split("/");
+						totalBestPoints += parseInt(scoreStr, 10) || 0;
 						totalPossiblePoints += parseInt(totalStr, 10) || 0;
+					} else {
+						// Fallback to the stored best score if no history
+						totalBestPoints += scoreData.correct;
 					}
 				}
 			}
@@ -379,15 +387,23 @@ export class ScoreManager {
 			};
 		}
 
-		// Get the total questions from the most recent attempt
+		// Find the attempt that achieved the best score to get the correct total
+		let bestScore = scoreData.correct;
 		let totalQuestions = 0;
 		if (scoreData.history.length > 0) {
-			const mostRecentAttempt = scoreData.history[0];
-			const [, totalStr] = mostRecentAttempt.address.split("/");
+			// Find the attempt with the highest score
+			const bestAttempt = scoreData.history.reduce((best, current) => {
+				const currentScore = parseInt(current.address.split("/")[0], 10) || 0;
+				const bestScoreFromHistory =
+					parseInt(best.address.split("/")[0], 10) || 0;
+				return currentScore > bestScoreFromHistory ? current : best;
+			});
+
+			const [scoreStr, totalStr] = bestAttempt.address.split("/");
+			bestScore = parseInt(scoreStr, 10) || 0;
 			totalQuestions = parseInt(totalStr, 10) || 0;
 		}
 
-		const bestScore = scoreData.correct; // This stores the best score achieved
 		const percentage =
 			totalQuestions > 0 ? Math.round((bestScore / totalQuestions) * 100) : 0;
 
@@ -432,13 +448,22 @@ export class ScoreManager {
 				const displayName = `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Program ${programIndex + 1}`;
 
 				let totalQuestions = 0;
+				let bestScore = scoreData.correct;
 				if (scoreData.history.length > 0) {
-					const mostRecentAttempt = scoreData.history[0];
-					const [, totalStr] = mostRecentAttempt.address.split("/");
+					// Find the attempt with the highest score to get the correct total
+					const bestAttempt = scoreData.history.reduce((best, current) => {
+						const currentScore =
+							parseInt(current.address.split("/")[0], 10) || 0;
+						const bestScoreFromHistory =
+							parseInt(best.address.split("/")[0], 10) || 0;
+						return currentScore > bestScoreFromHistory ? current : best;
+					});
+
+					const [scoreStr, totalStr] = bestAttempt.address.split("/");
+					bestScore = parseInt(scoreStr, 10) || 0;
 					totalQuestions = parseInt(totalStr, 10) || 0;
 				}
 
-				const bestScore = scoreData.correct;
 				const accuracy =
 					totalQuestions > 0 ? (bestScore / totalQuestions) * 100 : 0;
 
@@ -486,17 +511,29 @@ export class ScoreManager {
 
 				let totalQuestions = 0;
 				let lastAttemptDate = "";
+				let bestScore = scoreData.correct;
 
 				if (scoreData.history.length > 0) {
-					const mostRecentAttempt = scoreData.history[0];
-					const [, totalStr] = mostRecentAttempt.address.split("/");
+					// Find the attempt with the highest score to get the correct total
+					const bestAttempt = scoreData.history.reduce((best, current) => {
+						const currentScore =
+							parseInt(current.address.split("/")[0], 10) || 0;
+						const bestScoreFromHistory =
+							parseInt(best.address.split("/")[0], 10) || 0;
+						return currentScore > bestScoreFromHistory ? current : best;
+					});
+
+					const [scoreStr, totalStr] = bestAttempt.address.split("/");
+					bestScore = parseInt(scoreStr, 10) || 0;
 					totalQuestions = parseInt(totalStr, 10) || 0;
+
+					// Get the most recent attempt date for display
+					const mostRecentAttempt = scoreData.history[0];
 					lastAttemptDate = new Date(
 						mostRecentAttempt.timestamp,
 					).toLocaleDateString("en-GB");
 				}
 
-				const bestScore = scoreData.correct;
 				const accuracy =
 					totalQuestions > 0 ? (bestScore / totalQuestions) * 100 : 0;
 

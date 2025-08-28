@@ -219,10 +219,7 @@ export function StatsModal({
 							<Card>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
-										📋{" "}
-										{programScores.length > 0
-											? "Program Scores"
-											: "Breakdown by Category"}
+										📋 Program Scores
 									</CardTitle>
 								</CardHeader>
 								<CardContent>

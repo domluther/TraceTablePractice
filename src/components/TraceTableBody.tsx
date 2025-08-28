@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type {
@@ -51,6 +51,9 @@ export function TraceTableBody({
 		[key: string]: boolean; // key format: "rowIndex-fieldName", value: isCorrect
 	}>({});
 	const [isMarked, setIsMarked] = useState(false);
+
+	// Ref to focus on the first input cell after clearing
+	const firstInputRef = useRef<HTMLInputElement>(null);
 
 	// Execute program and generate expected trace when program changes
 	useEffect(() => {
@@ -234,10 +237,8 @@ export function TraceTableBody({
 				userIndex++;
 			} else {
 				// Missing line entry - count all cells as incorrect
-				total +=
-					1 +
-					programVariables.length +
-					(expectedStep.output.length > 0 ? 1 : 0);
+				total += 1 + programVariables.length + 1; // Always count output cell
+				expectedStep.output.length > 0 ? 1 : 0;
 				errors.push(`Missing entry for line ${lineNum}`);
 			}
 		});
@@ -258,14 +259,9 @@ export function TraceTableBody({
 				newCellResults[`${actualUserIndex}-${varName}`] = false;
 			});
 
-			if (
-				userEntry.output?.trim() ||
-				expectedTrace.some((step) => step.output.length > 0)
-			) {
-				total++; // output
-				newCellResults[`${actualUserIndex}-output`] = false;
-			}
-
+			// Always count output cell to be consistent
+			total++; // output
+			newCellResults[`${actualUserIndex}-output`] = false;
 			userIndex++;
 		}
 
@@ -306,53 +302,18 @@ export function TraceTableBody({
 		const cellKey = `${rowIndex}-${fieldName}`;
 		const isCorrect = cellResults[cellKey];
 
-		let baseClass =
-			"w-full border-none p-2 text-center text-sm bg-white rounded";
+		// Base classes that maintain consistent sizing and styling
+		const baseClass =
+			"w-full h-8 px-2 text-center text-sm rounded-sm border-none focus:outline-2 focus:outline-blue-500 focus:bg-blue-50 box-border";
 
 		if (isMarked && isCorrect !== undefined) {
 			if (isCorrect) {
-				// Legacy correct styling: --success-bg: #c6f6d5, --success-text: #22543d, --success-border: #9ae6b4
-				baseClass += " !important";
-				return `z${baseClass} focus:outline-2 focus:outline-blue-500 focus:bg-blue-50`;
+				return `${baseClass} bg-green-100 text-green-800 border-green-400`;
 			} else {
-				// Legacy incorrect styling: --error-bg: #fed7d7, --error-text: #c53030, --error-border: #feb2b2
-				baseClass += " !important";
-				return `${baseClass} focus:outline-2 focus:outline-blue-500 focus:bg-blue-50`;
-			}
-		} else {
-			baseClass += " focus:outline-2 focus:outline-blue-500 focus:bg-blue-50";
-		}
-
-		return baseClass;
-	};
-
-	// Helper function to get cell inline styles for correct/incorrect coloring
-	const getCellStyle = (rowIndex: number, fieldName: string) => {
-		const cellKey = `${rowIndex}-${fieldName}`;
-		const isCorrect = cellResults[cellKey];
-
-		if (isMarked && isCorrect !== undefined) {
-			if (isCorrect) {
-				return {
-					background: "#c6f6d5",
-					color: "#22543d",
-					border: "1px solid #9ae6b4",
-				};
-			} else {
-				return {
-					background: "#fed7d7",
-					color: "#c53030",
-					border: "1px solid #feb2b2",
-				};
+				return `${baseClass} bg-red-100 text-red-800 border-red-400`;
 			}
 		}
-
-		return {
-			background: "#ffffff",
-			borderRadius: "4px",
-			padding: "8px",
-			fontSize: "13px",
-		};
+		return `${baseClass} bg-white`;
 	};
 
 	const shuffleInputs = useCallback(() => {
@@ -631,45 +592,22 @@ export function TraceTableBody({
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="pt-0">
-					<div
-						className="bg-white rounded-lg p-5 max-h-96 overflow-auto"
-						style={{
-							borderRadius: "8px",
-						}}
-					>
-						<table className="w-full border-collapse bg-white text-sm">
+					<div className="bg-white rounded-lg max-h-96 overflow-auto">
+						<table className="w-full border-collapse bg-white text-sm table-fixed">
 							<thead>
-								<tr
-									className="sticky top-0 z-10"
-									style={{
-										background: "#4a5568",
-									}}
-								>
-									<th
-										className="text-center text-white font-semibold border border-gray-800 p-3"
-										style={{
-											padding: "12px 8px",
-										}}
-									>
+								<tr className="sticky top-0 z-10 bg-slate-600">
+									<th className="text-center text-white font-semibold border border-gray-800 py-3 px-2">
 										Line Number
 									</th>
 									{programVariables.map((varName) => (
 										<th
 											key={varName}
-											className="text-center text-white font-semibold border border-gray-800 p-3"
-											style={{
-												padding: "12px 8px",
-											}}
+											className="text-center text-white font-semibold border border-gray-800 py-3 px-2"
 										>
 											{varName}
 										</th>
 									))}
-									<th
-										className="text-center text-white font-semibold border border-gray-800 p-3"
-										style={{
-											padding: "12px 8px",
-										}}
-									>
+									<th className="text-center text-white font-semibold border border-gray-800 py-3 px-2">
 										Output
 									</th>
 								</tr>
@@ -680,17 +618,11 @@ export function TraceTableBody({
 										key={entry.id}
 										className="hover:bg-gray-50 transition-colors"
 									>
-										<td
-											className="text-center bg-white p-1"
-											style={{
-												border: "1px solid #e2e8f0",
-												padding: "5px",
-											}}
-										>
+										<td className="text-center p-1 border border-slate-200">
 											<input
+												ref={rowIndex === 0 ? firstInputRef : undefined}
 												type="text"
 												className={getCellClassName(rowIndex, "lineNumber")}
-												style={getCellStyle(rowIndex, "lineNumber")}
 												value={entry.lineNumber}
 												onChange={(e) =>
 													updateUserEntry(
@@ -705,16 +637,11 @@ export function TraceTableBody({
 										{programVariables.map((varName) => (
 											<td
 												key={varName}
-												className="text-center bg-white p-1"
-												style={{
-													border: "1px solid #e2e8f0",
-													padding: "5px",
-												}}
+												className="text-center p-1 border border-slate-200"
 											>
 												<input
 													type="text"
 													className={getCellClassName(rowIndex, varName)}
-													style={getCellStyle(rowIndex, varName)}
 													value={entry.variables[varName] || ""}
 													onChange={(e) =>
 														updateUserEntry(rowIndex, varName, e.target.value)
@@ -723,17 +650,10 @@ export function TraceTableBody({
 												/>
 											</td>
 										))}
-										<td
-											className="text-center bg-white p-1"
-											style={{
-												border: "1px solid #e2e8f0",
-												padding: "5px",
-											}}
-										>
+										<td className="text-center p-1 border border-slate-200">
 											<input
 												type="text"
 												className={getCellClassName(rowIndex, "output")}
-												style={getCellStyle(rowIndex, "output")}
 												value={entry.output}
 												onChange={(e) =>
 													updateUserEntry(rowIndex, "output", e.target.value)
@@ -824,123 +744,37 @@ export function TraceTableBody({
 			)}
 
 			{/* Keyboard Shortcuts Help */}
-			<div
-				className="mx-auto bg-blue-50 rounded-lg border border-blue-100"
-				style={{ margin: "15px 0" }}
-			>
+			<div className="mx-auto bg-blue-50 rounded-lg border border-blue-100 my-4">
 				<details open>
-					<summary
-						className="cursor-pointer font-semibold text-gray-600 select-none list-none flex items-center gap-2 relative"
-						style={{
-							padding: "12px 15px",
-							userSelect: "none",
-						}}
-					>
-						<span
-							className="text-xs transition-transform duration-200 inline-block arrow-icon"
-							style={{
-								fontSize: "0.8em",
-							}}
-						>
+					<summary className="cursor-pointer font-semibold text-gray-600 select-none list-none flex items-center gap-2 relative px-4 py-3">
+						<span className="text-xs transition-transform duration-200 inline-block arrow-icon">
 							▶
 						</span>
 						⌨️ Keyboard Shortcuts
 					</summary>
-					<div
-						className="grid gap-2 border-t border-blue-100"
-						style={{
-							padding: "15px",
-							paddingTop: "0",
-							gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-						}}
-					>
+					<div className="grid grid-cols-1 sm:flex sm:justify-evenly gap-2 border-t border-blue-100 p-4 pt-0">
 						<span className="flex items-center gap-2 text-sm text-gray-600">
-							<kbd
-								className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
-								style={{
-									background: "#2d3748",
-									padding: "4px 8px",
-									borderRadius: "4px",
-									fontSize: "0.8em",
-									minWidth: "24px",
-									border: "1px solid #4a5568",
-									boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-								}}
-							>
-								Enter
-							</kbd>
+							<kbd className="kbd-style">Enter</kbd>
 							Mark Answer
 						</span>
 						{onNextProgram && (
 							<span className="flex items-center gap-2 text-sm text-gray-600">
-								<kbd
-									className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
-									style={{
-										background: "#2d3748",
-										padding: "4px 8px",
-										borderRadius: "4px",
-										fontSize: "0.8em",
-										minWidth: "24px",
-										border: "1px solid #4a5568",
-										boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-									}}
-								>
-									N
-								</kbd>
+								<kbd className="kbd-style">N</kbd>
 								Next Program
 							</span>
 						)}
 						{onPreviousProgram && (
 							<span className="flex items-center gap-2 text-sm text-gray-600">
-								<kbd
-									className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
-									style={{
-										background: "#2d3748",
-										padding: "4px 8px",
-										borderRadius: "4px",
-										fontSize: "0.8em",
-										minWidth: "24px",
-										border: "1px solid #4a5568",
-										boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-									}}
-								>
-									P
-								</kbd>
+								<kbd className="kbd-style">P</kbd>
 								Previous Program
 							</span>
 						)}
 						<span className="flex items-center gap-2 text-sm text-gray-600">
-							<kbd
-								className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
-								style={{
-									background: "#2d3748",
-									padding: "4px 8px",
-									borderRadius: "4px",
-									fontSize: "0.8em",
-									minWidth: "24px",
-									border: "1px solid #4a5568",
-									boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-								}}
-							>
-								S
-							</kbd>
+							<kbd className="kbd-style">S</kbd>
 							Shuffle Inputs
 						</span>
 						<span className="flex items-center gap-2 text-sm text-gray-600">
-							<kbd
-								className="text-white text-xs font-semibold min-w-6 text-center border shadow-sm"
-								style={{
-									background: "#2d3748",
-									padding: "4px 8px",
-									borderRadius: "4px",
-									fontSize: "0.8em",
-									minWidth: "24px",
-									border: "1px solid #4a5568",
-									boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-								}}
-							>
-								Esc
-							</kbd>
+							<kbd className="kbd-style">Esc</kbd>
 							Clear Table
 						</span>
 					</div>

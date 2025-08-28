@@ -118,6 +118,7 @@ function Index() {
 		};
 
 		updateStats();
+		// TODO - This is bad - slow to update. How else could this be done?
 		// Update stats every few seconds to reflect changes
 		const interval = setInterval(updateStats, 5000);
 		return () => clearInterval(interval);

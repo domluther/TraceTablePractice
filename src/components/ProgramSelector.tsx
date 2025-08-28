@@ -145,7 +145,7 @@ export function ProgramSelector({
 									padding: "15px 20px",
 								}}
 							>
-								Last Score
+								Best Score
 							</th>
 							<th
 								className="px-4 py-3 text-left font-semibold text-white border-b"

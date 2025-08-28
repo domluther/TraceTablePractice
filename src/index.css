@@ -18,6 +18,11 @@
 	animation: gentle-bounce 2s ease-in-out infinite;
 }
 
+/* Custom kbd styling */
+.kbd-style {
+	@apply bg-slate-700 text-white text-xs font-semibold px-2 py-1 rounded border border-slate-600 shadow-sm min-w-[24px] text-center;
+}
+
 @theme inline {
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);

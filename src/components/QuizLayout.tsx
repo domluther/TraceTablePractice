@@ -34,7 +34,7 @@ export function QuizLayout({
 			}}
 		>
 			<div
-				className="w-full max-w-6xl bg-white rounded-lg shadow-2xl overflow-hidden"
+				className="w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden"
 				style={{
 					borderRadius: "12px",
 					boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
