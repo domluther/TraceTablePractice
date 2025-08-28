@@ -519,7 +519,7 @@ export function TraceTableBody({
 	return (
 		<div className="space-y-6">
 			{/* Code Display */}
-			<Card className="border-slate-200 shadow-sm">
+			<Card id="program-code-section" className="border-slate-200 shadow-sm">
 				<CardHeader className="pb-3">
 					<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
 						<div className="flex flex-col gap-2">

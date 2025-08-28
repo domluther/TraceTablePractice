@@ -162,6 +162,19 @@ function Index() {
 		}
 	}, [search]);
 
+	// Helper function to scroll to program code section
+	const scrollToProgramCode = useCallback(() => {
+		setTimeout(() => {
+			const programCodeSection = document.getElementById("program-code-section");
+			if (programCodeSection) {
+				programCodeSection.scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
+			}
+		}, 100);
+	}, []);
+
 	const handleProgramSelect = useCallback(
 		(program: Program, difficulty: string, index: number) => {
 			setCurrentProgram(program);
@@ -175,8 +188,11 @@ function Index() {
 					program: index,
 				},
 			});
+
+			// Scroll to the Program Code section
+			scrollToProgramCode();
 		},
-		[navigate],
+		[navigate, scrollToProgramCode],
 	);
 
 	const handleDifficultyChange = useCallback(
@@ -230,8 +246,11 @@ function Index() {
 					program: newIndex,
 				},
 			});
+
+			// Scroll to the Program Code section
+			scrollToProgramCode();
 		}
-	}, [currentProgramIndex, currentDifficulty, navigate]);
+	}, [currentProgramIndex, currentDifficulty, navigate, scrollToProgramCode]);
 
 	const handleNextProgram = useCallback(() => {
 		const programList =
@@ -267,8 +286,11 @@ function Index() {
 					program: newIndex,
 				},
 			});
+
+			// Scroll to the Program Code section
+			scrollToProgramCode();
 		}
-	}, [currentProgramIndex, currentDifficulty, navigate]);
+	}, [currentProgramIndex, currentDifficulty, navigate, scrollToProgramCode]);
 
 	const handleScoreUpdate = useCallback(
 		(correct: number, total: number) => {
