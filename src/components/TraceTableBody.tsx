@@ -649,7 +649,7 @@ export function TraceTableBody({
 
 			{/* Keyboard Shortcuts Help */}
 			<div className="mx-auto my-4 border border-blue-100 rounded-lg bg-blue-50">
-				<details open>
+				<details>
 					<summary className="relative flex items-center gap-2 px-4 py-3 font-semibold text-gray-600 list-none cursor-pointer select-none">
 						<span className="inline-block text-xs transition-transform duration-200 arrow-icon">
 							▶

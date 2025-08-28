@@ -13,7 +13,6 @@ import {
 } from "@/components";
 import { HintPanel } from "@/components/HintPanel";
 import { Panel } from "@/components/Panel";
-import { QuizButton } from "@/components/QuizButton";
 import { ASTInterpreter } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
 import { programs } from "@/lib/programs";
@@ -74,7 +73,6 @@ function Index() {
 		useState<Difficulty>("easy");
 	const [currentProgramIndex, setCurrentProgramIndex] = useState<number>(-1);
 	const [showStatsModal, setShowStatsModal] = useState(false);
-	const [showHints, setShowHints] = useState(false);
 	const [programCodeId, setProgramCodeId] = useState<string>("");
 
 	// Overall statistics for score display
@@ -276,23 +274,20 @@ function Index() {
 
 	// Help section
 	const helpSection = currentProgram ? (
-		<div className="max-w-full p-4 mt-6 border-l-4 border-green-500 rounded-lg bg-gray-50">
-			<div className="flex items-center justify-between mb-3">
-				<h2 className="text-lg font-semibold text-gray-800">Need Help?</h2>
-				<QuizButton
-					variant="primary"
-					size="sm"
-					onClick={() => setShowHints(!showHints)}
-				>
-					{showHints ? "Hide" : "Show"} Help
-				</QuizButton>
-			</div>
-			<HintPanel
-				isVisible={showHints}
-				title="📝 Trace Table Tips:"
-				items={siteConfig.hints || []}
-			/>
-		</div>
+		<Panel type="info">
+			<details>
+				<summary className="relative flex items-center gap-2 px-4 py-3 font-semibold text-gray-600 list-none cursor-pointer select-none">
+					<span className="inline-block text-xs transition-transform duration-200 arrow-icon">
+						▶
+					</span>
+					Need Help?
+				</summary>
+				<HintPanel
+					title="📝 Trace Table Tips:"
+					items={siteConfig.hints || []}
+				/>
+			</details>
+		</Panel>
 	) : null;
 
 	return (

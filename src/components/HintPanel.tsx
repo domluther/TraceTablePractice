@@ -8,7 +8,6 @@ export interface HintItem {
 }
 
 interface HintPanelProps {
-	isVisible: boolean;
 	title?: string;
 	items: HintItem[];
 }
@@ -19,12 +18,9 @@ interface HintPanelProps {
  * Toggleable visibility with smooth transitions and color-coded sections
  */
 export function HintPanel({
-	isVisible,
 	title = "📝 Help & Rules:",
 	items,
 }: HintPanelProps) {
-	if (!isVisible) return null;
-
 	const colorClasses = {
 		blue: "font-semibold text-blue-700",
 		purple: "font-semibold text-purple-700",
@@ -38,14 +34,12 @@ export function HintPanel({
 			className={cn(
 				"mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-6",
 				"transition-all duration-300 ease-in-out",
-				isVisible
-					? "opacity-100 max-h-none overflow-visible"
-					: "opacity-0 max-h-0 overflow-hidden",
+				"opacity-100 max-h-none overflow-visible",
 			)}
 		>
 			<h3 className="mb-4 text-lg font-bold text-yellow-800">{title}</h3>
 			<div className="overflow-y-auto max-h-64">
-				<ul className="text-gray-700 space-y-4">
+				<ul className="space-y-4 text-gray-700">
 					{items.map((item) => (
 						<li key={item.title} className="flex flex-col gap-1">
 							<div className={colorClasses[item.color]}>{item.title}:</div>

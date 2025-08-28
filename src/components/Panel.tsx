@@ -30,7 +30,7 @@ export function Panel({
 
 	return (
 		<div
-			className={`bg-gray-100 rounded-lg border-l-4 p-4 ${getBorderColor(type)} ${className}`}
+			className={`max-w-full bg-gray-100 rounded-lg border-l-4 p-4 ${getBorderColor(type)} ${className}`}
 		>
 			{children}
 		</div>
