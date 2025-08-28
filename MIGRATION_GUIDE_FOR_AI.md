@@ -100,8 +100,6 @@ export const SITE_CONFIG: SiteConfig = {
   subtitle: "Learn something specific",
   icon: "🎯",                            // Choose appropriate emoji
   scoring: {
-    pointsPerCorrect: 10,                // From legacy analysis
-    pointsPerIncorrect: -2,              // From legacy analysis
     customLevels: [                      // Create themed progression
       {
         emoji: "🥚",

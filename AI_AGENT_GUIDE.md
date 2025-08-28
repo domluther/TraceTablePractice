@@ -188,8 +188,6 @@ export const SITE_CONFIG: SiteConfig = {
   subtitle: "Quiz Description", 
   icon: "🧠",
   scoring: {
-    pointsPerCorrect: 10,
-    pointsPerIncorrect: -2,
     customLevels: [ /* custom level progression */ ]
   },
   hints: [ /* site-specific help content */ ]

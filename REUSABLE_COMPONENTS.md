@@ -169,8 +169,6 @@ const customSite: SiteConfig = {
   subtitle: "Learn something awesome",
   icon: "🧠",
   scoring: {
-    pointsPerCorrect: 10,
-    pointsPerIncorrect: -2,
     customLevels: [
       // Custom level progression...
     ]

@@ -18,10 +18,6 @@ export interface SiteConfig {
 }
 
 export interface ScoringConfig {
-	/** Points awarded for correct answers */
-	pointsPerCorrect: number;
-	/** Points deducted for incorrect answers */
-	pointsPerIncorrect: number;
 	/** Custom level system (optional, falls back to duck levels) */
 	customLevels?: LevelInfo[];
 }
@@ -41,8 +37,6 @@ export const SITE_CONFIG: SiteConfig = {
 	subtitle: "Master tracing OCR ERL algorithms thanks to instant feedback",
 	icon: "🦆",
 	scoring: {
-		pointsPerCorrect: 1,
-		pointsPerIncorrect: 0,
 		customLevels: [
 			{
 				emoji: "🥚",
@@ -55,36 +49,36 @@ export const SITE_CONFIG: SiteConfig = {
 				emoji: "🐣",
 				title: "Variable Voyager",
 				description: "Getting comfortable with variables!",
-				minPoints: 10,
+				minPoints: 30,
 				minAccuracy: 50,
 			},
 			{
 				emoji: "🐤",
 				title: "Loop Learner",
 				description: "Navigating through loops with ease!",
-				minPoints: 25,
+				minPoints: 90,
 				minAccuracy: 65,
 			},
 			{
 				emoji: "🦆",
 				title: "Condition Captain",
 				description: "Mastering conditionals and branches!",
-				minPoints: 50,
-				minAccuracy: 75,
+				minPoints: 150,
+				minAccuracy: 70,
 			},
 			{
 				emoji: "🦆✨",
 				title: "Algorithm Ace",
 				description: "Tracing through complex algorithms effortlessly!",
-				minPoints: 100,
-				minAccuracy: 85,
+				minPoints: 400,
+				minAccuracy: 80,
 			},
 			{
 				emoji: "🪿👑",
 				title: "Trace Table Master",
 				description: "The ultimate trace table expert!",
-				minPoints: 200,
-				minAccuracy: 95,
+				minPoints: 750,
+				minAccuracy: 90,
 			},
 		],
 	},

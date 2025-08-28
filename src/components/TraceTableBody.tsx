@@ -489,7 +489,7 @@ export function TraceTableBody({
 			/>
 
 			{/* Trace Table */}
-			<Card className="border-slate-200 shadow-sm">
+			<Card className="shadow-sm border-slate-200">
 				<CardHeader className="pb-3">
 					<CardTitle className="text-lg font-semibold text-slate-800">
 						Trace Table
@@ -520,12 +520,12 @@ export function TraceTableBody({
 								{userEntries.map((entry, rowIndex) => (
 									<tr
 										key={entry.id}
-										className="hover:bg-gray-50 transition-colors"
+										className="transition-colors hover:bg-gray-50"
 									>
 										<td className="p-1 text-center border border-slate-200">
 											<input
 												ref={rowIndex === 0 ? firstInputRef : undefined}
-												type="text"
+												type="number"
 												className={getCellClassName(rowIndex, "lineNumber")}
 												value={entry.lineNumber}
 												onChange={(e) =>
@@ -650,34 +650,34 @@ export function TraceTableBody({
 			{/* Keyboard Shortcuts Help */}
 			<div className="mx-auto my-4 border border-blue-100 rounded-lg bg-blue-50">
 				<details open>
-					<summary className="relative flex items-center px-4 py-3 font-semibold text-gray-600 list-none cursor-pointer select-none gap-2">
+					<summary className="relative flex items-center gap-2 px-4 py-3 font-semibold text-gray-600 list-none cursor-pointer select-none">
 						<span className="inline-block text-xs transition-transform duration-200 arrow-icon">
 							▶
 						</span>
 						⌨️ Keyboard Shortcuts
 					</summary>
-					<div className="p-4 pt-0 border-t border-blue-100 grid grid-cols-1 sm:flex sm:justify-evenly gap-2">
-						<span className="flex items-center text-sm text-gray-600 gap-2">
+					<div className="grid grid-cols-1 gap-2 p-4 pt-0 border-t border-blue-100 sm:flex sm:justify-evenly">
+						<span className="flex items-center gap-2 text-sm text-gray-600">
 							<kbd className="kbd-style">Enter</kbd>
 							Mark Answer
 						</span>
 						{onNextProgram && (
-							<span className="flex items-center text-sm text-gray-600 gap-2">
+							<span className="flex items-center gap-2 text-sm text-gray-600">
 								<kbd className="kbd-style">N</kbd>
 								Next Program
 							</span>
 						)}
 						{onPreviousProgram && (
-							<span className="flex items-center text-sm text-gray-600 gap-2">
+							<span className="flex items-center gap-2 text-sm text-gray-600">
 								<kbd className="kbd-style">P</kbd>
 								Previous Program
 							</span>
 						)}
-						<span className="flex items-center text-sm text-gray-600 gap-2">
+						<span className="flex items-center gap-2 text-sm text-gray-600">
 							<kbd className="kbd-style">S</kbd>
 							Shuffle Inputs
 						</span>
-						<span className="flex items-center text-sm text-gray-600 gap-2">
+						<span className="flex items-center gap-2 text-sm text-gray-600">
 							<kbd className="kbd-style">Esc</kbd>
 							Clear Table
 						</span>
