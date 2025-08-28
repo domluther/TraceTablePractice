@@ -12,6 +12,7 @@ import {
 	TraceTableBody,
 } from "@/components";
 import { HintPanel } from "@/components/HintPanel";
+import { Panel } from "@/components/Panel";
 import { QuizButton } from "@/components/QuizButton";
 import { ASTInterpreter } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
@@ -19,7 +20,6 @@ import { programs } from "@/lib/programs";
 import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
 import type { Difficulty } from "@/lib/types";
-import { Panel } from '@/components/Panel';
 
 type SearchParams = {
 	difficulty?: Difficulty;

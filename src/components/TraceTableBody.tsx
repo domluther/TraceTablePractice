@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type {
 	ASTInterpreter,
@@ -7,13 +6,15 @@ import type {
 	VariableValue,
 } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
+import type { Difficulty } from "@/lib/types";
+import { ProgramCode } from "./ProgramCode";
 import { QuizButton } from "./QuizButton";
 
 interface TraceTableBodyProps {
 	currentProgram: Program | null;
 	interpreter: ASTInterpreter;
 	onScoreUpdate: (correct: number, total: number) => void;
-	difficulty: string;
+	difficulty: Difficulty;
 	programIndex: number;
 	onPreviousProgram?: () => void;
 	onNextProgram?: () => void;
@@ -409,56 +410,6 @@ export function TraceTableBody({
 		}
 	}, [currentProgram, interpreter]);
 
-	// Helper function to encode code for ERL IDE URL
-	const encodeForERL = useCallback((code: string): string => {
-		return code
-			.replace(/\\/g, "%5C") // Convert backslashes to %5C
-			.replace(/"/g, "%5C%22") // Convert double quotes to \\" -> %5C%22
-			.replace(/'/g, "%27") // Convert single quotes to %27
-			.replace(/\?/g, "%3F") // Convert question marks to %3F
-			.replace(/=/g, "%3D") // Convert equals signs to %3D
-			.replace(/\+/g, "%2B") // Convert + operators to %2B
-			.replace(/\n/g, "%5Cn") // Convert newlines to %5Cn
-			.replace(/ /g, "+") // Convert spaces to +
-			.replace(/\(/g, "%28") // Convert ( to %28
-			.replace(/\)/g, "%29"); // Convert ) to %29
-	}, []);
-
-	// Generate ERL IDE URL
-	const generateERLURL = useCallback(
-		(code: string): string => {
-			const encodedCode = encodeForERL(code);
-			return `https://www.examreferencelanguage.co.uk/index.php?code=%5B%7B%22name%22%3A%22code%22%2C%22content%22%3A%22${encodedCode}%22%7D%5D`;
-		},
-		[encodeForERL],
-	);
-
-	// Share current program
-	const shareProgram = useCallback(async () => {
-		if (!currentProgram) return;
-
-		const shareURL = `${window.location.origin}${window.location.pathname}?difficulty=${difficulty}&program=${programIndex}`;
-
-		try {
-			await navigator.clipboard.writeText(shareURL);
-			// You could add a toast notification here
-			console.log("Share URL copied to clipboard:", shareURL);
-		} catch (error) {
-			console.error("Failed to copy to clipboard:", error);
-			// Fallback: show URL in alert
-			alert(`Share this URL: ${shareURL}`);
-		}
-	}, [currentProgram, difficulty, programIndex]);
-
-	// Get program display name
-	const getProgramDisplayName = useCallback((): string => {
-		if (!currentProgram || difficulty === "" || programIndex < 0) return "";
-
-		const difficultyName =
-			difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
-		return `${difficultyName} #${programIndex}`;
-	}, [currentProgram, difficulty, programIndex]);
-
 	// Keyboard shortcuts
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -527,100 +478,15 @@ export function TraceTableBody({
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4">
 			{/* Code Display */}
-			<Card id={programCodeId} className="border-slate-200 shadow-sm">
-				<CardHeader className="pb-3">
-					<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-						<div className="flex flex-col gap-2">
-							<CardTitle className="text-lg font-semibold text-slate-800">
-								Program Code
-							</CardTitle>
-							{currentProgram && (
-								<div className="flex items-center gap-3">
-									<span className="text-sm font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
-										{getProgramDisplayName()}: {currentProgram.description}
-									</span>
-								</div>
-							)}
-						</div>
-						{currentProgram && (
-							<div className="flex items-center gap-2 flex-shrink-0">
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() =>
-										window.open(generateERLURL(currentProgram.code), "_blank")
-									}
-									className="text-xs hover:bg-blue-50 hover:border-blue-200 transition-colors"
-								>
-									🖥️ Open in ERL IDE
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={shareProgram}
-									className="text-xs hover:bg-green-50 hover:border-green-200 transition-colors"
-								>
-									🔗 Share Link
-								</Button>
-							</div>
-						)}
-					</div>
-				</CardHeader>
-				<CardContent className="pt-0">
-					<div className="bg-slate-50 rounded-lg p-4 overflow-x-auto border border-slate-200">
-						<pre className="text-sm font-mono whitespace-pre-wrap leading-relaxed">
-							{currentProgram.code.split("\n").map((line, index) => (
-								<div
-									key={`line-${index}-${line}`}
-									className="flex hover:bg-slate-100 px-1 py-0.5 rounded"
-								>
-									<span className="text-slate-400 mr-4 select-none w-8 text-right font-medium text-xs">
-										{index + 1}
-									</span>
-									<span className="text-slate-800">{line || " "}</span>
-								</div>
-							))}
-						</pre>
-					</div>
-					<div className="mt-4 space-y-2">
-						{currentProgram.inputs && currentProgram.inputs.length > 0 && (
-							<div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-								<div className="flex items-start gap-2">
-									<span className="text-blue-600 text-sm">📝</span>
-									<div className="flex-1">
-										<div className="text-sm font-medium text-blue-800 mb-1">
-											Input Values
-										</div>
-										<div className="text-sm text-blue-700 font-mono">
-											{currentProgram.inputs
-												.map((input) => `"${input}"`)
-												.join(", ")}
-										</div>
-									</div>
-								</div>
-							</div>
-						)}
 
-						{currentProgram.randomValue !== undefined && (
-							<div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-								<div className="flex items-start gap-2">
-									<span className="text-purple-600 text-sm">🎲</span>
-									<div className="flex-1">
-										<div className="text-sm font-medium text-purple-800 mb-1">
-											Random Value
-										</div>
-										<div className="text-sm text-purple-700 font-mono">
-											{currentProgram.randomValue}
-										</div>
-									</div>
-								</div>
-							</div>
-						)}
-					</div>
-				</CardContent>
-			</Card>
+			<ProgramCode
+				currentProgram={currentProgram}
+				difficulty={difficulty}
+				programIndex={programIndex}
+				programCodeId={programCodeId}
+			/>
 
 			{/* Trace Table */}
 			<Card className="border-slate-200 shadow-sm">
