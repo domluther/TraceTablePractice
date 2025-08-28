@@ -65,10 +65,15 @@ export function ProgramCode({
 		}
 	}, [currentProgram, difficulty, programIndex]);
 
-    const valuesToDisplay = (currentProgram.inputs && currentProgram.inputs.length > 0) || currentProgram.randomValue !== undefined;
+	const valuesToDisplay =
+		(currentProgram.inputs && currentProgram.inputs.length > 0) ||
+		currentProgram.randomValue !== undefined;
 	return (
-<Card id={programCodeId} className="gap-4 py-0 shadow-xl bg-slate-700 border-slate-600">
-  <CardHeader className="border-b bg-gradient-to-br from-gray-800 to-gray-900 px-4 !pb-2 !pt-2 rounded-t-lg">
+		<Card
+			id={programCodeId}
+			className="gap-4 py-0 shadow-xl bg-slate-700 border-slate-600"
+		>
+			<CardHeader className="border-b bg-gradient-to-br from-gray-800 to-gray-900 px-4 !pb-2 !pt-2 rounded-t-lg">
 				<div className="flex flex-col justify-between gap-3 md:flex-row lg:items-center">
 					<div className="flex flex-col">
 						<CardTitle className="text-lg font-semibold text-white">
@@ -114,7 +119,7 @@ export function ProgramCode({
 								key={`line-${index}-${line}`}
 								className="flex transition-colors duration-150 hover:bg-slate-600"
 							>
-								<span className="text-blue-300 bg-slate-700 border-r border-slate-700 px-1 py-2 select-none min-w-[3rem] text-right font-medium text-xs leading-none">  
+								<span className="text-blue-300 bg-slate-700 border-r border-slate-700 px-1 py-2 select-none min-w-[3rem] text-right font-medium text-xs leading-none">
 									{index + 1}
 								</span>
 								<span className="flex-1 px-4 py-1 leading-none text-slate-100">
@@ -124,39 +129,38 @@ export function ProgramCode({
 						))}
 					</pre>
 				</div>
-                { valuesToDisplay && (
-				<div className="p-2">
-					{currentProgram.inputs && currentProgram.inputs.length > 0 && (
-						<div className="px-3 py-0">
-							<div className="flex items-start gap-2">
-								<div className="flex-1">
-									<div className="mb-1 text-sm font-medium text-blue-300">
-										Input Values: {" "}
-									<span className="font-mono text-sm text-blue-300">
-										{currentProgram.inputs
-											.map((input) => `"${input}"`)
-											.join(", ")}
-									</span>
+				{valuesToDisplay && (
+					<div className="p-2">
+						{currentProgram.inputs && currentProgram.inputs.length > 0 && (
+							<div className="px-3 py-0">
+								<div className="flex items-start gap-2">
+									<div className="flex-1">
+										<div className="mb-1 text-sm font-medium text-blue-300">
+											Input Values:{" "}
+											<span className="font-mono text-sm text-blue-300">
+												{currentProgram.inputs
+													.map((input) => `"${input}"`)
+													.join(", ")}
+											</span>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					)}
+						)}
 
-					{currentProgram.randomValue !== undefined && (
-						<div className="px-3 py-0">
-							<div className="flex items-start gap-2">
-								<div className="flex-1">
-									<div className="mb-1 text-sm font-medium text-blue-300">
-										Random Value: {" "}
-										{currentProgram.randomValue}
+						{currentProgram.randomValue !== undefined && (
+							<div className="px-3 py-0">
+								<div className="flex items-start gap-2">
+									<div className="flex-1">
+										<div className="mb-1 text-sm font-medium text-blue-300">
+											Random Value: {currentProgram.randomValue}
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					)}
-				</div>
-                )}
+						)}
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);
