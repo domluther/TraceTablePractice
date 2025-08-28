@@ -227,7 +227,7 @@ function Index() {
 
   // Question renderer (customize for your question type)
   const questionRenderer = useCallback((question: YourQuestionType) => (
-    <div className="font-mono text-2xl sm:text-3xl text-center p-6 sm:p-8 bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 text-white rounded-xl border-3 border-blue-600 shadow-lg font-semibold tracking-wider break-all">
+    <div className="p-6 font-mono text-2xl font-semibold tracking-wider text-center text-white break-all border-blue-600 shadow-lg sm:text-3xl sm:p-8 bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 rounded-xl border-3">
       {question.problem}
     </div>
   ), []);
@@ -265,8 +265,8 @@ function Index() {
 
   // Help section
   const helpSection = (
-    <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-green-500">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">Need Help?</h2>
+    <div className="p-6 border-l-4 border-green-500 rounded-lg bg-gray-50">
+      <h2 className="mb-4 text-xl font-semibold text-gray-800">Need Help?</h2>
       <QuizButton variant="secondary" onClick={() => setShowHints(!showHints)}>
         {showHints ? "Hide" : "Show"} Help
       </QuizButton>

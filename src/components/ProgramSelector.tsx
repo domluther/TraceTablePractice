@@ -76,16 +76,16 @@ export function ProgramSelector({
 
 	return (
 		<>
-			<h3 className="text-xl font-semibold mb-6 text-gray-800">
+			<h3 className="mb-6 text-xl font-semibold text-gray-800">
 				Select a program
 			</h3>
 
 			{/* Controls */}
-			<div className="flex items-center gap-6 mb-6">
+			<div className="flex items-center mb-6 gap-6">
 				<div className="flex items-center gap-3">
 					<label
 						htmlFor={difficultySelectId}
-						className="text-md font-bold text-gray-700"
+						className="font-bold text-gray-700 text-md"
 					>
 						Difficulty:
 					</label>
@@ -111,17 +111,17 @@ export function ProgramSelector({
 			</div>
 
 			{/* Program Table */}
-			<div className="bg-white rounded-lg shadow-sm max-h-96 overflow-scroll">
-				<table className="w-full border-collapse bg-white text-sm">
+			<div className="overflow-scroll bg-white rounded-lg shadow-sm max-h-96">
+				<table className="w-full text-sm bg-white border-collapse">
 					<thead>
 						<tr className="sticky top-0 z-10 bg-gradient-to-br from-gray-800 to-gray-900">
-							<th className="px-4 py-3 text-left font-semibold text-white border-b">
+							<th className="px-4 py-3 font-semibold text-left text-white border-b">
 								Program
 							</th>
-							<th className="px-4 py-3 text-left font-semibold text-white border-b">
+							<th className="px-4 py-3 font-semibold text-left text-white border-b">
 								Best Score
 							</th>
-							<th className="px-4 py-3 text-left font-semibold text-white border-b">
+							<th className="px-4 py-3 font-semibold text-left text-white border-b">
 								Action
 							</th>
 						</tr>
@@ -132,7 +132,7 @@ export function ProgramSelector({
 							return (
 								<tr
 									key={`${selectedDifficulty}-${index}-${program.description}`}
-									className="hover:bg-gray-50 transition-colors duration-150 border-b"
+									className="border-b hover:bg-gray-50 transition-colors duration-150"
 								>
 									<td className="px-4 py-3 align-middle">
 										<div>
@@ -140,7 +140,7 @@ export function ProgramSelector({
 												{program.description}
 											</div>
 											{program.inputSets && (
-												<div className="text-xs text-gray-500 mt-1">
+												<div className="mt-1 text-xs text-gray-500">
 													Multiple input variations available
 												</div>
 											)}

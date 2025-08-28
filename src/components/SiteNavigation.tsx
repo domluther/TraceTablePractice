@@ -49,7 +49,7 @@ export function SiteNavigation({
 	}, []);
 
 	return (
-		<nav className="absolute top-3 left-3 xl:top-5 xl:left-8 z-50">
+		<nav className="absolute z-50 top-3 left-3 xl:top-5 xl:left-8">
 			<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
 				<DropdownMenuTrigger asChild>
 					<Button
@@ -63,13 +63,13 @@ export function SiteNavigation({
 					>
 						{/* Responsive display */}
 						{compact ? (
-							<Menu className="h-5 w-5" />
+							<Menu className="w-5 h-5" />
 						) : (
 							<>
 								<span className="hidden xl:block">
 									{icon} {title}
 								</span>
-								<Menu className="xl:hidden h-5 w-5" />
+								<Menu className="w-5 h-5 xl:hidden" />
 							</>
 						)}
 						<ChevronDown
@@ -81,14 +81,14 @@ export function SiteNavigation({
 					</Button>
 				</DropdownMenuTrigger>
 
-				<DropdownMenuContent className="w-80 p-0" align="start" sideOffset={8}>
+				<DropdownMenuContent className="p-0 w-80" align="start" sideOffset={8}>
 					{/* Header */}
-					<div className="bg-gradient-to-r from-gray-700 to-gray-900 text-white px-4 py-3 font-semibold uppercase text-sm">
+					<div className="px-4 py-3 text-sm font-semibold text-white uppercase bg-gradient-to-r from-gray-700 to-gray-900">
 						Computer Science Practice
 					</div>
 
 					{/* Menu Items */}
-					<div className="max-h-96 overflow-y-auto">
+					<div className="overflow-y-auto max-h-96">
 						{menuItems.map((item) => (
 							<DropdownMenuItem key={item.id} asChild className="p-0 m-0">
 								<a
@@ -103,7 +103,7 @@ export function SiteNavigation({
 									rel="noopener noreferrer"
 								>
 									<div className="flex flex-col space-y-1">
-										<div className="font-bold text-lg text-center group-hover:text-indigo-600 transition-colors">
+										<div className="text-lg font-bold text-center group-hover:text-indigo-600 transition-colors">
 											{item.title}
 										</div>
 										<div className="text-sm text-gray-600">

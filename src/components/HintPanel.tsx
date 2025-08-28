@@ -43,9 +43,9 @@ export function HintPanel({
 					: "opacity-0 max-h-0 overflow-hidden",
 			)}
 		>
-			<h3 className="text-lg font-bold text-yellow-800 mb-4">{title}</h3>
-			<div className="max-h-64 overflow-y-auto">
-				<ul className="space-y-4 text-gray-700">
+			<h3 className="mb-4 text-lg font-bold text-yellow-800">{title}</h3>
+			<div className="overflow-y-auto max-h-64">
+				<ul className="text-gray-700 space-y-4">
 					{items.map((item) => (
 						<li key={item.title} className="flex flex-col gap-1">
 							<div className={colorClasses[item.color]}>{item.title}:</div>
@@ -53,7 +53,7 @@ export function HintPanel({
 							{item.examples.map((example) => (
 								<div
 									key={example}
-									className="text-sm text-gray-600 bg-gray-100 rounded px-2 py-1 font-mono"
+									className="px-2 py-1 font-mono text-sm text-gray-600 bg-gray-100 rounded"
 								>
 									{example}
 								</div>

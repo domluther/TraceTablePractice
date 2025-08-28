@@ -69,7 +69,7 @@ export function StatsModal({
 
 	return (
 		<div
-			className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+			className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby={titleId}
@@ -88,19 +88,19 @@ export function StatsModal({
 				role="document"
 			>
 				{/* Header */}
-				<div className="bg-gradient-to-r from-gray-700 to-gray-900 text-white px-6 py-4 flex items-center justify-between">
+				<div className="flex items-center justify-between px-6 py-4 text-white bg-gradient-to-r from-gray-700 to-gray-900">
 					<h2
 						id={titleId}
-						className="text-2xl font-bold flex items-center gap-2"
+						className="flex items-center text-2xl font-bold gap-2"
 					>
 						{headerIcon} {title}
 					</h2>
 					<button
 						type="button"
 						onClick={onClose}
-						className="text-white hover:text-gray-200 transition-colors text-2xl w-8 h-8 flex items-center justify-center"
+						className="flex items-center justify-center w-8 h-8 text-2xl text-white hover:text-gray-200 transition-colors"
 					>
-						<X className="h-6 w-6" />
+						<X className="w-6 h-6" />
 					</button>
 				</div>
 
@@ -110,8 +110,8 @@ export function StatsModal({
 					overallStats.totalAttempts > 0 ? (
 						<div className="space-y-6 ">
 							{/* Level Info Card */}
-							<Card className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-								<CardHeader className=" text-white">
+							<Card className="text-white bg-gradient-to-r from-indigo-500 to-purple-600">
+								<CardHeader className="text-white ">
 									<div className="flex items-center gap-4">
 										<div className="text-5xl animate-gentle-bounce">
 											{overallStats.level.emoji}
@@ -120,15 +120,15 @@ export function StatsModal({
 											<CardTitle className="text-2xl">
 												{overallStats.level.title}
 											</CardTitle>
-											<p className="text-indigo-100 mt-1">
+											<p className="mt-1 text-indigo-100">
 												{overallStats.level.description}
 											</p>
 										</div>
 									</div>
 								</CardHeader>
 								{overallStats.nextLevel && (
-									<CardContent className="mx-4 pt-4 rounded-md bg-white/20 backdrop-blur-sm">
-										<div className="flex justify-between items-center mb-2 text-sm font-semibold">
+									<CardContent className="pt-4 mx-4 rounded-md bg-white/20 backdrop-blur-sm">
+										<div className="flex items-center justify-between mb-2 text-sm font-semibold">
 											<span>
 												Progress to {overallStats.nextLevel.emoji}{" "}
 												{overallStats.nextLevel.title}
@@ -162,8 +162,8 @@ export function StatsModal({
 								{!overallStats.nextLevel && (
 									<CardContent className="pt-4">
 										<div className="text-center">
-											<div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white rounded-lg p-3">
-												<p className="font-semibold text-lg">
+											<div className="p-3 text-white rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600">
+												<p className="text-lg font-semibold">
 													🎉 Maximum Level Reached!
 												</p>
 												<p className="text-sm text-yellow-100">
@@ -184,7 +184,7 @@ export function StatsModal({
 								</CardHeader>
 								<CardContent>
 									<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-										<div className="bg-blue-50 rounded-lg p-4 text-center border-l-4 border-blue-500">
+										<div className="p-4 text-center border-l-4 border-blue-500 rounded-lg bg-blue-50">
 											<div className="text-2xl font-bold text-blue-600">
 												{traceTableStats
 													? traceTableStats.totalCorrect
@@ -194,7 +194,7 @@ export function StatsModal({
 												Best Points Total
 											</div>
 										</div>
-										<div className="bg-green-50 rounded-lg p-4 text-center border-l-4 border-green-500">
+										<div className="p-4 text-center border-l-4 border-green-500 rounded-lg bg-green-50">
 											<div className="text-2xl font-bold text-green-600">
 												{traceTableStats
 													? traceTableStats.totalAttempts
@@ -204,7 +204,7 @@ export function StatsModal({
 												Programs Attempted
 											</div>
 										</div>
-										<div className="bg-purple-50 rounded-lg p-4 text-center border-l-4 border-purple-500">
+										<div className="p-4 text-center border-l-4 border-purple-500 rounded-lg bg-purple-50">
 											<div className="text-2xl font-bold text-purple-600">
 												{traceTableStats
 													? Math.round(traceTableStats.percentage)
@@ -233,10 +233,10 @@ export function StatsModal({
 												programScores.map((program) => (
 													<div
 														key={program.programName}
-														className="bg-gray-50 rounded-lg p-4"
+														className="p-4 rounded-lg bg-gray-50"
 													>
 														<div className="flex items-center justify-between mb-2">
-															<div className="font-semibold text-lg">
+															<div className="text-lg font-semibold">
 																{program.programName}
 															</div>
 															<div
@@ -266,10 +266,10 @@ export function StatsModal({
 														stats.attempts > 0 && (
 															<div
 																key={type}
-																className="bg-gray-50 rounded-lg p-4 flex items-center justify-between"
+																className="flex items-center justify-between p-4 rounded-lg bg-gray-50"
 															>
 																<div>
-																	<div className="font-semibold text-lg">
+																	<div className="text-lg font-semibold">
 																		{type === "none" ? "Invalid Items" : type}
 																	</div>
 																	<div className="text-sm text-gray-600">
@@ -302,9 +302,9 @@ export function StatsModal({
 							</Card>
 						</div>
 					) : (
-						<div className="text-center py-12">
-							<div className="text-6xl mb-4">🦆</div>
-							<p className="text-xl text-gray-600 mb-2">
+						<div className="py-12 text-center">
+							<div className="mb-4 text-6xl">🦆</div>
+							<p className="mb-2 text-xl text-gray-600">
 								No scores recorded yet
 							</p>
 							<p className="text-gray-500">
@@ -315,7 +315,7 @@ export function StatsModal({
 				</div>
 
 				{/* Footer */}
-				<div className="px-6 py-4 bg-gray-50 flex justify-between items-center gap-4">
+				<div className="flex items-center justify-between px-6 py-4 bg-gray-50 gap-4">
 					<Button variant="destructive" onClick={handleResetScores}>
 						Reset All Scores
 					</Button>

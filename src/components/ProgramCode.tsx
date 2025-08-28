@@ -71,7 +71,7 @@ export function ProgramCode({
 	return (
 		<Card
 			id={programCodeId}
-			className="gap-4 py-0 shadow-xl bg-slate-700 border-slate-600"
+			className="py-0 shadow-xl gap-4 bg-slate-700 border-slate-600"
 		>
 			<CardHeader className="border-b bg-gradient-to-br from-gray-800 to-gray-900 px-4 !pb-2 !pt-2 rounded-t-lg">
 				<div className="flex flex-col justify-between gap-3 md:flex-row lg:items-center">

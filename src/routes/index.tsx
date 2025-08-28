@@ -276,7 +276,7 @@ function Index() {
 
 	// Help section
 	const helpSection = currentProgram ? (
-		<div className="bg-gray-50 rounded-lg p-4 border-l-4 border-green-500 mt-6 max-w-full">
+		<div className="max-w-full p-4 mt-6 border-l-4 border-green-500 rounded-lg bg-gray-50">
 			<div className="flex items-center justify-between mb-3">
 				<h2 className="text-lg font-semibold text-gray-800">Need Help?</h2>
 				<QuizButton

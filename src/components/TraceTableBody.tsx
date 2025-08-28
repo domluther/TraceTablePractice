@@ -496,22 +496,22 @@ export function TraceTableBody({
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="pt-0">
-					<div className="bg-white rounded-lg max-h-96 overflow-auto">
-						<table className="w-full border-collapse bg-white text-sm table-fixed">
+					<div className="overflow-auto bg-white rounded-lg max-h-96">
+						<table className="w-full text-sm bg-white border-collapse table-fixed">
 							<thead>
 								<tr className="sticky top-0 z-10 bg-slate-600">
-									<th className="text-center text-white font-semibold border border-gray-800 py-3 px-2">
+									<th className="px-2 py-3 font-semibold text-center text-white border border-gray-800">
 										Line Number
 									</th>
 									{programVariables.map((varName) => (
 										<th
 											key={varName}
-											className="text-center text-white font-semibold border border-gray-800 py-3 px-2"
+											className="px-2 py-3 font-semibold text-center text-white border border-gray-800"
 										>
 											{varName}
 										</th>
 									))}
-									<th className="text-center text-white font-semibold border border-gray-800 py-3 px-2">
+									<th className="px-2 py-3 font-semibold text-center text-white border border-gray-800">
 										Output
 									</th>
 								</tr>
@@ -522,7 +522,7 @@ export function TraceTableBody({
 										key={entry.id}
 										className="hover:bg-gray-50 transition-colors"
 									>
-										<td className="text-center p-1 border border-slate-200">
+										<td className="p-1 text-center border border-slate-200">
 											<input
 												ref={rowIndex === 0 ? firstInputRef : undefined}
 												type="text"
@@ -541,7 +541,7 @@ export function TraceTableBody({
 										{programVariables.map((varName) => (
 											<td
 												key={varName}
-												className="text-center p-1 border border-slate-200"
+												className="p-1 text-center border border-slate-200"
 											>
 												<input
 													type="text"
@@ -554,7 +554,7 @@ export function TraceTableBody({
 												/>
 											</td>
 										))}
-										<td className="text-center p-1 border border-slate-200">
+										<td className="p-1 text-center border border-slate-200">
 											<input
 												type="text"
 												className={getCellClassName(rowIndex, "output")}
@@ -574,7 +574,7 @@ export function TraceTableBody({
 			</Card>
 
 			{/* Action Buttons */}
-			<div className="flex flex-wrap gap-2 justify-center">
+			<div className="flex flex-wrap justify-center gap-2">
 				{onPreviousProgram && (
 					<QuizButton
 						onClick={onPreviousProgram}
@@ -624,7 +624,7 @@ export function TraceTableBody({
 									: ""}
 							</p>
 							{feedback.details && feedback.details.length > 0 && (
-								<div className="feedback-details mt-4">
+								<div className="mt-4 feedback-details">
 									<p
 										className={`text-sm font-semibold mb-3 ${feedback.isCorrect ? "text-green-700" : "text-red-700"}`}
 									>
@@ -634,7 +634,7 @@ export function TraceTableBody({
 										{feedback.details.map((error) => (
 											<div
 												key={error}
-												className="feedback-item incorrect bg-red-100 p-2 rounded text-sm font-mono text-red-800 leading-relaxed"
+												className="p-2 font-mono text-sm leading-relaxed text-red-800 bg-red-100 rounded feedback-item incorrect"
 											>
 												{error}
 											</div>
@@ -648,36 +648,36 @@ export function TraceTableBody({
 			)}
 
 			{/* Keyboard Shortcuts Help */}
-			<div className="mx-auto bg-blue-50 rounded-lg border border-blue-100 my-4">
+			<div className="mx-auto my-4 border border-blue-100 rounded-lg bg-blue-50">
 				<details open>
-					<summary className="cursor-pointer font-semibold text-gray-600 select-none list-none flex items-center gap-2 relative px-4 py-3">
-						<span className="text-xs transition-transform duration-200 inline-block arrow-icon">
+					<summary className="relative flex items-center px-4 py-3 font-semibold text-gray-600 list-none cursor-pointer select-none gap-2">
+						<span className="inline-block text-xs transition-transform duration-200 arrow-icon">
 							▶
 						</span>
 						⌨️ Keyboard Shortcuts
 					</summary>
-					<div className="grid grid-cols-1 sm:flex sm:justify-evenly gap-2 border-t border-blue-100 p-4 pt-0">
-						<span className="flex items-center gap-2 text-sm text-gray-600">
+					<div className="p-4 pt-0 border-t border-blue-100 grid grid-cols-1 sm:flex sm:justify-evenly gap-2">
+						<span className="flex items-center text-sm text-gray-600 gap-2">
 							<kbd className="kbd-style">Enter</kbd>
 							Mark Answer
 						</span>
 						{onNextProgram && (
-							<span className="flex items-center gap-2 text-sm text-gray-600">
+							<span className="flex items-center text-sm text-gray-600 gap-2">
 								<kbd className="kbd-style">N</kbd>
 								Next Program
 							</span>
 						)}
 						{onPreviousProgram && (
-							<span className="flex items-center gap-2 text-sm text-gray-600">
+							<span className="flex items-center text-sm text-gray-600 gap-2">
 								<kbd className="kbd-style">P</kbd>
 								Previous Program
 							</span>
 						)}
-						<span className="flex items-center gap-2 text-sm text-gray-600">
+						<span className="flex items-center text-sm text-gray-600 gap-2">
 							<kbd className="kbd-style">S</kbd>
 							Shuffle Inputs
 						</span>
-						<span className="flex items-center gap-2 text-sm text-gray-600">
+						<span className="flex items-center text-sm text-gray-600 gap-2">
 							<kbd className="kbd-style">Esc</kbd>
 							Clear Table
 						</span>

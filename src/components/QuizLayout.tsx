@@ -28,13 +28,13 @@ export function QuizLayout({
 }: QuizLayoutProps) {
 	return (
 		<div
-			className="min-h-screen p-5 flex items-center justify-center"
+			className="flex items-center justify-center min-h-screen p-5"
 			style={{
 				background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
 			}}
 		>
 			<div
-				className="w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden"
+				className="w-full overflow-hidden bg-white rounded-lg shadow-2xl max-w-7xl"
 				style={{
 					borderRadius: "12px",
 					boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
@@ -49,7 +49,7 @@ export function QuizLayout({
 					<div className="mx-auto">{children}</div>
 				</main>
 				<footer
-					className="text-center text-sm border-t"
+					className="text-sm text-center border-t"
 					style={{
 						background: "#2d3748",
 						color: "#e2e8f0",
