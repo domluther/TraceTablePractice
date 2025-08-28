@@ -108,51 +108,32 @@ export function ProgramSelector({
 					</select>
 				</div>
 
-				<QuizButton onClick={generateRandomProgram} size="sm">
+				<QuizButton onClick={generateRandomProgram} size="xs">
 					🎲 Random
 				</QuizButton>
 			</div>
 
 			{/* Program Table */}
 			<div
-				className="bg-white rounded-lg shadow-sm max-h-96 overflow-auto"
-				style={{
-					borderRadius: "8px",
-					boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-				}}
+				className="bg-white rounded-lg shadow-sm max-h-96 overflow-scroll"
 			>
 				<table className="w-full border-collapse bg-white text-sm">
 					<thead>
 						<tr
-							className="sticky top-0 z-10"
-							style={{
-								background: "#2d3748",
-							}}
+							className="sticky top-0 z-10 bg-gradient-to-br from-gray-800 to-gray-900"
 						>
 							<th
 								className="px-4 py-3 text-left font-semibold text-white border-b"
-								style={{
-									borderBottom: "1px solid #4a5568",
-									padding: "15px 20px",
-								}}
 							>
 								Program
 							</th>
 							<th
 								className="px-4 py-3 text-left font-semibold text-white border-b"
-								style={{
-									borderBottom: "1px solid #4a5568",
-									padding: "15px 20px",
-								}}
 							>
 								Best Score
 							</th>
 							<th
 								className="px-4 py-3 text-left font-semibold text-white border-b"
-								style={{
-									borderBottom: "1px solid #4a5568",
-									padding: "15px 20px",
-								}}
 							>
 								Action
 							</th>
@@ -164,16 +145,10 @@ export function ProgramSelector({
 							return (
 								<tr
 									key={`${selectedDifficulty}-${index}-${program.description}`}
-									className="hover:bg-gray-50 transition-colors duration-150"
-									style={{
-										borderBottom: "1px solid #e2e8f0",
-									}}
+									className="hover:bg-gray-50 transition-colors duration-150 border-b"
 								>
 									<td
 										className="px-4 py-3 align-middle"
-										style={{
-											padding: "15px 20px",
-										}}
 									>
 										<div>
 											<div className="font-medium text-gray-800">
@@ -188,9 +163,6 @@ export function ProgramSelector({
 									</td>
 									<td
 										className="px-4 py-3 align-middle"
-										style={{
-											padding: "15px 20px",
-										}}
 									>
 										<span
 											className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
@@ -210,9 +182,6 @@ export function ProgramSelector({
 									</td>
 									<td
 										className="px-4 py-3 align-middle"
-										style={{
-											padding: "15px 20px",
-										}}
 									>
 										<QuizButton
 											onClick={() => handleProgramSelect(program, index)}
