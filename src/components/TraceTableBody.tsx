@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type {
@@ -19,6 +19,7 @@ interface TraceTableBodyProps {
 	onNextProgram?: () => void;
 	canGoPrevious?: boolean;
 	canGoNext?: boolean;
+	onProgramCodeIdReady?: (id: string) => void;
 }
 
 interface UserTraceEntry {
@@ -38,6 +39,7 @@ export function TraceTableBody({
 	onNextProgram,
 	canGoPrevious = false,
 	canGoNext = false,
+	onProgramCodeIdReady,
 }: TraceTableBodyProps) {
 	const [expectedTrace, setExpectedTrace] = useState<TraceStep[]>([]);
 	const [programVariables, setProgramVariables] = useState<string[]>([]);
@@ -54,6 +56,14 @@ export function TraceTableBody({
 
 	// Ref to focus on the first input cell after clearing
 	const firstInputRef = useRef<HTMLInputElement>(null);
+
+	// Generate unique ID for the program code section
+	const programCodeId = useId();
+
+	// Notify parent component of the program code ID
+	useEffect(() => {
+		onProgramCodeIdReady?.(programCodeId);
+	}, [programCodeId, onProgramCodeIdReady]);
 
 	// Execute program and generate expected trace when program changes
 	useEffect(() => {
@@ -519,7 +529,7 @@ export function TraceTableBody({
 	return (
 		<div className="space-y-6">
 			{/* Code Display */}
-			<Card id="program-code-section" className="border-slate-200 shadow-sm">
+			<Card id={programCodeId} className="border-slate-200 shadow-sm">
 				<CardHeader className="pb-3">
 					<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
 						<div className="flex flex-col gap-2">

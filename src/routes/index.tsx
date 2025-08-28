@@ -72,6 +72,7 @@ function Index() {
 	const [currentProgramIndex, setCurrentProgramIndex] = useState<number>(-1);
 	const [showStatsModal, setShowStatsModal] = useState(false);
 	const [showHints, setShowHints] = useState(false);
+	const [programCodeId, setProgramCodeId] = useState<string>("");
 
 	// Overall statistics for score display
 	const [overallStats, setOverallStats] = useState({
@@ -175,9 +176,7 @@ function Index() {
 	// Helper function to scroll to program code section
 	const scrollToProgramCode = useCallback(() => {
 		setTimeout(() => {
-			const programCodeSection = document.getElementById(
-				"program-code-section",
-			);
+			const programCodeSection = document.getElementById(programCodeId);
 			if (programCodeSection) {
 				programCodeSection.scrollIntoView({
 					behavior: "smooth",
@@ -185,7 +184,7 @@ function Index() {
 				});
 			}
 		}, 100);
-	}, []);
+	}, [programCodeId]);
 
 	// Central function to navigate to a specific program
 	const navigateToProgram = useCallback(
@@ -220,6 +219,11 @@ function Index() {
 		},
 		[navigateToProgram],
 	);
+
+	// Handle when program code ID is ready
+	const handleProgramCodeIdReady = useCallback((id: string) => {
+		setProgramCodeId(id);
+	}, []);
 
 	const handleDifficultyChange = useCallback(
 		(difficulty: "easy" | "medium" | "hard") => {
@@ -323,6 +327,7 @@ function Index() {
 						programIndex={currentProgramIndex}
 						onPreviousProgram={handlePreviousProgram}
 						onNextProgram={handleNextProgram}
+						onProgramCodeIdReady={handleProgramCodeIdReady}
 						canGoPrevious={currentProgramIndex > 0}
 						canGoNext={
 							currentProgramIndex <
