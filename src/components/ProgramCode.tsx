@@ -1,7 +1,8 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import type { Program } from "@/lib/astInterpreter";
 import type { Difficulty } from "@/lib/types";
+import { captureElement } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface ProgramCodeProps {
@@ -17,6 +18,8 @@ export function ProgramCode({
 	programIndex,
 	programCodeId,
 }: ProgramCodeProps) {
+	const cardRef = useRef<HTMLDivElement | null>(null);
+
 	// Get program display name
 	const getProgramDisplayName = (): string => {
 		const difficultyName =
@@ -49,18 +52,14 @@ export function ProgramCode({
 	);
 
 	// Share current program
-	const shareProgram = useCallback(async () => {
+	const generateShareURL = useCallback(async () => {
 		if (!currentProgram) return;
 
 		const shareURL = `${window.location.origin}${window.location.pathname}?difficulty=${difficulty}&program=${programIndex}`;
 
 		try {
 			await navigator.clipboard.writeText(shareURL);
-			// You could add a toast notification here
-			console.log("Share URL copied to clipboard:", shareURL);
-		} catch (error) {
-			console.error("Failed to copy to clipboard:", error);
-			// Fallback: show URL in alert
+		} catch (_err) {
 			alert(`Share this URL: ${shareURL}`);
 		}
 	}, [currentProgram, difficulty, programIndex]);
@@ -68,10 +67,12 @@ export function ProgramCode({
 	const valuesToDisplay =
 		(currentProgram.inputs && currentProgram.inputs.length > 0) ||
 		currentProgram.randomValue !== undefined;
+
 	return (
 		<Card
+			ref={cardRef}
 			id={programCodeId}
-			className="py-0 border-l-4 shadow-xl gap-4 bg-slate-700 border-slate-600 border-l-blue-500"
+			className="gap-4 py-0 border-l-4 shadow-xl bg-slate-700 border-slate-600 border-l-blue-500"
 		>
 			<CardHeader className="border-b bg-gradient-to-br from-gray-800 to-gray-900 px-4 !pb-2 !pt-2 rounded-t-lg">
 				<div className="flex flex-col justify-between gap-3 md:flex-row lg:items-center">
@@ -102,10 +103,19 @@ export function ProgramCode({
 							<Button
 								variant="outline"
 								size="sm"
-								onClick={shareProgram}
+								onClick={generateShareURL}
 								className="text-sm font-light text-blue-300 transition-all duration-200 bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500 hover:text-white"
 							>
 								🔗 Share Link
+							</Button>
+
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => captureElement(cardRef, getProgramDisplayName())}
+								className="text-sm font-light text-blue-300 transition-all duration-200 bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500 hover:text-white"
+							>
+								📸 Screenshot
 							</Button>
 						</div>
 					)}
@@ -147,7 +157,6 @@ export function ProgramCode({
 								</div>
 							</div>
 						)}
-
 						{currentProgram.randomValue !== undefined && (
 							<div className="px-3 py-0">
 								<div className="flex items-start gap-2">
