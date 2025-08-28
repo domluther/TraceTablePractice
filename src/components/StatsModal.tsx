@@ -3,7 +3,7 @@ import { useEffect, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import type { ProgramScore, ScoreManager } from "@/lib/scoreManager";
+import type { ScoreManager } from "@/lib/scoreManager";
 import { cn } from "@/lib/utils";
 
 interface StatsModalProps {
@@ -47,12 +47,12 @@ export function StatsModal({
 	if (!isOpen) return null;
 
 	const overallStats = scoreManager.getOverallStats();
-	const traceTableStats = (scoreManager as any).getTraceTableStats
-		? (scoreManager as any).getTraceTableStats()
+	const traceTableStats = scoreManager.getTraceTableStats
+		? scoreManager.getTraceTableStats()
 		: null;
 	const typeStats = scoreManager.getScoresByType();
-	const programScores = (scoreManager as any).getProgramScores
-		? ((scoreManager as any).getProgramScores() as ProgramScore[])
+	const programScores = scoreManager.getProgramScores
+		? scoreManager.getProgramScores()
 		: [];
 
 	const handleResetScores = () => {
