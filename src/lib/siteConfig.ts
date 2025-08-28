@@ -102,19 +102,13 @@ export const SITE_CONFIG: SiteConfig = {
 		},
 		{
 			title: "Output",
-			description: "Record what gets printed during program execution",
+			description: "Record what gets output during program execution",
 			examples: [
 				"print('Hello')",
 				"print(result)",
 				"print('Age: ' + str(age))",
 			],
 			color: "purple",
-		},
-		{
-			title: "Arrays",
-			description: "Track changes to array elements and their indices",
-			examples: ["myArray[0] = 5", "myArray[1] = myArray[0] + 2"],
-			color: "yellow",
 		},
 		{
 			title: "Conditionals",
@@ -124,13 +118,19 @@ export const SITE_CONFIG: SiteConfig = {
 		},
 		{
 			title: "Loops",
-			description: "Understand how loops repeat and when they terminate",
+			description: "Focus on the condition, especially updating the loop variable",
 			examples: [
 				"for i = 1 to 10",
 				"while count < 5",
-				"do...until done = true",
+				"do...until done == true",
 			],
 			color: "purple",
+		},
+		{
+			title: "Arrays",
+			description: "Track assigning values to elements",
+			examples: ['array colours = ["Blue", "Pink", "Green"]',"myArray[0] = 5", ],
+			color: "yellow",
 		},
 	],
 };

@@ -29,14 +29,14 @@ export function HintPanel({
 	};
 
 	return (
-		<div
-			className={cn(
-				"mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-6",
+		<details className={cn(
+				"mt-4 bg-slate-100 border-l-teal-500 border-l-4 rounded-lg p-6",
 				"transition-all duration-300 ease-in-out",
-				"opacity-100 max-h-none overflow-visible",
+				"max-h-none overflow-visible",
+				"cursor-pointer list-none"
 			)}
 		>
-			<h3 className="mb-4 text-lg font-bold text-yellow-800">{title}</h3>
+			<summary className="mb-0 font-semibold text-md">{title}</summary>
 			<div className="overflow-y-auto max-h-64">
 				<ul className="space-y-4 text-gray-700">
 					{items.map((item) => (
@@ -46,7 +46,7 @@ export function HintPanel({
 							{item.examples.map((example) => (
 								<div
 									key={example}
-									className="px-2 py-1 font-mono text-sm text-gray-600 bg-gray-100 rounded"
+									className="px-2 py-1 font-mono text-sm text-gray-600 bg-gray-200 rounded"
 								>
 									{example}
 								</div>
@@ -55,6 +55,7 @@ export function HintPanel({
 					))}
 				</ul>
 			</div>
-		</div>
+		</details>
+
 	);
 }

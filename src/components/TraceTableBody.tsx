@@ -7,8 +7,10 @@ import type {
 } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
 import type { Difficulty } from "@/lib/types";
+import type { SITE_CONFIG } from "@/lib/siteConfig";
 import { ProgramCode } from "./ProgramCode";
 import { QuizButton } from "./QuizButton";
+import { HintPanel } from './HintPanel';
 
 interface TraceTableBodyProps {
 	currentProgram: Program | null;
@@ -21,6 +23,7 @@ interface TraceTableBodyProps {
 	canGoPrevious?: boolean;
 	canGoNext?: boolean;
 	onProgramCodeIdReady?: (id: string) => void;
+	siteConfig: typeof SITE_CONFIG;
 }
 
 interface UserTraceEntry {
@@ -41,6 +44,7 @@ export function TraceTableBody({
 	canGoPrevious = false,
 	canGoNext = false,
 	onProgramCodeIdReady,
+	siteConfig
 }: TraceTableBodyProps) {
 	const [expectedTrace, setExpectedTrace] = useState<TraceStep[]>([]);
 	const [programVariables, setProgramVariables] = useState<string[]>([]);
@@ -348,7 +352,7 @@ export function TraceTableBody({
 				return `${baseClass} bg-red-100 text-red-800 border-red-400`;
 			}
 		}
-		return `${baseClass} bg-white`;
+		return `${baseClass} bg-slate-50`;
 	};
 
 	const shuffleInputs = useCallback(() => {
@@ -489,15 +493,15 @@ export function TraceTableBody({
 			/>
 
 			{/* Trace Table */}
-			<Card className="shadow-sm border-slate-200">
-				<CardHeader className="pb-3">
-					<CardTitle className="text-lg font-semibold text-slate-800">
+			<Card className="gap-2 shadow-sm border-slate-200 bg-slate-100">
+				<CardHeader className="pb-0">
+					<CardTitle className="text-xl font-semibold text-slate-800">
 						Trace Table
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="pt-0">
-					<div className="overflow-auto bg-white rounded-lg max-h-96">
-						<table className="w-full text-sm bg-white border-collapse table-fixed">
+					<div className="overflow-auto rounded-lg max-h-96">
+						<table className="w-full text-sm border-collapse table-fixed bg-slate-50">
 							<thead>
 								<tr className="sticky top-0 z-10 bg-slate-600">
 									<th className="px-2 py-3 font-semibold text-center text-white border border-gray-800">
@@ -647,10 +651,18 @@ export function TraceTableBody({
 				</Card>
 			)}
 
+				{/* Help Section */}
+				{currentProgram ? (
+					<HintPanel
+						title="📝 Trace Table Tips"
+						items={siteConfig.hints || []}
+					/>
+				) : null}
+
 			{/* Keyboard Shortcuts Help */}
-			<div className="mx-auto my-4 border border-blue-100 rounded-lg bg-blue-50">
+			<div className="mx-auto my-4 border border-l-4 rounded-lg border-l-teal-500 bg-slate-100">
 				<details>
-					<summary className="relative flex items-center gap-2 px-4 py-3 font-semibold text-gray-600 list-none cursor-pointer select-none">
+					<summary className="relative flex items-center gap-2 px-4 py-3 font-semibold list-none cursor-pointer select-none">
 						<span className="inline-block text-xs transition-transform duration-200 arrow-icon">
 							▶
 						</span>

@@ -11,7 +11,6 @@ import {
 	StatsModal,
 	TraceTableBody,
 } from "@/components";
-import { HintPanel } from "@/components/HintPanel";
 import { Panel } from "@/components/Panel";
 import { ASTInterpreter } from "@/lib/astInterpreter";
 import type { Program } from "@/lib/programs";
@@ -272,24 +271,6 @@ function Index() {
 		[currentDifficulty, currentProgramIndex, scoreManager, updateStats],
 	);
 
-	// Help section
-	const helpSection = currentProgram ? (
-		<Panel type="info">
-			<details>
-				<summary className="relative flex items-center gap-2 px-4 py-3 font-semibold text-gray-600 list-none cursor-pointer select-none">
-					<span className="inline-block text-xs transition-transform duration-200 arrow-icon">
-						▶
-					</span>
-					Need Help?
-				</summary>
-				<HintPanel
-					title="📝 Trace Table Tips:"
-					items={siteConfig.hints || []}
-				/>
-			</details>
-		</Panel>
-	) : null;
-
 	return (
 		<QuizLayout
 			title={siteConfig.title}
@@ -333,11 +314,11 @@ function Index() {
 								.length -
 								1
 						}
+						siteConfig={siteConfig}
+
 					/>
 				)}
 
-				{/* Help Section */}
-				{helpSection}
 			</div>
 
 			{/* Statistics Modal */}

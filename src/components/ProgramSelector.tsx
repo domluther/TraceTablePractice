@@ -77,7 +77,7 @@ export function ProgramSelector({
 	return (
 		<details open>
 			<summary className="my-2 text-xl font-semibold text-gray-800">
-				Select a program
+				🖥️ Pick a program
 			</summary>
 
 			{/* Controls */}
