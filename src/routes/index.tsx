@@ -86,43 +86,40 @@ function Index() {
 		accuracy: 0,
 	});
 
-	// Update overall stats periodically
-	useEffect(() => {
-		const updateStats = () => {
-			const stats = scoreManager.getTraceTableStats();
+	// Function to update overall stats
+	const updateStats = useCallback(() => {
+		const stats = scoreManager.getTraceTableStats();
 
-			// Calculate level based on performance
-			let currentLevel = siteConfig.scoring.customLevels?.[0];
-			if (siteConfig.scoring.customLevels) {
-				for (const level of siteConfig.scoring.customLevels) {
-					if (
-						stats.totalCorrect >= level.minPoints &&
-						stats.percentage >= level.minAccuracy
-					) {
-						currentLevel = level;
-					}
+		// Calculate level based on performance
+		let currentLevel = siteConfig.scoring.customLevels?.[0];
+		if (siteConfig.scoring.customLevels) {
+			for (const level of siteConfig.scoring.customLevels) {
+				if (
+					stats.totalCorrect >= level.minPoints &&
+					stats.percentage >= level.minAccuracy
+				) {
+					currentLevel = level;
 				}
 			}
+		}
 
-			setOverallStats({
-				level: currentLevel || {
-					emoji: "🥚",
-					title: "Beginner",
-					description: "Just getting started!",
-					minPoints: 0,
-					minAccuracy: 0,
-				},
-				totalPoints: stats.totalCorrect,
-				accuracy: stats.percentage,
-			});
-		};
-
-		updateStats();
-		// TODO - This is bad - slow to update. How else could this be done?
-		// Update stats every few seconds to reflect changes
-		const interval = setInterval(updateStats, 5000);
-		return () => clearInterval(interval);
+		setOverallStats({
+			level: currentLevel || {
+				emoji: "🥚",
+				title: "Beginner",
+				description: "Just getting started!",
+				minPoints: 0,
+				minAccuracy: 0,
+			},
+			totalPoints: stats.totalCorrect,
+			accuracy: stats.percentage,
+		});
 	}, [scoreManager, siteConfig.scoring.customLevels]);
+
+	// Update stats on mount and when dependencies change
+	useEffect(() => {
+		updateStats();
+	}, [updateStats]);
 
 	// Load program from URL using Tanstack Router search
 	useEffect(() => {
@@ -282,9 +279,11 @@ function Index() {
 					correct,
 					total,
 				);
+				// Update stats immediately after score changes
+				updateStats();
 			}
 		},
-		[currentDifficulty, currentProgramIndex, scoreManager],
+		[currentDifficulty, currentProgramIndex, scoreManager, updateStats],
 	);
 
 	// Help section
@@ -363,6 +362,7 @@ function Index() {
 				onClose={() => setShowStatsModal(false)}
 				scoreManager={scoreManager}
 				title="Trace Table Statistics"
+				onStatsUpdate={updateStats}
 			/>
 		</QuizLayout>
 	);

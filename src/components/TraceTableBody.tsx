@@ -283,6 +283,25 @@ export function TraceTableBody({
 	}, [expectedTrace, userEntries, programVariables, onScoreUpdate]);
 
 	const clearTable = useCallback(() => {
+		// Check if there's any user input before confirming
+		const hasUserInput = userEntries.some(
+			(entry) =>
+				entry.lineNumber.trim() !== "" ||
+				Object.values(entry.variables).some((value) => value.trim() !== "") ||
+				entry.output.trim() !== "",
+		);
+
+		// Only show confirmation if there's actually data to clear
+		if (hasUserInput) {
+			if (
+				!confirm(
+					"Are you sure you want to clear the trace table? This will remove all your entries.",
+				)
+			) {
+				return;
+			}
+		}
+
 		const clearedEntries = userEntries.map((entry) => ({
 			id: entry.id, // Preserve the original ID
 			lineNumber: "",

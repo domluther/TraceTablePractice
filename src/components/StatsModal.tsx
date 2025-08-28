@@ -12,6 +12,8 @@ interface StatsModalProps {
 	scoreManager: ScoreManager;
 	/** Title for the modal */
 	title?: string;
+	/** Callback to trigger stats update in parent component */
+	onStatsUpdate?: () => void;
 }
 
 /**
@@ -23,6 +25,7 @@ export function StatsModal({
 	onClose,
 	scoreManager,
 	title = "Your Progress",
+	onStatsUpdate,
 }: StatsModalProps) {
 	const headerIcon = "🏆";
 	const titleId = useId();
@@ -59,7 +62,8 @@ export function StatsModal({
 			)
 		) {
 			scoreManager.resetAllScores();
-			window.location.reload(); // Refresh to update all displays
+			// Trigger stats update in parent component instead of reloading
+			onStatsUpdate?.();
 		}
 	};
 
