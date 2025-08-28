@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { type Program, programs } from "@/lib/programs";
 import type { ScoreManager } from "@/lib/scoreManager";
+import type { Difficulty } from "@/lib/types";
 import { QuizButton } from "./QuizButton";
-
-export type Difficulty = "easy" | "medium" | "hard";
 
 interface ProgramSelectorProps {
 	onProgramSelect: (
@@ -76,7 +75,7 @@ export function ProgramSelector({
 	);
 
 	return (
-		<div className="bg-white">
+		<>
 			<h3 className="text-xl font-semibold mb-6 text-gray-800">
 				Select a program
 			</h3>
@@ -179,6 +178,6 @@ export function ProgramSelector({
 					</tbody>
 				</table>
 			</div>
-		</div>
+		</>
 	);
 }

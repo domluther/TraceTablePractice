@@ -18,8 +18,8 @@ import type { Program } from "@/lib/programs";
 import { programs } from "@/lib/programs";
 import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
-
-export type Difficulty = "easy" | "medium" | "hard";
+import type { Difficulty } from "@/lib/types";
+import { Panel } from '@/components/Panel';
 
 type SearchParams = {
 	difficulty?: Difficulty;
@@ -310,13 +310,15 @@ function Index() {
 			}
 		>
 			<div className="space-y-6">
-				{/* Program Selection */}
-				<ProgramSelector
-					onProgramSelect={handleProgramSelect}
-					onDifficultyChange={handleDifficultyChange}
-					scoreManager={scoreManager}
-					currentDifficulty={currentDifficulty}
-				/>
+				<Panel>
+					{/* Program Selection */}
+					<ProgramSelector
+						onProgramSelect={handleProgramSelect}
+						onDifficultyChange={handleDifficultyChange}
+						scoreManager={scoreManager}
+						currentDifficulty={currentDifficulty}
+					/>
+				</Panel>
 
 				{/* Trace Table Interface */}
 				{currentProgram && (
