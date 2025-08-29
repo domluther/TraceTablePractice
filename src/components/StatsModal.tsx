@@ -50,7 +50,6 @@ export function StatsModal({
 	const traceTableStats = scoreManager.getTraceTableStats
 		? scoreManager.getTraceTableStats()
 		: null;
-	const typeStats = scoreManager.getScoresByType();
 	const programScores = scoreManager.getProgramScores
 		? scoreManager.getProgramScores()
 		: [];
@@ -228,75 +227,41 @@ export function StatsModal({
 								</CardHeader>
 								<CardContent>
 									<div className="space-y-3">
-										{programScores.length > 0
-											? // Show program scores for trace tables
-												programScores.map((program) => (
-													<div
-														key={program.programName}
-														className="p-4 rounded-lg bg-gray-50"
-													>
-														<div className="flex items-center justify-between mb-2">
+										{
+											// Show program scores for trace tables
+											programScores.map((program) => (
+												<div
+													key={program.programName}
+													className="p-4 rounded-lg bg-gray-50"
+												>
+													<div className="flex items-center justify-between">
+														<div className="flex-1">
 															<div className="text-lg font-semibold">
 																{program.programName}
 															</div>
-															<div
-																className={cn(
-																	"text-xl font-bold px-3 py-1 rounded-full text-white",
-																	program.accuracy >= 90
-																		? "bg-green-500"
-																		: program.accuracy >= 70
-																			? "bg-blue-500"
-																			: program.accuracy >= 50
-																				? "bg-yellow-500"
-																				: "bg-red-500",
-																)}
-															>
-																{program.bestScore}
+															<div className="text-sm text-gray-600">
+																Attempts: {program.attempts} • Last:{" "}
+																{program.lastAttempt}
 															</div>
 														</div>
-														<div className="text-sm text-gray-600">
-															Attempts: {program.attempts} • Last:{" "}
-															{program.lastAttempt}
+														<div
+															className={cn(
+																"text-xl font-bold px-3 py-1 rounded-full ml-4 min-w-24 text-center",
+																program.accuracy >= 80
+																	? "bg-emerald-200 text-emerald-800"
+																	: program.accuracy >= 60
+																		? "bg-lime-200 text-lime-800"
+																		: program.accuracy >= 40
+																			? "bg-amber-200 text-amber-800"
+																			: "bg-red-200 text-red-800",
+															)}
+														>
+															{program.bestScore}
 														</div>
 													</div>
-												))
-											: // Fallback to original category breakdown
-												Object.entries(typeStats).map(
-													([type, stats]) =>
-														stats.attempts > 0 && (
-															<div
-																key={type}
-																className="flex items-center justify-between p-4 rounded-lg bg-gray-50"
-															>
-																<div>
-																	<div className="text-lg font-semibold">
-																		{type === "none" ? "Invalid Items" : type}
-																	</div>
-																	<div className="text-sm text-gray-600">
-																		{stats.correct} correct out of{" "}
-																		{stats.attempts} attempts
-																	</div>
-																</div>
-																<div className="text-right">
-																	<div
-																		className={cn(
-																			"text-2xl font-bold",
-																			stats.accuracy >= 80
-																				? "text-green-600"
-																				: stats.accuracy >= 60
-																					? "text-yellow-600"
-																					: "text-red-600",
-																		)}
-																	>
-																		{Math.round(stats.accuracy)}%
-																	</div>
-																	<div className="text-xs text-gray-500">
-																		accuracy
-																	</div>
-																</div>
-															</div>
-														),
-												)}
+												</div>
+											))
+										}
 									</div>
 								</CardContent>
 							</Card>
