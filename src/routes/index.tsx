@@ -18,6 +18,7 @@ import { programs } from "@/lib/programs";
 import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
 import type { Difficulty } from "@/lib/types";
+import { pickProgramInputs } from '@/lib/utils';
 
 type SearchParams = {
 	difficulty?: Difficulty;
@@ -113,34 +114,6 @@ function Index() {
 		updateStats();
 	}, [updateStats]);
 
-	// Helper function to apply random selections to a program
-	const getProgramInputs = useCallback((program: Program): Program => {
-		const processedProgram = { ...program };
-
-		// Apply random input set if available
-		if (processedProgram.inputSets && processedProgram.inputSets.length > 0) {
-			const randomInputSet =
-				processedProgram.inputSets[
-					Math.floor(Math.random() * processedProgram.inputSets.length)
-				];
-			processedProgram.inputs = randomInputSet;
-		}
-
-		// Apply random value if available
-		if (
-			processedProgram.randomValues &&
-			processedProgram.randomValues.length > 0
-		) {
-			const randomValue =
-				processedProgram.randomValues[
-					Math.floor(Math.random() * processedProgram.randomValues.length)
-				];
-			processedProgram.randomValue = randomValue;
-		}
-
-		return processedProgram;
-	}, []);
-
 	// Load program from URL using Tanstack Router search
 	useEffect(() => {
 		const { difficulty, program: programIndex } = search;
@@ -153,7 +126,8 @@ function Index() {
 			const programList = programs[selectedDifficulty];
 
 			if (programList && programIndex < programList.length) {
-				const program = getProgramInputs(programList[programIndex]);
+				console.log('in useEffect')
+				const program = pickProgramInputs(programList[programIndex]);
 				setCurrentProgram(program);
 				setCurrentProgramIndex(programIndex);
 			}
@@ -162,7 +136,7 @@ function Index() {
 			setCurrentProgram(null);
 			setCurrentProgramIndex(-1);
 		}
-	}, [search, getProgramInputs]);
+	}, [search, pickProgramInputs]);
 
 	// Helper function to scroll to program code section
 	const scrollToProgramCode = useCallback(() => {
@@ -182,7 +156,8 @@ function Index() {
 			const programList = programs[difficulty as Difficulty] || programs.easy;
 
 			if (index >= 0 && index < programList.length) {
-				const program = getProgramInputs(programList[index]);
+				console.log('in navigateToProgram')
+				const program = pickProgramInputs(programList[index]);
 
 				setCurrentProgram(program);
 				setCurrentDifficulty(difficulty);
@@ -199,7 +174,7 @@ function Index() {
 				scrollToProgramCode();
 			}
 		},
-		[navigate, scrollToProgramCode, getProgramInputs],
+		[navigate, scrollToProgramCode, pickProgramInputs],
 	);
 
 	const handleProgramSelect = useCallback(

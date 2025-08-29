@@ -3,6 +3,7 @@ import { type Program, programs } from "@/lib/programs";
 import type { ScoreManager } from "@/lib/scoreManager";
 import type { Difficulty } from "@/lib/types";
 import { QuizButton } from "./QuizButton";
+import { pickProgramInputs } from '@/lib/utils';
 
 interface ProgramSelectorProps {
 	onProgramSelect: (
@@ -38,23 +39,8 @@ export function ProgramSelector({
 	const handleProgramSelect = useCallback(
 		(program: Program, index: number) => {
 			// If the program has multiple input sets, randomly select one
-			const selectedProgram = { ...program };
-			if (program.inputSets && program.inputSets.length > 0) {
-				const randomInputSet =
-					program.inputSets[
-						Math.floor(Math.random() * program.inputSets.length)
-					];
-				selectedProgram.inputs = randomInputSet;
-			}
-
-			// If the program has multiple random values, randomly select one
-			if (program.randomValues && program.randomValues.length > 0) {
-				const randomValue =
-					program.randomValues[
-						Math.floor(Math.random() * program.randomValues.length)
-					];
-				selectedProgram.randomValue = randomValue;
-			}
+			console.log('handle program select')
+			const selectedProgram = pickProgramInputs({ ...program });
 
 			onProgramSelect(selectedProgram, selectedDifficulty, index);
 		},
@@ -81,7 +67,7 @@ export function ProgramSelector({
 			</summary>
 
 			{/* Controls */}
-			<div className="flex items-center mb-6 gap-6">
+			<div className="flex items-center gap-6 mb-6">
 				<div className="flex items-center gap-3">
 					<label
 						htmlFor={difficultySelectId}
@@ -132,7 +118,7 @@ export function ProgramSelector({
 							return (
 								<tr
 									key={`${selectedDifficulty}-${index}-${program.description}`}
-									className="border-b transition-colors duration-150 hover:bg-gray-50"
+									className="transition-colors duration-150 border-b hover:bg-gray-50"
 								>
 									<td className="px-4 py-3 align-middle">
 										<div>
