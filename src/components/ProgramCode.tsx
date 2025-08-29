@@ -4,6 +4,7 @@ import type { Program } from "@/lib/astInterpreter";
 import type { Difficulty } from "@/lib/types";
 import { captureElement } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { toast } from 'sonner';
 
 interface ProgramCodeProps {
 	currentProgram: Program;
@@ -59,6 +60,8 @@ export function ProgramCode({
 
 		try {
 			await navigator.clipboard.writeText(shareURL);
+			toast.success("URL copied to clipboard", { duration: 2000,});
+
 		} catch (_err) {
 			alert(`Share this URL: ${shareURL}`);
 		}
@@ -72,7 +75,7 @@ export function ProgramCode({
 		<Card
 			ref={cardRef}
 			id={programCodeId}
-			className="py-0 border-l-4 shadow-xl gap-4 bg-slate-700 border-slate-600 border-l-blue-500"
+			className="gap-4 py-0 border-l-4 shadow-xl bg-slate-700 border-slate-600 border-l-blue-500"
 		>
 			<CardHeader className="border-b bg-gradient-to-br from-gray-800 to-gray-900 px-4 !pb-2 !pt-2 rounded-t-lg">
 				<div className="flex flex-col justify-between gap-3 md:flex-row lg:items-center">

@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { toBlob, toPng } from "html-to-image";
 import { twMerge } from "tailwind-merge";
 import type { Program } from "./programs";
+import { toast } from 'sonner';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -33,6 +34,7 @@ export const captureElement = async (
 
 			const clipboardItem = new ClipboardItem({ "image/png": blob });
 			await navigator.clipboard.write([clipboardItem]);
+			toast.success("Screenshot copied to clipboard", { duration: 2000 });
 		} else {
 			const dataUrl = await toPng(node, {
 				pixelRatio: Math.max(2, window.devicePixelRatio || 1),
