@@ -633,7 +633,7 @@ export function TraceTableBody({
 				<Card
 					className={`mt-6 border-2 ${feedback.isCorrect ? "border-green-400 bg-green-50" : "border-red-400 bg-red-50"}`}
 				>
-					<CardContent className="p-6">
+					<CardContent className="px-6">
 						<div
 							className={`feedback ${feedback.isCorrect ? "correct" : "incorrect"}`}
 						>
