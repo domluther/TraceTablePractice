@@ -1,4 +1,4 @@
-node_modules
-.vscode
-dist
-.tanstack
+node_modules/
+.vscode/
+dist/
+.tanstack/
