@@ -150,51 +150,14 @@ export class ScoreManager {
 		this.saveStreak();
 	}
 
-	recordScore(
-		itemKey: string,
-		score: number,
-		maxScore = 100,
-		address = "",
-	): void {
-		const percentage = Math.round((score / maxScore) * 100);
-
-		if (!this.scores[itemKey]) {
-			this.scores[itemKey] = {
-				attempts: 0,
-				correct: 0,
-				totalScore: 0,
-				history: [],
-			};
-		}
-
-		const scoreData = this.scores[itemKey];
-		scoreData.attempts++;
-		if (score === maxScore) {
-			scoreData.correct++;
-		}
-		scoreData.totalScore += percentage;
-
-		// Add to history (keep last 50 entries)
-		scoreData.history.unshift({
-			timestamp: Date.now(),
-			correct: score === maxScore,
-			address,
-		});
-
-		if (scoreData.history.length > 50) {
-			scoreData.history = scoreData.history.slice(0, 50);
-		}
-
-		this.saveScores();
-	}
-
-	// Add trace table specific methods for compatibility
 	saveScore(
 		difficulty: Difficulty,
 		programIndex: number,
 		correct: number,
 		total: number,
 	): boolean {
+		console.log('saving score', { difficulty, programIndex, correct, total });
+
 		try {
 			const itemKey = `${difficulty}-${programIndex}`;
 
