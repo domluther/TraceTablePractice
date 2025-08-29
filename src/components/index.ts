@@ -14,10 +14,10 @@ export type {
 	QuizButtonVariant,
 } from "./QuizButton";
 export { QuizButton } from "./QuizButton";
-// Layout Components
-export { SiteLayout } from "./SiteLayout";
 // Utility Components
 export { ScoreButton } from "./ScoreButton";
+// Layout Components
+export { SiteLayout } from "./SiteLayout";
 // Quiz Body Components
 export { SiteNavigation } from "./SiteNavigation";
 // Modal Components

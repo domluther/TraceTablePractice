@@ -6,8 +6,8 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import {
 	ProgramSelector,
-	SiteLayout,
 	ScoreButton,
+	SiteLayout,
 	StatsModal,
 	TraceTableBody,
 } from "@/components";

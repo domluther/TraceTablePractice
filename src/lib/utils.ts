@@ -1,8 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
 import { toBlob, toPng } from "html-to-image";
+import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
 import type { Program } from "./programs";
-import { toast } from 'sonner';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -45,6 +45,7 @@ export const captureElement = async (
 			a.href = dataUrl;
 			a.download = `${fileName.replace(/\s+/g, "_")}.png`;
 			a.click();
+			toast.success("Screenshot downloaded", { duration: 2000 });
 		}
 	} catch (err) {
 		console.error("Failed to capture element:", err);
