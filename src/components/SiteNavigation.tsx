@@ -83,12 +83,12 @@ export function SiteNavigation({
 
 				<DropdownMenuContent className="p-0 w-80" align="start" sideOffset={8}>
 					{/* Header */}
-					<div className="px-4 py-3 text-sm font-semibold text-white uppercase bg-gradient-to-r from-gray-700 to-gray-900">
+					<div className="px-4 py-3 text-sm font-semibold text-center text-white uppercase bg-gradient-to-r from-gray-700 to-gray-900">
 						Computer Science Practice
 					</div>
 
 					{/* Menu Items */}
-					<div className="overflow-y-auto max-h-96">
+					<div className="overflow-y-auto">
 						{menuItems.map((item) => (
 							<DropdownMenuItem key={item.id} asChild className="p-0 m-0">
 								<a
@@ -103,7 +103,7 @@ export function SiteNavigation({
 									rel="noopener noreferrer"
 								>
 									<div className="flex flex-col space-y-1">
-										<div className="text-lg font-bold text-center group-hover:text-indigo-600 transition-colors">
+										<div className="text-lg font-bold text-center transition-colors group-hover:text-indigo-600">
 											{item.title}
 										</div>
 										<div className="text-sm text-gray-600">
