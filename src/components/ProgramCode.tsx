@@ -129,10 +129,10 @@ export function ProgramCode({
 								key={`line-${index}-${line}`}
 								className="flex transition-colors duration-150 hover:bg-slate-600"
 							>
-								<span className="text-blue-300 bg-slate-700 border-r border-slate-700 px-1 py-2 select-none min-w-[3rem] text-right font-medium text-xs leading-none">
+								<span className="text-blue-300 bg-slate-700 border-r border-slate-700 px-1 py-1.5 select-none min-w-[3rem] text-right font-medium text-xs leading-none">
 									{index + 1}
 								</span>
-								<span className="flex-1 px-4 py-1 leading-none text-slate-100">
+								<span className="flex-1 px-4 py-1.5 leading-none text-slate-100">
 									{line || " "}
 								</span>
 							</div>

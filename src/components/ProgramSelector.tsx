@@ -112,7 +112,7 @@ export function ProgramSelector({
 
 			{/* Program Table */}
 			<div className="overflow-scroll bg-white rounded-lg shadow-sm max-h-96">
-				<table className="w-full text-sm bg-white border-collapse">
+				<table className="w-full text-base bg-white border-collapse">
 					<thead>
 						<tr className="sticky top-0 z-10 bg-gradient-to-br from-gray-800 to-gray-900">
 							<th className="px-4 py-3 font-semibold text-left text-white border-b">
