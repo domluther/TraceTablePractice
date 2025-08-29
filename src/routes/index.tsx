@@ -89,15 +89,15 @@ function Index() {
 
 	// Function to update overall stats
 	const updateStats = useCallback(() => {
-		const stats = scoreManager.getTraceTableStats();
+		const stats = scoreManager.getOverallStats();
 
 		// Calculate level based on performance
 		let currentLevel = siteConfig.scoring.customLevels?.[0];
 		if (siteConfig.scoring.customLevels) {
 			for (const level of siteConfig.scoring.customLevels) {
 				if (
-					stats.totalCorrect >= level.minPoints &&
-					stats.percentage >= level.minAccuracy
+					stats.totalBestPoints >= level.minPoints &&
+					stats.accuracy >= level.minAccuracy
 				) {
 					currentLevel = level;
 				}
@@ -112,8 +112,8 @@ function Index() {
 				minPoints: 0,
 				minAccuracy: 0,
 			},
-			totalPoints: stats.totalCorrect,
-			accuracy: stats.percentage,
+			totalPoints: stats.totalBestPoints,
+			accuracy: stats.accuracy,
 		});
 	}, [scoreManager, siteConfig.scoring.customLevels]);
 

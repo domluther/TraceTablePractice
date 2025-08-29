@@ -47,9 +47,6 @@ export function StatsModal({
 	if (!isOpen) return null;
 
 	const overallStats = scoreManager.getOverallStats();
-	const traceTableStats = scoreManager.getTraceTableStats
-		? scoreManager.getTraceTableStats()
-		: null;
 	const programScores = scoreManager.getProgramScores
 		? scoreManager.getProgramScores()
 		: [];
@@ -105,8 +102,7 @@ export function StatsModal({
 
 				{/* Content */}
 				<div className="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
-					{(traceTableStats && traceTableStats.totalAttempts > 0) ||
-					overallStats.totalAttempts > 0 ? (
+					{overallStats.programsAttempted > 0 ? (
 						<div className="space-y-6 ">
 							{/* Level Info Card */}
 							<Card className="text-white bg-gradient-to-r from-indigo-500 to-purple-600">
@@ -185,9 +181,7 @@ export function StatsModal({
 									<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 										<div className="p-4 text-center border-l-4 border-blue-500 rounded-lg bg-blue-50">
 											<div className="text-2xl font-bold text-blue-600">
-												{traceTableStats
-													? traceTableStats.totalCorrect
-													: overallStats.totalCorrect}
+												{overallStats.totalBestPoints}
 											</div>
 											<div className="text-sm text-gray-600">
 												Best Points Total
@@ -195,9 +189,7 @@ export function StatsModal({
 										</div>
 										<div className="p-4 text-center border-l-4 border-green-500 rounded-lg bg-green-50">
 											<div className="text-2xl font-bold text-green-600">
-												{traceTableStats
-													? traceTableStats.totalAttempts
-													: overallStats.totalAttempts}
+												{overallStats.programsAttempted}
 											</div>
 											<div className="text-sm text-gray-600">
 												Programs Attempted
@@ -205,9 +197,7 @@ export function StatsModal({
 										</div>
 										<div className="p-4 text-center border-l-4 border-purple-500 rounded-lg bg-purple-50">
 											<div className="text-2xl font-bold text-purple-600">
-												{traceTableStats
-													? Math.round(traceTableStats.percentage)
-													: Math.round(overallStats.accuracy)}
+												{Math.round(overallStats.accuracy)}
 												%
 											</div>
 											<div className="text-sm text-gray-600">

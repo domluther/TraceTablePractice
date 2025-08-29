@@ -68,7 +68,7 @@ export function ProgramSelector({
 	}, [selectedDifficulty, handleProgramSelect]);
 
 	const getScoreDisplay = useCallback(
-		(difficulty: string, index: number) => {
+		(difficulty: Difficulty, index: number) => {
 			return scoreManager.getScoreDisplay(difficulty, index);
 		},
 		[scoreManager],

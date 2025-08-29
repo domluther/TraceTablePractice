@@ -1,3 +1,5 @@
+import type { Difficulty } from './types';
+
 export interface LevelInfo {
 	emoji: string;
 	title: string;
@@ -23,7 +25,6 @@ export interface ScoreData {
 	attempts: number;
 	correct: number;
 	totalScore: number;
-	byType: Record<string, { attempts: number; correct: number }>;
 	history: Array<{
 		timestamp: number;
 		correct: boolean;
@@ -164,12 +165,6 @@ export class ScoreManager {
 				attempts: 0,
 				correct: 0,
 				totalScore: 0,
-				byType: {
-					IPv4: { attempts: 0, correct: 0 },
-					IPv6: { attempts: 0, correct: 0 },
-					MAC: { attempts: 0, correct: 0 },
-					none: { attempts: 0, correct: 0 },
-				},
 				history: [],
 			};
 		}
@@ -180,13 +175,6 @@ export class ScoreManager {
 			scoreData.correct++;
 		}
 		scoreData.totalScore += percentage;
-
-		if (addressType && scoreData.byType[addressType]) {
-			scoreData.byType[addressType].attempts++;
-			if (score === maxScore) {
-				scoreData.byType[addressType].correct++;
-			}
-		}
 
 		// Add to history (keep last 50 entries)
 		scoreData.history.unshift({
@@ -205,7 +193,7 @@ export class ScoreManager {
 
 	// Add trace table specific methods for compatibility
 	saveScore(
-		difficulty: string,
+		difficulty: Difficulty,
 		programIndex: number,
 		correct: number,
 		total: number,
@@ -218,12 +206,6 @@ export class ScoreManager {
 					attempts: 0,
 					correct: 0,
 					totalScore: 0,
-					byType: {
-						IPv4: { attempts: 0, correct: 0 },
-						IPv6: { attempts: 0, correct: 0 },
-						MAC: { attempts: 0, correct: 0 },
-						none: { attempts: 0, correct: 0 },
-					},
 					history: [],
 				};
 			}
@@ -261,29 +243,52 @@ export class ScoreManager {
 		}
 	}
 
+	// Overall stats adapted for trace table scoring system 
 	getOverallStats(): {
 		totalAttempts: number;
-		totalCorrect: number;
+		totalBestPoints: number;
 		accuracy: number;
 		totalPoints: number;
+		totalPossiblePoints: number;
+		programsAttempted: number;
 		level: LevelInfo;
 		progress: number;
 		nextLevel: LevelInfo | null;
 	} {
-		const stats = Object.values(this.scores).reduce(
-			(acc, score) => ({
-				totalAttempts: acc.totalAttempts + score.attempts,
-				totalCorrect: acc.totalCorrect + score.correct,
-				totalScore: acc.totalScore + score.totalScore,
-			}),
-			{ totalAttempts: 0, totalCorrect: 0, totalScore: 0 },
-		);
+		// For trace tables, we need to calculate accuracy differently since 'correct' is points, not binary
+		let totalAttempts = 0;
+		let totalBestPoints = 0;
+		let totalPossiblePoints = 0;
+		let totalScore = 0;
+		let programsAttempted = 0;
 
-		const accuracy =
-			stats.totalAttempts > 0
-				? (stats.totalCorrect / stats.totalAttempts) * 100
-				: 0;
-		const totalPoints = stats.totalCorrect;
+		for (const [, scoreData] of Object.entries(this.scores)) {
+			totalAttempts += scoreData.attempts;
+			totalScore += scoreData.totalScore;
+			
+			// All data is trace table programs - correct field is best score achieved
+			totalBestPoints += scoreData.correct;
+			
+			// Count programs that have been attempted
+			if (scoreData.attempts > 0) {
+				programsAttempted++;
+			}
+			
+			// Get total possible from most recent attempt
+			if (scoreData.history.length > 0) {
+				const recentAttempt = scoreData.history[0];
+				const [, totalStr] = recentAttempt.address.split("/");
+				totalPossiblePoints += parseInt(totalStr, 10) || 0;
+			}
+		}
+
+		// Calculate accuracy based on points earned vs possible points
+		const accuracy = totalPossiblePoints > 0 
+			? (totalBestPoints / totalPossiblePoints) * 100 
+			: 0;
+			
+		// Use total best points as the points for leveling
+		const totalPoints = totalBestPoints;
 
 		// Find current level
 		let currentLevel = this.levels[0];
@@ -317,69 +322,23 @@ export class ScoreManager {
 		}
 
 		return {
-			totalAttempts: stats.totalAttempts,
-			totalCorrect: stats.totalCorrect,
+			totalAttempts,
+			totalBestPoints: totalBestPoints,
 			accuracy,
 			totalPoints,
+			totalPossiblePoints,
+			programsAttempted,
 			level: currentLevel,
 			progress,
 			nextLevel,
 		};
 	}
 
-	// Trace table compatible version of getOverallStats
-	getTraceTableStats(): {
-		totalCorrect: number;
-		totalQuestions: number;
-		totalAttempts: number;
-		percentage: number;
-	} {
-		let totalBestPoints = 0;
-		let totalPossiblePoints = 0;
-		let programsAttempted = 0;
-
-		for (const [key, scoreData] of Object.entries(this.scores)) {
-			// Only count trace table programs (those with the difficulty-index pattern)
-			if (key.match(/^(easy|medium|hard)-\d+$/)) {
-				if (scoreData.attempts > 0) {
-					programsAttempted++;
-					// Find the attempt with the highest score to get both score and total
-					if (scoreData.history.length > 0) {
-						const bestAttempt = scoreData.history.reduce((best, current) => {
-							const currentScore =
-								parseInt(current.address.split("/")[0], 10) || 0;
-							const bestScoreFromHistory =
-								parseInt(best.address.split("/")[0], 10) || 0;
-							return currentScore > bestScoreFromHistory ? current : best;
-						});
-
-						const [scoreStr, totalStr] = bestAttempt.address.split("/");
-						totalBestPoints += parseInt(scoreStr, 10) || 0;
-						totalPossiblePoints += parseInt(totalStr, 10) || 0;
-					} else {
-						// Fallback to the stored best score if no history
-						totalBestPoints += scoreData.correct;
-					}
-				}
-			}
-		}
-
-		return {
-			totalCorrect: totalBestPoints,
-			totalQuestions: totalPossiblePoints,
-			totalAttempts: programsAttempted,
-			percentage:
-				totalPossiblePoints > 0
-					? Math.round((totalBestPoints / totalPossiblePoints) * 100)
-					: 0,
-		};
-	}
-
-	// Get display text and styling for a program's score (trace table compatibility)
-	getScoreDisplay(difficulty: string, programIndex: number): ScoreDisplay {
+	// Simplified score display - uses stored best score and gets total from most recent attempt
+	getScoreDisplay(difficulty: Difficulty, programIndex: number): ScoreDisplay {
 		const key = `${difficulty}-${programIndex}`;
 		const scoreData = this.scores[key];
-
+		console.log(scoreData)
 		if (!scoreData || scoreData.attempts === 0) {
 			return {
 				text: "N/A",
@@ -387,20 +346,13 @@ export class ScoreManager {
 			};
 		}
 
-		// Find the attempt that achieved the best score to get the correct total
-		let bestScore = scoreData.correct;
+		// Use stored best score and get total from most recent attempt
+		const bestScore = scoreData.correct;
 		let totalQuestions = 0;
+		
 		if (scoreData.history.length > 0) {
-			// Find the attempt with the highest score
-			const bestAttempt = scoreData.history.reduce((best, current) => {
-				const currentScore = parseInt(current.address.split("/")[0], 10) || 0;
-				const bestScoreFromHistory =
-					parseInt(best.address.split("/")[0], 10) || 0;
-				return currentScore > bestScoreFromHistory ? current : best;
-			});
-
-			const [scoreStr, totalStr] = bestAttempt.address.split("/");
-			bestScore = parseInt(scoreStr, 10) || 0;
+			const recentAttempt = scoreData.history[0]; // Most recent is first
+			const [, totalStr] = recentAttempt.address.split("/");
 			totalQuestions = parseInt(totalStr, 10) || 0;
 		}
 
@@ -430,39 +382,30 @@ export class ScoreManager {
 		return { text, className };
 	}
 
-	// Get detailed program scores with timestamps for display
+	// Simplified program scores - uses stored data more efficiently
 	getProgramScores(): ProgramScore[] {
 		const programScores: ProgramScore[] = [];
 
 		for (const [key, scoreData] of Object.entries(this.scores)) {
-			// Only include trace table programs
-			if (key.match(/^(easy|medium|hard)-\d+$/) && scoreData.attempts > 0) {
+			if (scoreData.attempts > 0) {
 				const [difficulty, indexStr] = key.split("-");
 				const programIndex = parseInt(indexStr, 10);
 				const programName = `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Program ${programIndex + 1}`;
 
+				// Use stored best score and get total from most recent attempt
+				const bestScore = scoreData.correct;
 				let totalQuestions = 0;
 				let lastAttemptDate = "";
-				let bestScore = scoreData.correct;
 
 				if (scoreData.history.length > 0) {
-					// Find the attempt with the highest score to get the correct total
-					const bestAttempt = scoreData.history.reduce((best, current) => {
-						const currentScore =
-							parseInt(current.address.split("/")[0], 10) || 0;
-						const bestScoreFromHistory =
-							parseInt(best.address.split("/")[0], 10) || 0;
-						return currentScore > bestScoreFromHistory ? current : best;
-					});
-
-					const [scoreStr, totalStr] = bestAttempt.address.split("/");
-					bestScore = parseInt(scoreStr, 10) || 0;
+					// Get total from most recent attempt (all attempts should have same total for a program)
+					const recentAttempt = scoreData.history[0]; // Most recent is first
+					const [, totalStr] = recentAttempt.address.split("/");
 					totalQuestions = parseInt(totalStr, 10) || 0;
 
 					// Get the most recent attempt date for display
-					const mostRecentAttempt = scoreData.history[0];
 					lastAttemptDate = new Date(
-						mostRecentAttempt.timestamp,
+						recentAttempt.timestamp,
 					).toLocaleDateString("en-GB");
 				}
 

@@ -24,7 +24,7 @@ export function ScoreButton({
 		>
 			{/* Full text on larger screens */}
 			<span className="hidden xl:block">
-				{levelEmoji} {levelTitle} ({points} pts)
+				{levelEmoji} {levelTitle} ({points ? points : 0} pts)
 			</span>
 			{/* Compact text on smaller screens */}
 			<span className="xl:hidden">
