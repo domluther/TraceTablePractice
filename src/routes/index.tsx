@@ -96,7 +96,7 @@ function Index() {
 		if (siteConfig.scoring.customLevels) {
 			for (const level of siteConfig.scoring.customLevels) {
 				if (
-					stats.totalBestPoints >= level.minPoints &&
+					stats.totalPoints >= level.minPoints &&
 					stats.accuracy >= level.minAccuracy
 				) {
 					currentLevel = level;
@@ -112,7 +112,7 @@ function Index() {
 				minPoints: 0,
 				minAccuracy: 0,
 			},
-			totalPoints: stats.totalBestPoints,
+			totalPoints: stats.totalPoints,
 			accuracy: stats.accuracy,
 		});
 	}, [scoreManager, siteConfig.scoring.customLevels]);

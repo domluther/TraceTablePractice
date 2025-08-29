@@ -1,4 +1,4 @@
-import type { Difficulty } from './types';
+import type { Difficulty } from "./types";
 
 export interface LevelInfo {
 	emoji: string;
@@ -23,11 +23,11 @@ export interface ProgramScore {
 
 export interface ScoreData {
 	attempts: number;
-	correct: number;
-	totalScore: number;
+	bestScore: number;
+	outOf: number;
 	history: Array<{
 		timestamp: number;
-		correct: boolean;
+		perfect: boolean;
 		address: string;
 	}>;
 }
@@ -153,10 +153,15 @@ export class ScoreManager {
 	saveScore(
 		difficulty: Difficulty,
 		programIndex: number,
-		correct: number,
+		attemptScore: number,
 		total: number,
 	): boolean {
-		console.log('saving score', { difficulty, programIndex, correct, total });
+		console.log("saving score", {
+			difficulty,
+			programIndex,
+			attemptScore,
+			total,
+		});
 
 		try {
 			const itemKey = `${difficulty}-${programIndex}`;
@@ -164,8 +169,9 @@ export class ScoreManager {
 			if (!this.scores[itemKey]) {
 				this.scores[itemKey] = {
 					attempts: 0,
-					correct: 0,
-					totalScore: 0,
+					bestScore: 0,
+					// Only needs setting the first time
+					outOf: total,
 					history: [],
 				};
 			}
@@ -173,25 +179,19 @@ export class ScoreManager {
 			const scoreData = this.scores[itemKey];
 			scoreData.attempts++;
 
-			// For trace tables, we want to track the actual correct answers, not just pass/fail
-			// Update the "correct" field to be the best score achieved so far
-			if (correct > scoreData.correct) {
-				scoreData.correct = correct;
+			if (attemptScore > scoreData.bestScore) {
+				scoreData.bestScore = attemptScore;
 			}
 
-			// Add to total score (sum of all attempts)
-			const percentage = Math.round((correct / total) * 100);
-			scoreData.totalScore += percentage;
-
-			// Add to history (keep last 50 entries)
+			// Add to history (keep last 10 entries)
 			scoreData.history.unshift({
 				timestamp: Date.now(),
-				correct: correct === total, // Only mark as fully correct if perfect
-				address: `${correct}/${total}`,
+				perfect: attemptScore === total, // Only mark as fully correct if perfect
+				address: `${attemptScore}/${total}`,
 			});
 
-			if (scoreData.history.length > 50) {
-				scoreData.history = scoreData.history.slice(0, 50);
+			if (scoreData.history.length > 10) {
+				scoreData.history = scoreData.history.slice(0, 10);
 			}
 
 			this.saveScores();
@@ -202,10 +202,9 @@ export class ScoreManager {
 		}
 	}
 
-	// Overall stats adapted for trace table scoring system 
+	// Overall stats adapted for trace table scoring system
 	getOverallStats(): {
 		totalAttempts: number;
-		totalBestPoints: number;
 		accuracy: number;
 		totalPoints: number;
 		totalPossiblePoints: number;
@@ -216,38 +215,28 @@ export class ScoreManager {
 	} {
 		// For trace tables, we need to calculate accuracy differently since 'correct' is points, not binary
 		let totalAttempts = 0;
-		let totalBestPoints = 0;
+		let totalPoints = 0;
 		let totalPossiblePoints = 0;
-		let totalScore = 0;
 		let programsAttempted = 0;
 
 		for (const [, scoreData] of Object.entries(this.scores)) {
 			totalAttempts += scoreData.attempts;
-			totalScore += scoreData.totalScore;
-			
+
 			// All data is trace table programs - correct field is best score achieved
-			totalBestPoints += scoreData.correct;
-			
+			totalPoints += scoreData.bestScore;
+			totalPossiblePoints += scoreData.outOf;
+
 			// Count programs that have been attempted
 			if (scoreData.attempts > 0) {
 				programsAttempted++;
 			}
-			
-			// Get total possible from most recent attempt
-			if (scoreData.history.length > 0) {
-				const recentAttempt = scoreData.history[0];
-				const [, totalStr] = recentAttempt.address.split("/");
-				totalPossiblePoints += parseInt(totalStr, 10) || 0;
-			}
 		}
 
 		// Calculate accuracy based on points earned vs possible points
-		const accuracy = totalPossiblePoints > 0 
-			? (totalBestPoints / totalPossiblePoints) * 100 
-			: 0;
-			
+		const accuracy =
+			totalPossiblePoints > 0 ? (totalPoints / totalPossiblePoints) * 100 : 0;
+
 		// Use total best points as the points for leveling
-		const totalPoints = totalBestPoints;
 
 		// Find current level
 		let currentLevel = this.levels[0];
@@ -282,7 +271,6 @@ export class ScoreManager {
 
 		return {
 			totalAttempts,
-			totalBestPoints: totalBestPoints,
 			accuracy,
 			totalPoints,
 			totalPossiblePoints,
@@ -297,7 +285,7 @@ export class ScoreManager {
 	getScoreDisplay(difficulty: Difficulty, programIndex: number): ScoreDisplay {
 		const key = `${difficulty}-${programIndex}`;
 		const scoreData = this.scores[key];
-		console.log(scoreData)
+		console.log(scoreData);
 		if (!scoreData || scoreData.attempts === 0) {
 			return {
 				text: "N/A",
@@ -306,9 +294,9 @@ export class ScoreManager {
 		}
 
 		// Use stored best score and get total from most recent attempt
-		const bestScore = scoreData.correct;
+		const bestScore = scoreData.bestScore;
 		let totalQuestions = 0;
-		
+
 		if (scoreData.history.length > 0) {
 			const recentAttempt = scoreData.history[0]; // Most recent is first
 			const [, totalStr] = recentAttempt.address.split("/");
@@ -352,7 +340,7 @@ export class ScoreManager {
 				const programName = `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Program ${programIndex + 1}`;
 
 				// Use stored best score and get total from most recent attempt
-				const bestScore = scoreData.correct;
+				const bestScore = scoreData.bestScore;
 				let totalQuestions = 0;
 				let lastAttemptDate = "";
 
