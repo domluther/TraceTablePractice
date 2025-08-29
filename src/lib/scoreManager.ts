@@ -28,7 +28,6 @@ export interface ScoreData {
 	history: Array<{
 		timestamp: number;
 		correct: boolean;
-		addressType: string;
 		address: string;
 	}>;
 }
@@ -155,7 +154,6 @@ export class ScoreManager {
 		itemKey: string,
 		score: number,
 		maxScore = 100,
-		addressType: string | null = null,
 		address = "",
 	): void {
 		const percentage = Math.round((score / maxScore) * 100);
@@ -180,7 +178,6 @@ export class ScoreManager {
 		scoreData.history.unshift({
 			timestamp: Date.now(),
 			correct: score === maxScore,
-			addressType: addressType || "unknown",
 			address,
 		});
 
@@ -227,7 +224,6 @@ export class ScoreManager {
 			scoreData.history.unshift({
 				timestamp: Date.now(),
 				correct: correct === total, // Only mark as fully correct if perfect
-				addressType: "trace-table",
 				address: `${correct}/${total}`,
 			});
 

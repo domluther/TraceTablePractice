@@ -51,8 +51,6 @@ export function useQuizLogic({
 				maxPoints,
 				// Type assertion for questionData properties (safe since it's optional)
 				(questionData as { type?: string; address?: string } | undefined)?.type,
-				(questionData as { type?: string; address?: string } | undefined)
-					?.address,
 			);
 
 			// Update streak
