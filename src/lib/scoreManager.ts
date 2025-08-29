@@ -35,9 +35,7 @@ export interface ScoreData {
 export class ScoreManager {
 	private siteKey: string;
 	private storageKey: string;
-	private streakKey: string;
 	private scores: Record<string, ScoreData> = {};
-	private streak: number = 0;
 	private levels: LevelInfo[];
 
 	// Default generic levels that can be used as fallback
@@ -86,13 +84,11 @@ export class ScoreManager {
 		},
 	];
 
-	constructor(siteKey = "generic-quiz", customLevels?: LevelInfo[]) {
+	constructor(siteKey: string, customLevels?: LevelInfo[]) {
 		this.siteKey = siteKey;
 		this.storageKey = `gcse-cs-scores-${this.siteKey}`;
-		this.streakKey = `${this.storageKey}-streak`;
 		this.levels = customLevels || ScoreManager.DEFAULT_LEVELS;
 		this.scores = this.loadScores();
-		this.streak = this.loadStreak();
 	}
 
 	private loadScores(): Record<string, ScoreData> {
@@ -111,43 +107,6 @@ export class ScoreManager {
 		} catch (error) {
 			console.warn("Error saving scores:", error);
 		}
-	}
-
-	private loadStreak(): number {
-		try {
-			const stored = localStorage.getItem(this.streakKey);
-			return stored ? parseInt(stored, 10) : 0;
-		} catch (error) {
-			console.warn("Error loading streak:", error);
-			return 0;
-		}
-	}
-
-	private saveStreak(): void {
-		try {
-			localStorage.setItem(this.streakKey, this.streak.toString());
-		} catch (error) {
-			console.warn("Error saving streak:", error);
-		}
-	}
-
-	updateStreak(isCorrect: boolean): number {
-		if (isCorrect) {
-			this.streak++;
-		} else {
-			this.streak = 0;
-		}
-		this.saveStreak();
-		return this.streak;
-	}
-
-	getStreak(): number {
-		return this.streak;
-	}
-
-	resetStreak(): void {
-		this.streak = 0;
-		this.saveStreak();
 	}
 
 	saveScore(
@@ -391,33 +350,6 @@ export class ScoreManager {
 
 	resetAllScores(): void {
 		this.scores = {};
-		this.streak = 0;
 		this.saveScores();
-		this.saveStreak();
-	}
-
-	formatStreakEmojis(streak: number): string {
-		if (streak === 0) return "";
-
-		const denominations = [
-			{ value: 50, emoji: "🪿" }, // Golden Goose for 50s
-			{ value: 25, emoji: "🦅" }, // Eagle for 25s
-			{ value: 10, emoji: "🦢" }, // Swan for 10s
-			{ value: 5, emoji: "🦆" }, // Duck for 5s
-			{ value: 1, emoji: "🐤" }, // Duckling for 1s
-		];
-
-		let result = "";
-		let remaining = streak;
-
-		for (const { value, emoji } of denominations) {
-			const count = Math.floor(remaining / value);
-			if (count > 0) {
-				result += emoji.repeat(count);
-				remaining -= count * value;
-			}
-		}
-
-		return result;
 	}
 }
