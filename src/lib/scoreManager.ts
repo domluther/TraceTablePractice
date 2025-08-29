@@ -115,13 +115,6 @@ export class ScoreManager {
 		attemptScore: number,
 		total: number,
 	): boolean {
-		console.log("saving score", {
-			difficulty,
-			programIndex,
-			attemptScore,
-			total,
-		});
-
 		try {
 			const itemKey = `${difficulty}-${programIndex}`;
 
@@ -161,7 +154,7 @@ export class ScoreManager {
 		}
 	}
 
-	// Overall stats adapted for trace table scoring system
+	// Calculates latest stats & returns them
 	getOverallStats(): {
 		accuracy: number;
 		totalPoints: number;
@@ -190,7 +183,6 @@ export class ScoreManager {
 		// Calculate accuracy based on points earned vs possible points
 		const accuracy =
 			totalPossiblePoints > 0 ? (totalPoints / totalPossiblePoints) * 100 : 0;
-
 
 		// Find current level
 		let currentLevel = this.levels[0];
@@ -238,11 +230,10 @@ export class ScoreManager {
 	getScoreDisplay(difficulty: Difficulty, programIndex: number): ScoreDisplay {
 		const key = `${difficulty}-${programIndex}`;
 		const scoreData = this.scores[key];
-		console.log(scoreData);
 		if (!scoreData || scoreData.attempts === 0) {
 			return {
 				text: "N/A",
-				accuracy: null
+				accuracy: null,
 			};
 		}
 

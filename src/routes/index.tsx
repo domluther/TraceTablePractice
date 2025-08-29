@@ -76,7 +76,7 @@ function Index() {
 	const [programCodeId, setProgramCodeId] = useState<string>("");
 
 	// Overall statistics for score display
-	const [overallStats, setOverallStats] = useState({
+	const [localStats, setLocalStats] = useState({
 		level: siteConfig.scoring.customLevels?.[0] || {
 			emoji: "🥚",
 			title: "Beginner",
@@ -93,19 +93,9 @@ function Index() {
 		const stats = scoreManager.getOverallStats();
 
 		// Calculate level based on performance
-		let currentLevel = siteConfig.scoring.customLevels?.[0];
-		if (siteConfig.scoring.customLevels) {
-			for (const level of siteConfig.scoring.customLevels) {
-				if (
-					stats.totalPoints >= level.minPoints &&
-					stats.accuracy >= level.minAccuracy
-				) {
-					currentLevel = level;
-				}
-			}
-		}
+		let currentLevel = stats.currentLevel;
 
-		setOverallStats({
+		setLocalStats({
 			level: currentLevel || {
 				emoji: "🥚",
 				title: "Beginner",
@@ -371,9 +361,9 @@ function Index() {
 			titleIcon={siteConfig.icon}
 			scoreButton={
 				<ScoreButton
-					levelEmoji={overallStats.level.emoji}
-					levelTitle={overallStats.level.title}
-					points={overallStats.totalPoints}
+					levelEmoji={localStats.level.emoji}
+					levelTitle={localStats.level.title}
+					points={localStats.totalPoints}
 					onClick={() => setShowStatsModal(true)}
 				/>
 			}

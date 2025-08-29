@@ -23,7 +23,6 @@ export const captureElement = async (
 
 	try {
 		if (mode === "clipboard") {
-			console.log("Attempting to copy image to clipboard...");
 			const blob = await toBlob(node, {
 				pixelRatio: Math.max(2, window.devicePixelRatio || 1),
 				cacheBust: true,
@@ -33,8 +32,6 @@ export const captureElement = async (
 
 			const clipboardItem = new ClipboardItem({ "image/png": blob });
 			await navigator.clipboard.write([clipboardItem]);
-
-			console.log("Image copied to clipboard!");
 		} else {
 			const dataUrl = await toPng(node, {
 				pixelRatio: Math.max(2, window.devicePixelRatio || 1),
