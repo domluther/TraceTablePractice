@@ -18,7 +18,7 @@ import { programs } from "@/lib/programs";
 import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
 import type { Difficulty } from "@/lib/types";
-import { pickProgramInputs } from '@/lib/utils';
+import { pickProgramInputs } from "@/lib/utils";
 
 type SearchParams = {
 	difficulty?: Difficulty;
@@ -94,7 +94,7 @@ function Index() {
 		const stats = scoreManager.getOverallStats();
 
 		// Calculate level based on performance
-		let currentLevel = stats.currentLevel;
+		const currentLevel = stats.currentLevel;
 
 		setLocalStats({
 			level: currentLevel || {
@@ -107,14 +107,14 @@ function Index() {
 			totalPoints: stats.totalPoints,
 			accuracy: stats.accuracy,
 		});
-	}, [scoreManager, siteConfig.scoring.customLevels]);
+	}, [scoreManager]);
 
 	// Update stats on mount and when dependencies change
 	useEffect(() => {
 		updateStats();
 	}, [updateStats]);
 
-	// Load program from URL using Tanstack Router search
+	// Used to set a program
 	useEffect(() => {
 		const { difficulty, program: programIndex } = search;
 
@@ -126,7 +126,6 @@ function Index() {
 			const programList = programs[selectedDifficulty];
 
 			if (programList && programIndex < programList.length) {
-				console.log('in useEffect')
 				const program = pickProgramInputs(programList[programIndex]);
 				setCurrentProgram(program);
 				setCurrentProgramIndex(programIndex);
@@ -136,7 +135,7 @@ function Index() {
 			setCurrentProgram(null);
 			setCurrentProgramIndex(-1);
 		}
-	}, [search, pickProgramInputs]);
+	}, [search]);
 
 	// Helper function to scroll to program code section
 	const scrollToProgramCode = useCallback(() => {
@@ -156,13 +155,7 @@ function Index() {
 			const programList = programs[difficulty as Difficulty] || programs.easy;
 
 			if (index >= 0 && index < programList.length) {
-				console.log('in navigateToProgram')
-				const program = pickProgramInputs(programList[index]);
-
-				setCurrentProgram(program);
-				setCurrentDifficulty(difficulty);
-				setCurrentProgramIndex(index);
-
+				// Just update the URL - let useEffect handle the program selection
 				// Update URL using Tanstack Router navigation
 				navigate({
 					search: {
@@ -174,7 +167,7 @@ function Index() {
 				scrollToProgramCode();
 			}
 		},
-		[navigate, scrollToProgramCode, pickProgramInputs],
+		[navigate, scrollToProgramCode],
 	);
 
 	const handleProgramSelect = useCallback(

@@ -3,7 +3,6 @@ import { type Program, programs } from "@/lib/programs";
 import type { ScoreManager } from "@/lib/scoreManager";
 import type { Difficulty } from "@/lib/types";
 import { QuizButton } from "./QuizButton";
-import { pickProgramInputs } from '@/lib/utils';
 
 interface ProgramSelectorProps {
 	onProgramSelect: (
@@ -38,11 +37,8 @@ export function ProgramSelector({
 
 	const handleProgramSelect = useCallback(
 		(program: Program, index: number) => {
-			// If the program has multiple input sets, randomly select one
-			console.log('handle program select')
-			const selectedProgram = pickProgramInputs({ ...program });
-
-			onProgramSelect(selectedProgram, selectedDifficulty, index);
+			// Just pass the raw program - let the parent handle pickProgramInputs
+			onProgramSelect(program, selectedDifficulty, index);
 		},
 		[selectedDifficulty, onProgramSelect],
 	);
