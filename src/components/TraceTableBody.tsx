@@ -495,7 +495,7 @@ export function TraceTableBody({
 			/>
 
 			{/* Trace Table */}
-			<Card className="gap-2 shadow-sm border-slate-200 bg-slate-100">
+			<Card className="gap-2 shadow-sm border-slate-200 bg-slate-100 border-l-4 border-l-gray-500">
 				<CardHeader className="flex flex-row justify-between pb-0">
 					<CardTitle className="text-xl font-semibold text-slate-800">
 						Trace Table
