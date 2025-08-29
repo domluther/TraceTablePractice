@@ -19,7 +19,7 @@ interface QuizLayoutProps {
  * Provides consistent header, navigation, and content structure
  * Updated to match legacy visual styling
  */
-export function QuizLayout({
+export function SiteLayout({
 	children,
 	title,
 	subtitle,

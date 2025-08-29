@@ -15,7 +15,7 @@ export type {
 } from "./QuizButton";
 export { QuizButton } from "./QuizButton";
 // Layout Components
-export { QuizLayout } from "./QuizLayout";
+export { SiteLayout } from "./QuizLayout";
 // Utility Components
 export { ScoreButton } from "./ScoreButton";
 // Quiz Body Components

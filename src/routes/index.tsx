@@ -6,7 +6,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import {
 	ProgramSelector,
-	QuizLayout,
+	SiteLayout,
 	ScoreButton,
 	StatsModal,
 	TraceTableBody,
@@ -149,13 +149,17 @@ function Index() {
 		}, 0);
 	}, [programCodeId]);
 
+	// Handle when program code ID is ready
+	const handleProgramCodeIdReady = useCallback((id: string) => {
+		setProgramCodeId(id);
+	}, []);
+
 	// Central function to navigate to a specific program
 	const navigateToProgram = useCallback(
 		(difficulty: Difficulty, index: number) => {
 			const programList = programs[difficulty as Difficulty] || programs.easy;
 
 			if (index >= 0 && index < programList.length) {
-				// Just update the URL - let useEffect handle the program selection
 				// Update URL using Tanstack Router navigation
 				navigate({
 					search: {
@@ -176,11 +180,6 @@ function Index() {
 		},
 		[navigateToProgram],
 	);
-
-	// Handle when program code ID is ready
-	const handleProgramCodeIdReady = useCallback((id: string) => {
-		setProgramCodeId(id);
-	}, []);
 
 	const handleDifficultyChange = useCallback(
 		(difficulty: Difficulty) => {
@@ -309,7 +308,7 @@ function Index() {
 	const handleScoreUpdate = useCallback(
 		(correct: number, total: number) => {
 			if (currentDifficulty && currentProgramIndex >= 0) {
-				scoreManager.saveScore(
+				scoreManager.recordScore(
 					currentDifficulty,
 					currentProgramIndex,
 					correct,
@@ -323,7 +322,7 @@ function Index() {
 	);
 
 	return (
-		<QuizLayout
+		<SiteLayout
 			title={siteConfig.title}
 			subtitle={siteConfig.subtitle}
 			titleIcon={siteConfig.icon}
@@ -373,6 +372,6 @@ function Index() {
 				title="Trace Table Statistics"
 				onStatsUpdate={updateStats}
 			/>
-		</QuizLayout>
+		</SiteLayout>
 	);
 }

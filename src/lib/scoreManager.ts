@@ -109,7 +109,7 @@ export class ScoreManager {
 		}
 	}
 
-	saveScore(
+	recordScore(
 		difficulty: Difficulty,
 		programIndex: number,
 		attemptScore: number,
