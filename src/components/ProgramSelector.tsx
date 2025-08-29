@@ -149,16 +149,15 @@ export function ProgramSelector({
 									<td className="px-4 py-3 align-middle">
 										<span
 											className={`inline-block min-w-24 text-center px-2 py-1 rounded-full text-xs font-semibold ${
-												scoreDisplay.className === "score-perfect" ||
-												scoreDisplay.className === "score-good"
+												// No attempt grey, otherwise colour coded
+												scoreDisplay.accuracy === null ? "bg-gray-200 text-gray-600"
+												: scoreDisplay.accuracy >= 80
 													? "bg-emerald-200 text-emerald-800"
-													: scoreDisplay.className === "score-okay"
+													: scoreDisplay.accuracy >= 60
 														? "bg-lime-200 text-lime-800"
-														: scoreDisplay.className === "score-poor"
+														: scoreDisplay.accuracy >= 40
 															? "bg-amber-200 text-amber-800"
-															: scoreDisplay.className === "score-bad"
-																? "bg-red-200 text-red-800"
-																: "bg-gray-200 text-gray-600"
+															: "bg-red-200 text-red-800"
 											}`}
 										>
 											{scoreDisplay.text}

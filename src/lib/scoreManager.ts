@@ -10,7 +10,7 @@ export interface LevelInfo {
 
 export interface ScoreDisplay {
 	text: string;
-	className: string;
+	accuracy: number | null;
 }
 
 export interface ProgramScore {
@@ -28,7 +28,7 @@ export interface ScoreData {
 	history: Array<{
 		timestamp: number;
 		perfect: boolean;
-		address: string;
+		score: number;
 	}>;
 }
 
@@ -146,7 +146,7 @@ export class ScoreManager {
 			scoreData.history.unshift({
 				timestamp: Date.now(),
 				perfect: attemptScore === total, // Only mark as fully correct if perfect
-				address: `${attemptScore}/${total}`,
+				score: attemptScore,
 			});
 
 			if (scoreData.history.length > 10) {
@@ -163,29 +163,25 @@ export class ScoreManager {
 
 	// Overall stats adapted for trace table scoring system
 	getOverallStats(): {
-		totalAttempts: number;
 		accuracy: number;
 		totalPoints: number;
 		totalPossiblePoints: number;
 		programsAttempted: number;
-		level: LevelInfo;
+		currentLevel: LevelInfo;
 		progress: number;
 		nextLevel: LevelInfo | null;
 	} {
 		// For trace tables, we need to calculate accuracy differently since 'correct' is points, not binary
-		let totalAttempts = 0;
 		let totalPoints = 0;
 		let totalPossiblePoints = 0;
 		let programsAttempted = 0;
 
 		for (const [, scoreData] of Object.entries(this.scores)) {
-			totalAttempts += scoreData.attempts;
-
 			// All data is trace table programs - correct field is best score achieved
 			totalPoints += scoreData.bestScore;
 			totalPossiblePoints += scoreData.outOf;
 
-			// Count programs that have been attempted
+			// Count programs that have been attempted - this should be everything in here
 			if (scoreData.attempts > 0) {
 				programsAttempted++;
 			}
@@ -195,7 +191,6 @@ export class ScoreManager {
 		const accuracy =
 			totalPossiblePoints > 0 ? (totalPoints / totalPossiblePoints) * 100 : 0;
 
-		// Use total best points as the points for leveling
 
 		// Find current level
 		let currentLevel = this.levels[0];
@@ -215,7 +210,7 @@ export class ScoreManager {
 				: null;
 
 		// Calculate progress to next level
-		let progress = 100;
+		let progress = 0;
 		if (nextLevel) {
 			const pointsProgress = Math.min(
 				100,
@@ -229,18 +224,17 @@ export class ScoreManager {
 		}
 
 		return {
-			totalAttempts,
 			accuracy,
 			totalPoints,
 			totalPossiblePoints,
 			programsAttempted,
-			level: currentLevel,
+			currentLevel,
 			progress,
 			nextLevel,
 		};
 	}
 
-	// Simplified score display - uses stored best score and gets total from most recent attempt
+	// Used on the program selector
 	getScoreDisplay(difficulty: Difficulty, programIndex: number): ScoreDisplay {
 		const key = `${difficulty}-${programIndex}`;
 		const scoreData = this.scores[key];
@@ -248,47 +242,34 @@ export class ScoreManager {
 		if (!scoreData || scoreData.attempts === 0) {
 			return {
 				text: "N/A",
-				className: "score-none",
+				accuracy: null
 			};
 		}
 
 		// Use stored best score and get total from most recent attempt
 		const bestScore = scoreData.bestScore;
-		let totalQuestions = 0;
+		const outOf = scoreData.outOf;
 
-		if (scoreData.history.length > 0) {
-			const recentAttempt = scoreData.history[0]; // Most recent is first
-			const [, totalStr] = recentAttempt.address.split("/");
-			totalQuestions = parseInt(totalStr, 10) || 0;
-		}
+		const accuracy = outOf > 0 ? Math.round((bestScore / outOf) * 100) : 0;
 
-		const percentage =
-			totalQuestions > 0 ? Math.round((bestScore / totalQuestions) * 100) : 0;
-
-		let className = "";
 		let text = "";
 
-		if (percentage === 100) {
-			className = "score-perfect";
-			text = `${bestScore}/${totalQuestions} ⭐`;
-		} else if (percentage >= 80) {
-			className = "score-good";
-			text = `${bestScore}/${totalQuestions} 👍`;
-		} else if (percentage >= 60) {
-			className = "score-okay";
-			text = `${bestScore}/${totalQuestions} 👌`;
-		} else if (percentage >= 40) {
-			className = "score-poor";
-			text = `${bestScore}/${totalQuestions} 😐`;
+		if (accuracy === 100) {
+			text = `${bestScore}/${outOf} ⭐`;
+		} else if (accuracy >= 80) {
+			text = `${bestScore}/${outOf} 👍`;
+		} else if (accuracy >= 60) {
+			text = `${bestScore}/${outOf} 👌`;
+		} else if (accuracy >= 40) {
+			text = `${bestScore}/${outOf} 😐`;
 		} else {
-			className = "score-bad";
-			text = `${bestScore}/${totalQuestions} 😞`;
+			text = `${bestScore}/${outOf} 😞`;
 		}
 
-		return { text, className };
+		return { text, accuracy };
 	}
 
-	// Simplified program scores - uses stored data more efficiently
+	// Used for the score modal
 	getProgramScores(): ProgramScore[] {
 		const programScores: ProgramScore[] = [];
 
@@ -296,18 +277,16 @@ export class ScoreManager {
 			if (scoreData.attempts > 0) {
 				const [difficulty, indexStr] = key.split("-");
 				const programIndex = parseInt(indexStr, 10);
-				const programName = `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Program ${programIndex + 1}`;
+				const programName = `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} #${programIndex}`;
 
 				// Use stored best score and get total from most recent attempt
 				const bestScore = scoreData.bestScore;
-				let totalQuestions = 0;
+				const outOf = scoreData.outOf;
 				let lastAttemptDate = "";
 
 				if (scoreData.history.length > 0) {
 					// Get total from most recent attempt (all attempts should have same total for a program)
 					const recentAttempt = scoreData.history[0]; // Most recent is first
-					const [, totalStr] = recentAttempt.address.split("/");
-					totalQuestions = parseInt(totalStr, 10) || 0;
 
 					// Get the most recent attempt date for display
 					lastAttemptDate = new Date(
@@ -315,13 +294,12 @@ export class ScoreManager {
 					).toLocaleDateString("en-GB");
 				}
 
-				const accuracy =
-					totalQuestions > 0 ? (bestScore / totalQuestions) * 100 : 0;
+				const accuracy = outOf > 0 ? (bestScore / outOf) * 100 : 0;
 
 				programScores.push({
 					programName,
 					attempts: scoreData.attempts,
-					bestScore: `${bestScore}/${totalQuestions}`,
+					bestScore: `${bestScore}/${outOf}`,
 					lastAttempt: lastAttemptDate,
 					accuracy: Math.round(accuracy),
 				});

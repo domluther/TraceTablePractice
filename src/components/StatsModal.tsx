@@ -109,14 +109,14 @@ export function StatsModal({
 								<CardHeader className="text-white ">
 									<div className="flex items-center gap-4">
 										<div className="text-5xl animate-gentle-bounce">
-											{overallStats.level.emoji}
+											{overallStats.currentLevel.emoji}
 										</div>
 										<div className="flex-1 text-left">
 											<CardTitle className="text-2xl">
-												{overallStats.level.title}
+												{overallStats.currentLevel.title}
 											</CardTitle>
 											<p className="mt-1 text-indigo-100">
-												{overallStats.level.description}
+												{overallStats.currentLevel.description}
 											</p>
 										</div>
 									</div>
