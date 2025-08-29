@@ -72,6 +72,7 @@ function Index() {
 		useState<Difficulty>("easy");
 	const [currentProgramIndex, setCurrentProgramIndex] = useState<number>(-1);
 	const [showStatsModal, setShowStatsModal] = useState(false);
+	// Used for scrolling
 	const [programCodeId, setProgramCodeId] = useState<string>("");
 
 	// Overall statistics for score display
@@ -180,10 +181,9 @@ function Index() {
 			if (programCodeSection) {
 				programCodeSection.scrollIntoView({
 					behavior: "smooth",
-					block: "start",
 				});
 			}
-		}, 100);
+		}, 0);
 	}, [programCodeId]);
 
 	// Central function to navigate to a specific program
