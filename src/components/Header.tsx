@@ -16,7 +16,7 @@ export function Header({ scoreButton, title, subtitle }: HeaderProps) {
 	const currentSiteId = detectCurrentSite();
 
 	return (
-		<header className="relative px-8 py-6 text-center text-white bg-gradient-to-br from-gray-800 to-gray-900">
+		<header className="relative p-4 text-center text-indigo-50 sm:p-6 bg-header/80">
 			<SiteNavigation
 				menuItems={GCSE_NAVIGATION_MENU}
 				currentSiteId={currentSiteId}

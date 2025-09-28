@@ -1,6 +1,6 @@
 export function Footer() {
 	return (
-		<footer className="p-4 text-sm text-center text-gray-200 border-t border-gray-600 bg-gradient-to-r from-gray-700 to-gray-900">
+		<footer className="p-4 text-sm text-center text-gray-200 bg-header/80">
 			Copyright{" "}
 			<a
 				href="https://mrluthercodes.netlify.app/"

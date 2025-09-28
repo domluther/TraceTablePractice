@@ -83,7 +83,7 @@ export function SiteNavigation({
 
 				<DropdownMenuContent className="p-0 w-80" align="start" sideOffset={8}>
 					{/* Header */}
-					<div className="px-4 py-3 text-sm font-semibold text-center text-white uppercase bg-gradient-to-r from-gray-700 to-gray-900">
+					<div className="p-3 text-xs font-semibold text-center text-white uppercase sm:p-4 sm:text-sm bg-header/90 ">
 						Computer Science Practice
 					</div>
 
