@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Header } from "@/components/Header";
+import { Footer } from './Footer';
 
 interface QuizLayoutProps {
 	/** The main content area of the quiz */
@@ -27,19 +28,9 @@ export function SiteLayout({
 	titleIcon = "🦆",
 }: QuizLayoutProps) {
 	return (
-		<div
-			className="flex items-center justify-center min-h-screen p-5"
-			style={{
-				background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-			}}
-		>
-			<div
-				className="w-full overflow-hidden bg-white rounded-lg shadow-2xl max-w-7xl"
-				style={{
-					borderRadius: "12px",
-					boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-				}}
-			>
+			<div className="flex flex-col items-center justify-center min-h-screen p-2 sm:p-5 bg-gradient-to-br from-indigo-400 to-purple-600">
+
+			<div className="w-full max-w-7xl overflow-hidden bg-white shadow-2xl rounded-xl">
 				<Header
 					scoreButton={scoreButton}
 					title={`${titleIcon} ${title} ${titleIcon}`}
@@ -48,29 +39,7 @@ export function SiteLayout({
 				<main className="p-8">
 					<div className="mx-auto">{children}</div>
 				</main>
-				<footer
-					className="text-sm text-center border-t"
-					style={{
-						background: "#2d3748",
-						color: "#e2e8f0",
-						padding: "15px 30px",
-						borderTop: "1px solid #4a5568",
-					}}
-				>
-					Copyright{" "}
-					<a
-						href="https://mrluthercodes.netlify.app/"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="underline transition-colors duration-200 hover:brightness-150"
-						style={{
-							color: "#90cdf4",
-						}}
-					>
-						Mr Luther
-					</a>{" "}
-					2025
-				</footer>
+				<Footer/>
 			</div>
 		</div>
 	);
