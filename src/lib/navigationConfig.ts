@@ -33,11 +33,11 @@ export const GCSE_NAVIGATION_MENU: NavMenuItem[] = [
 		keywords: ["ipormac", "network", "ip", "mac"],
 	},
 	{
-		title: "2.1 - Sorting Algorithms",
-		description: "Visualize bubble, merge & insertion sorts",
-		url: "https://ocrsortvisualiser.netlify.app/",
-		id: "sort-algorithms",
-		keywords: ["ocrsortvisualiser", "sort", "algorithm"],
+		title: "2.1 - Error Spotter",
+		description: "Find and fix syntax and logic errors",
+		url: "https://ocr-errors.netlify.app/",
+		id: "error-spotter",
+		keywords: ["ocr-errors", "error", "spotter", "debug"],
 	},
 	{
 		title: "2.1 - Trace Tables",
@@ -45,6 +45,13 @@ export const GCSE_NAVIGATION_MENU: NavMenuItem[] = [
 		url: "https://tracetablepractice.netlify.app/",
 		id: "trace-tables",
 		keywords: ["tracetablepractice", "trace", "table"],
+	},
+	{
+		title: "2.1 - Sorting Algorithms",
+		description: "Visualize bubble, merge & insertion sorts",
+		url: "https://ocrsortvisualiser.netlify.app/",
+		id: "sort-algorithms",
+		keywords: ["ocrsortvisualiser", "sort", "algorithm"],
 	},
 	{
 		title: "2.2 - Programming Fundamentals",
