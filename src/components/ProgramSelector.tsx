@@ -93,17 +93,17 @@ export function ProgramSelector({
 			</div>
 
 			{/* Program Table */}
-			<div className="overflow-scroll bg-card rounded-lg shadow-sm max-h-96">
-				<table className="w-full text-base bg-card border-collapse">
+			<div className="overflow-scroll rounded-lg bg-card shadow-sm max-h-96">
+				<table className="w-full text-base border-collapse bg-card">
 					<thead>
 						<tr className="sticky top-0 z-10 bg-button-primary">
-							<th className="px-4 py-3 font-semibold text-left text-button-primary-text border-b border-border">
+							<th className="px-4 py-3 font-semibold text-left border-b text-button-primary-text border-border">
 								Program
 							</th>
-							<th className="px-4 py-3 font-semibold text-left text-button-primary-text border-b border-border">
+							<th className="px-4 py-3 font-semibold text-left border-b text-button-primary-text border-border">
 								Best Score
 							</th>
-							<th className="px-4 py-3 font-semibold text-left text-button-primary-text border-b border-border">
+							<th className="px-4 py-3 font-semibold text-left border-b text-button-primary-text border-border">
 								Action
 							</th>
 						</tr>

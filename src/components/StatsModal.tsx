@@ -209,7 +209,7 @@ export function StatsModal({
 							</Card>
 
 							{/* Breakdown by Category */}
-							<Card className="gap-4 p-4">
+							<Card className="p-4 gap-4">
 								<CardHeader className="px-2 mb-0">
 									<CardTitle className="flex items-center">
 										📋 Breakdown by Category

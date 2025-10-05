@@ -1,5 +1,5 @@
-import type { HintItem } from "@/lib/types";
 import type { LevelInfo } from "@/lib/scoreManager";
+import type { HintItem } from "@/lib/types";
 
 /** Configuration interface for GCSE CS practice sites */
 export interface SiteConfig {

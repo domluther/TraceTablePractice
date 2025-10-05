@@ -541,7 +541,7 @@ export function TraceTableBody({
 			/>
 
 			{/* Trace Table */}
-			<Card className="border-l-4 gap-2 shadow-xl border-border bg-code-display-bg border-l-hint-card-border py-0">
+			<Card className="py-0 border-l-4 shadow-xl gap-2 border-border bg-code-display-bg border-l-hint-card-border">
 				<CardHeader className="border-b bg-button-primary px-4 !pb-2 !pt-2 rounded-t-lg">
 					<div className="flex flex-col justify-between gap-3 md:flex-row lg:items-center">
 						<div className="flex flex-col">
@@ -574,18 +574,18 @@ export function TraceTableBody({
 						>
 							<thead>
 								<tr className="sticky top-0 z-10 bg-button-primary">
-									<th className="px-2 py-3 font-semibold text-center text-button-primary-text border border-border">
+									<th className="px-2 py-3 font-semibold text-center border text-button-primary-text border-border">
 										Line Number
 									</th>
 									{programVariables.map((varName) => (
 										<th
 											key={varName}
-											className="px-2 py-3 font-semibold text-center text-button-primary-text border border-border"
+											className="px-2 py-3 font-semibold text-center border text-button-primary-text border-border"
 										>
 											{varName}
 										</th>
 									))}
-									<th className="px-2 py-3 font-semibold text-center text-button-primary-text border border-border">
+									<th className="px-2 py-3 font-semibold text-center border text-button-primary-text border-border">
 										Output
 									</th>
 								</tr>
@@ -708,7 +708,7 @@ export function TraceTableBody({
 										{feedback.details.map((error) => (
 											<div
 												key={error}
-												className="p-2 font-mono text-sm leading-relaxed text-feedback-error-text bg-feedback-error-bg rounded feedback-item incorrect"
+												className="p-2 font-mono text-sm leading-relaxed rounded text-feedback-error-text bg-feedback-error-bg feedback-item incorrect"
 											>
 												{error}
 											</div>
