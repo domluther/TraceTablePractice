@@ -16,21 +16,21 @@ export function Panel({
 	const getBorderColor = (type: PanelType): string => {
 		switch (type) {
 			case "success":
-				return "border-l-green-500";
+				return "border-l-stats-accuracy-high";
 			case "warning":
-				return "border-l-yellow-500";
+				return "border-l-stats-accuracy-medium";
 			case "error":
-				return "border-l-red-500";
+				return "border-l-stats-accuracy-low";
 			case "info":
-				return "border-l-blue-500";
+				return "border-l-hint-card-border";
 			default:
-				return "border-l-green-500";
+				return "border-l-stats-accuracy-high";
 		}
 	};
 
 	return (
 		<div
-			className={`max-w-full bg-gray-100 rounded-lg border-l-4 p-4 ${getBorderColor(type)} ${className}`}
+			className={`max-w-full bg-hint-card-code-bg rounded-lg border-l-4 p-4 ${getBorderColor(type)} ${className}`}
 		>
 			{children}
 		</div>

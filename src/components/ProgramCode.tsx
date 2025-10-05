@@ -74,17 +74,17 @@ export function ProgramCode({
 		<Card
 			ref={cardRef}
 			id={programCodeId}
-			className="py-0 border-l-4 shadow-xl gap-4 bg-slate-700 border-slate-600 border-l-blue-500"
+			className="py-0 border-l-4 shadow-xl gap-4 bg-code-display-bg border-border border-l-hint-card-border"
 		>
-			<CardHeader className="border-b bg-gradient-to-br from-gray-800 to-gray-900 px-4 !pb-2 !pt-2 rounded-t-lg">
+			<CardHeader className="border-b bg-button-primary px-4 !pb-2 !pt-2 rounded-t-lg">
 				<div className="flex flex-col justify-between gap-3 md:flex-row lg:items-center">
 					<div className="flex flex-col">
-						<CardTitle className="text-lg font-semibold text-white">
+						<CardTitle className="text-lg font-semibold text-button-primary-text">
 							Program Code
 						</CardTitle>
 						{currentProgram && (
 							<div className="flex items-center gap-3">
-								<span className="text-sm font-light text-blue-300 rounded-md ">
+								<span className="text-sm font-light text-header-subtitle rounded-md ">
 									{getProgramDisplayName()}: {currentProgram.description}
 								</span>
 							</div>
@@ -98,7 +98,7 @@ export function ProgramCode({
 								onClick={() =>
 									window.open(generateERLURL(currentProgram.code), "_blank")
 								}
-								className="text-sm font-light text-blue-300 transition-all duration-200 bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500 hover:text-white"
+								className="text-sm font-light text-link transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-link-hover"
 							>
 								💻 Open in ERL IDE
 							</Button>
@@ -106,7 +106,7 @@ export function ProgramCode({
 								variant="outline"
 								size="sm"
 								onClick={generateShareURL}
-								className="text-sm font-light text-blue-300 transition-all duration-200 bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500 hover:text-white"
+								className="text-sm font-light text-link transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-link-hover"
 							>
 								🔗 Share Link
 							</Button>
@@ -115,7 +115,7 @@ export function ProgramCode({
 								variant="outline"
 								size="sm"
 								onClick={() => captureElement(cardRef, getProgramDisplayName())}
-								className="text-sm font-light text-blue-300 transition-all duration-200 bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500 hover:text-white"
+								className="text-sm font-light text-link transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-link-hover"
 							>
 								📸 Screenshot
 							</Button>
@@ -124,17 +124,17 @@ export function ProgramCode({
 				</div>
 			</CardHeader>
 			<CardContent className="p-0 pt-0 pb-2 font-mono">
-				<div className="overflow-x-auto ">
+				<div className="overflow-x-auto">
 					<pre className="py-2 pl-2 m-0 text-sm leading-relaxed">
 						{currentProgram.code.split("\n").map((line, index) => (
 							<div
 								key={`line-${index}-${line}`}
-								className="flex transition-colors duration-150 hover:bg-slate-600"
+								className="flex transition-colors duration-150 hover:bg-checkbox-label-bg-hover"
 							>
-								<span className="text-blue-300 bg-slate-700 border-r border-slate-700 px-1 py-1.5 select-none min-w-[3rem] text-right font-medium text-xs leading-none">
+								<span className="text-code-line-number bg-code-display-bg border-r border-border px-1 py-1.5 select-none min-w-[3rem] text-right font-medium text-xs leading-none">
 									{index + 1}
 								</span>
-								<span className="flex-1 px-4 py-1.5 leading-none text-slate-100">
+								<span className="flex-1 px-4 py-1.5 leading-none text-code-display-text">
 									{line || " "}
 								</span>
 							</div>
@@ -147,9 +147,9 @@ export function ProgramCode({
 							<div className="px-3 py-0">
 								<div className="flex items-start gap-2">
 									<div className="flex-1">
-										<div className="mb-1 text-sm font-medium text-blue-300">
+										<div className="mb-1 text-sm font-medium text-code-line-number">
 											Input Values:{" "}
-											<span className="font-mono text-sm text-blue-300">
+											<span className="font-mono text-sm text-code-line-number">
 												{currentProgram.inputs
 													.map((input) => `"${input}"`)
 													.join(", ")}
@@ -163,7 +163,7 @@ export function ProgramCode({
 							<div className="px-3 py-0">
 								<div className="flex items-start gap-2">
 									<div className="flex-1">
-										<div className="mb-1 text-sm font-medium text-blue-300">
+										<div className="mb-1 text-sm font-medium text-code-line-number">
 											Random Value: {currentProgram.randomValue}
 										</div>
 									</div>

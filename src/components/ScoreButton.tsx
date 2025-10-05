@@ -19,12 +19,12 @@ export function ScoreButton({
 	return (
 		<button
 			onClick={onClick}
-			className="px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm whitespace-nowrap"
+			className="px-4 py-3 bg-button-primary hover:bg-button-primary-hover text-button-primary-text font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm whitespace-nowrap"
 			type="button"
 		>
 			{/* Full text on larger screens */}
 			<span className="hidden xl:block">
-				{levelEmoji} {levelTitle} ({points ? points : 0} pts)
+				{levelEmoji} {levelTitle} ({points} pts)
 			</span>
 			{/* Compact text on smaller screens */}
 			<span className="xl:hidden">

@@ -13,7 +13,8 @@ export type QuizButtonVariant =
 	| "selection" // Program/item selection buttons
 	| "primary" // Main call-to-action
 	| "secondary" // Secondary actions
-	| "destructive"; // Destructive actions
+	| "destructive" // Destructive actions
+	| "menu"; // Menu actions
 
 export type QuizButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
 
@@ -32,35 +33,33 @@ export type { QuizButtonProps };
 const buttonVariants = {
 	// Answer buttons - core quiz interaction
 	answer: `
-    relative py-4 px-12 text-lg font-semibold rounded-lg border-2 
-    bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 border-gray-300
-    hover:bg-gradient-to-br hover:from-indigo-500 hover:to-purple-600 
-    hover:text-white hover:border-indigo-600
+    relative py-3 sm:py-4 px-6 sm:px-12 text-base sm:text-lg font-semibold rounded-lg border-2 
+    bg-gray-50 text-gray-800 border-gray-300
+    hover:bg-button-primary hover:text-white hover:border-button-primary
     hover:transform hover:-translate-y-1 hover:shadow-md
     transition-all duration-200 shadow-sm
   `,
 	"answer-selected": `
-    relative py-4 px-12 text-lg font-semibold rounded-lg border-2 
-    bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-600 shadow-lg
+    relative py-3 sm:py-4 px-6 sm:px-12 text-base sm:text-lg font-semibold rounded-lg border-2 
+    bg-button-primary text-white border-button-primary shadow-lg
     transition-all duration-200
   `,
 	"answer-correct": `
-    relative py-4 px-12 text-lg font-semibold rounded-lg border-2 
-    bg-gradient-to-r from-green-500 to-green-600 text-white border-green-600 shadow-lg
+    relative py-3 sm:py-4 px-6 sm:px-12 text-base sm:text-lg font-semibold rounded-lg border-2 
+    bg-green-500 text-white border-green-600 shadow-lg
     transition-all duration-200
   `,
 	"answer-incorrect": `
-    relative py-4 px-12 text-lg font-semibold rounded-lg border-2 
-    bg-gradient-to-r from-red-500 to-red-600 text-white border-red-600 shadow-lg
+    relative py-3 sm:py-4 px-6 sm:px-12 text-base sm:text-lg font-semibold rounded-lg border-2 
+    bg-red-500 text-white border-red-600 shadow-lg
     transition-all duration-200
   `,
 
 	// Action buttons - Next Question, hints, etc.
 	action: `
-    px-8 py-3 font-semibold rounded-lg transition-all duration-200 shadow-lg
-    bg-gradient-to-r from-green-500 to-green-600 
-    hover:from-green-600 hover:to-green-700 
-    text-white hover:shadow-xl transform hover:-translate-y-1
+    px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-lg transition-all duration-200 shadow-lg
+    bg-action-button-bg hover:bg-action-button-bg-hover
+    text-action-button-text hover:shadow-xl transform hover:-translate-y-1
   `,
 
 	// Mode/Tab buttons
@@ -71,36 +70,36 @@ const buttonVariants = {
   `,
 	"mode-active": `
     px-6 py-2 font-medium rounded-md transition-all duration-200
-    bg-gradient-to-r from-indigo-500 to-purple-600 
-    text-white border border-indigo-600 shadow-sm
+    bg-button-primary text-white border border-button-primary shadow-sm
   `,
 
 	// Selection buttons - for program selection, etc.
 	selection: `
     px-4 py-2 font-medium rounded-md transition-all duration-200
-    bg-gradient-to-r from-blue-500 to-blue-600
-    hover:from-blue-600 hover:to-blue-700
+    bg-button-primary hover:bg-button-primary-hover
     text-white shadow-sm hover:shadow-md
   `,
 
 	// Standard buttons
 	primary: `
     px-6 py-3 font-semibold rounded-lg transition-all duration-200
-    bg-gradient-to-r from-indigo-500 to-purple-600
-    hover:from-indigo-600 hover:to-purple-700
+    bg-button-primary hover:bg-button-primary-hover
     text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1
   `,
 	secondary: `
     px-6 py-3 font-medium rounded-lg transition-all duration-200
-    bg-gradient-to-r from-orange-500 to-orange-600
-    hover:from-orange-600 hover:to-orange-700
+    bg-orange-500 hover:bg-orange-600
     text-white shadow-md hover:shadow-lg
   `,
 	destructive: `
     px-6 py-3 font-medium rounded-lg transition-all duration-200
-    bg-gradient-to-r from-red-500 to-red-600
-    hover:from-red-600 hover:to-red-700
+    bg-red-500 hover:bg-red-600
     text-white shadow-md hover:shadow-lg
+  `,
+	menu: `
+    px-3 sm:px-6 py-3 sm:py-6 text-sm sm:text-base font-semibold rounded-lg transition-all duration-200
+    bg-gray-100 hover:bg-gray-200
+    text-gray-800 shadow-md hover:shadow-lg
   `,
 };
 
@@ -114,9 +113,9 @@ const sizeVariants = {
 
 const shortcutVariants: Partial<Record<QuizButtonVariant, string>> = {
 	answer:
-		"absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-sm bg-indigo-500 text-white",
+		"absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-sm bg-button-primary text-white",
 	"answer-selected":
-		"absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-sm bg-white text-blue-600",
+		"absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-sm bg-white text-button-primary",
 	"answer-correct":
 		"absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-sm bg-white text-green-600",
 	"answer-incorrect":

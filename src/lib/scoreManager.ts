@@ -159,7 +159,7 @@ export class ScoreManager {
 		accuracy: number;
 		totalPoints: number;
 		totalPossiblePoints: number;
-		programsAttempted: number;
+		totalAttempts: number;
 		currentLevel: LevelInfo;
 		progress: number;
 		nextLevel: LevelInfo | null;
@@ -219,7 +219,7 @@ export class ScoreManager {
 			accuracy,
 			totalPoints,
 			totalPossiblePoints,
-			programsAttempted,
+			totalAttempts: programsAttempted,
 			currentLevel,
 			progress,
 			nextLevel,

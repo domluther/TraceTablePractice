@@ -3,26 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Custom animations */
-@keyframes gentle-bounce {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-3px);
-	}
-}
-
-.animate-gentle-bounce {
-	animation: gentle-bounce 2s ease-in-out infinite;
-}
-
-/* Custom kbd styling */
-.kbd-style {
-	@apply bg-slate-700 text-white text-xs font-semibold px-2 py-1 rounded border border-slate-600 shadow-sm min-w-[24px] text-center;
-}
-
 @theme inline {
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
@@ -60,46 +40,182 @@
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-header: var(--header);
+	--color-header-text: var(--header-text);
+	--color-header-subtitle: var(--header-subtitle);
+	--color-link: var(--link);
+	--color-link-hover: var(--link-hover);
+	--color-button-primary: var(--button-primary);
+	--color-button-primary-hover: var(--button-primary-hover);
+	--color-button-primary-text: var(--button-primary-text);
+	--color-nav-button-bg: var(--nav-button-bg);
+	--color-nav-button-bg-hover: var(--nav-button-bg-hover);
+	--color-nav-button-text: var(--nav-button-text);
+	--color-nav-item-text: var(--nav-item-text);
+	--color-nav-item-text-hover: var(--nav-item-text-hover);
+	--color-nav-item-description: var(--nav-item-description);
+	--color-nav-item-active-bg: var(--nav-item-active-bg);
+	--color-nav-item-active-border: var(--nav-item-active-border);
+	--color-modal-overlay: var(--modal-overlay);
+	--color-modal-header-text: var(--modal-header-text);
+	--color-level-card-bg: var(--level-card-bg);
+	--color-level-card-text: var(--level-card-text);
+	--color-progress-bar: var(--progress-bar);
+	--color-hint-card-bg: var(--hint-card-bg);
+	--color-hint-card-border: var(--hint-card-border);
+	--color-hint-card-title: var(--hint-card-title);
+	--color-hint-card-text: var(--hint-card-text);
+	--color-hint-card-code-bg: var(--hint-card-code-bg);
+	--color-hint-card-code-text: var(--hint-card-code-text);
+	--color-hint-tip-bg: var(--hint-tip-bg);
+	--color-hint-tip-border: var(--hint-tip-border);
+	--color-hint-tip-text: var(--hint-tip-text);
+	--color-stats-card-bg: var(--stats-card-bg);
+	--color-stats-card-border: var(--stats-card-border);
+	--color-stats-points: var(--stats-points);
+	--color-stats-streak: var(--stats-streak);
+	--color-stats-record: var(--stats-record);
+	--color-stats-accuracy-high: var(--stats-accuracy-high);
+	--color-stats-accuracy-medium: var(--stats-accuracy-medium);
+	--color-stats-accuracy-low: var(--stats-accuracy-low);
+	--color-stats-label: var(--stats-label);
+	--color-question-prompt-bg: var(--question-prompt-bg);
+	--color-question-prompt-text: var(--question-prompt-text);
+	--color-code-display-bg: var(--code-display-bg);
+	--color-code-display-text: var(--code-display-text);
+	--color-code-line-number: var(--code-line-number);
+	--color-checkbox-label-border: var(--checkbox-label-border);
+	--color-checkbox-label-border-hover: var(--checkbox-label-border-hover);
+	--color-checkbox-label-bg-hover: var(--checkbox-label-bg-hover);
+	--color-checkbox-kbd-bg: var(--checkbox-kbd-bg);
+	--color-action-button-bg: var(--action-button-bg);
+	--color-action-button-bg-hover: var(--action-button-bg-hover);
+	--color-action-button-text: var(--action-button-text);
+	--color-action-button-disabled: var(--action-button-disabled);
+	--color-feedback-success-bg: var(--feedback-success-bg);
+	--color-feedback-success-text: var(--feedback-success-text);
+	--color-feedback-error-bg: var(--feedback-error-bg);
+	--color-feedback-error-text: var(--feedback-error-text);
+	--color-hint-summary-bg: var(--hint-summary-bg);
+	--color-hint-summary-bg-hover: var(--hint-summary-bg-hover);
+	--color-hint-summary-border: var(--hint-summary-border);
+	--color-hint-summary-text: var(--hint-summary-text);
+	--color-hint-content-bg: var(--hint-content-bg);
 }
 
 :root {
 	--radius: 0.625rem;
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
+	--background: oklch(0.985 0.002 235);
+	--foreground: oklch(0.145 0.001 235);
+	--card: oklch(0.99 0.002 235);
+	--card-foreground: oklch(0.145 0.001 235);
+	--popover: oklch(0.99 0.002 235);
+	--popover-foreground: oklch(0.145 0.001 235);
+	--primary: oklch(0.21 0.034 235);
 	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
-	--accent-foreground: oklch(0.205 0 0);
+	--secondary: oklch(0.97 0.002 235);
+	--secondary-foreground: oklch(0.205 0.001 235);
+	--muted: oklch(0.97 0.002 235);
+	--muted-foreground: oklch(0.556 0.005 235);
+	--accent: oklch(0.97 0.002 235);
+	--accent-foreground: oklch(0.205 0.001 235);
 	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
+	--border: oklch(0.922 0.002 235);
+	--input: oklch(0.922 0.002 235);
+	--ring: oklch(0.708 0.005 235);
 	--chart-1: oklch(0.646 0.222 41.116);
 	--chart-2: oklch(0.6 0.118 184.704);
 	--chart-3: oklch(0.398 0.07 227.392);
 	--chart-4: oklch(0.828 0.189 84.429);
 	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.145 0 0);
-	--sidebar-primary: oklch(0.205 0 0);
+	--sidebar: oklch(0.985 0.001 235);
+	--sidebar-foreground: oklch(0.145 0.001 235);
+	--sidebar-primary: oklch(0.205 0.001 235);
 	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.97 0 0);
-	--sidebar-accent-foreground: oklch(0.205 0 0);
-	--sidebar-border: oklch(0.922 0 0);
-	--sidebar-ring: oklch(0.708 0 0);
-	--header: oklch(21% 0.034 264.665); /* gray-900 equivalent */
+	--sidebar-accent: oklch(0.97 0.002 235);
+	--sidebar-accent-foreground: oklch(0.205 0.001 235);
+	--sidebar-border: oklch(0.922 0.002 235);
+	--sidebar-ring: oklch(0.708 0.005 235);
+	--header: oklch(0.21 0.034 235); /* deep blue-900 */
+
+	/* Semantic color variables for light mode */
+	--header-text: oklch(0.96 0.02 235); /* deep blue-50 */
+	--header-subtitle: oklch(0.85 0.08 235); /* deep blue-200 */
+	--link: oklch(
+		0.82 0.12 235
+	); /* deep blue-200 - lighter for better contrast on dark backgrounds */
+	--link-hover: var(--primary-foreground); /* white */
+	--button-primary: oklch(0.45 0.15 235); /* deep blue-600 */
+	--button-primary-hover: oklch(0.38 0.14 235); /* deep blue-700 */
+	--button-primary-text: var(--header-text); /* deep blue-50 */
+	--nav-button-bg: oklch(1 0 0 / 0.1); /* white/10 */
+	--nav-button-bg-hover: oklch(1 0 0 / 0.2); /* white/20 */
+	--nav-button-text: var(--primary-foreground); /* white */
+	--nav-item-text: oklch(0.36 0.02 235); /* gray-800 with blue tint */
+	--nav-item-text-hover: var(--button-primary); /* deep blue-600 */
+	--nav-item-description: oklch(0.55 0.015 235); /* gray-600 with blue tint */
+	--nav-item-active-bg: oklch(0.93 0.08 235); /* deep blue-100 */
+	--nav-item-active-border: var(--button-primary); /* deep blue-600 */
+	--modal-overlay: oklch(0 0 0 / 0.3); /* black/30 */
+	--modal-header-text: var(--primary-foreground); /* white */
+	--level-card-bg: var(--button-primary); /* deep blue-600 */
+	--level-card-text: var(--primary-foreground); /* white */
+	--progress-bar: oklch(0.589 0.151 154.449); /* green-600 */
+
+	/* Hint card variables for light mode */
+	--hint-card-bg: var(--card); /* very light blue-white */
+	--hint-card-border: oklch(0.55 0.18 235); /* deep blue-500 */
+	--hint-card-title: oklch(0.48 0.17 235); /* deep blue-600 */
+	--hint-card-text: oklch(0.55 0.015 235); /* gray-600 with blue tint */
+	--hint-card-code-bg: oklch(0.981 0.002 235); /* gray-50 with blue tint */
+	--hint-card-code-text: oklch(0.45 0.015 235); /* gray-700 with blue tint */
+	--hint-tip-bg: var(--nav-item-active-bg); /* deep blue-100 */
+	--hint-tip-border: var(--link); /* deep blue-300 */
+	--hint-tip-text: oklch(0.38 0.14 235); /* deep blue-700 */
+
+	/* Quiz component variables for light mode */
+	--stats-card-bg: oklch(0.97 0.02 235); /* deep blue-50 */
+	--stats-card-border: var(--hint-card-border); /* deep blue-500 */
+	--stats-points: oklch(0.48 0.17 235); /* deep blue-600 */
+	--stats-streak: var(--progress-bar); /* green-600 */
+	--stats-record: oklch(0.516 0.178 303.9); /* purple-600 */
+	--stats-accuracy-high: var(--progress-bar); /* green-600 */
+	--stats-accuracy-medium: oklch(0.706 0.188 84.429); /* yellow-600 */
+	--stats-accuracy-low: oklch(0.627 0.257 27.325); /* red-600 */
+	--stats-label: oklch(
+		0.4 0.015 235
+	); /* gray-700 with blue tint - darker for better contrast */
+	--question-prompt-bg: var(--button-primary); /* deep blue-600 */
+	--question-prompt-text: var(--primary-foreground); /* white */
+	--code-display-bg: oklch(0.971 0.002 235); /* gray-100 with blue tint */
+	--code-display-text: oklch(0.145 0 0); /* near-black */
+	--code-line-number: oklch(0.608 0.015 235); /* gray-500 with blue tint */
+	--checkbox-label-border: oklch(0.905 0.002 235); /* gray-200 with blue tint */
+	--checkbox-label-border-hover: var(--link); /* deep blue-300 */
+	--checkbox-label-bg-hover: var(--stats-card-bg); /* deep blue-50 */
+	--checkbox-kbd-bg: var(--code-display-bg); /* gray-100 with blue tint */
+	--action-button-bg: oklch(
+		0.489 0.141 154.449
+	); /* green-700 - darker for better contrast */
+	--action-button-bg-hover: oklch(
+		0.422 0.121 154.449
+	); /* green-800 - even darker on hover */
+	--action-button-text: var(--primary-foreground); /* white */
+	--action-button-disabled: oklch(
+		0.608 0.013 235
+	); /* gray-400 with blue tint */
+	--feedback-success-bg: oklch(0.977 0.031 154.449); /* green-50 */
+	--feedback-success-text: oklch(0.422 0.111 154.449); /* green-800 */
+	--feedback-error-bg: oklch(0.977 0.051 27.325); /* red-50 */
+	--feedback-error-text: oklch(0.437 0.217 27.325); /* red-800 */
+	--hint-summary-bg: var(--stats-card-bg); /* deep blue-50 */
+	--hint-summary-bg-hover: var(--nav-item-active-bg); /* deep blue-100 */
+	--hint-summary-border: var(--link); /* deep blue-300 */
+	--hint-summary-text: oklch(0.38 0.14 235); /* deep blue-800 */
+	--hint-content-bg: var(--stats-card-bg); /* deep blue-50 */
 }
 
 .dark {
-	--background: oklch(0.145 0 0);
+	--background: oklch(0.205 0 0);
 	--foreground: oklch(0.985 0 0);
 	--card: oklch(0.205 0 0);
 	--card-foreground: oklch(0.985 0 0);
@@ -124,12 +240,102 @@
 	--chart-5: oklch(0.645 0.246 16.439);
 	--sidebar: oklch(0.205 0 0);
 	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
+	--sidebar-primary: oklch(0.488 0.24 235);
 	--sidebar-primary-foreground: oklch(0.985 0 0);
 	--sidebar-accent: oklch(0.269 0 0);
 	--sidebar-accent-foreground: oklch(0.985 0 0);
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.556 0 0);
+
+	/* Semantic color variables for dark mode */
+	--header-text: oklch(0.92 0.04 235); /* lighter deep blue for contrast */
+	--header-subtitle: oklch(0.75 0.12 235); /* lighter deep blue-200 */
+	--link: oklch(0.82 0.15 235); /* brighter deep blue */
+	--link-hover: var(--foreground); /* near white */
+	--button-primary: oklch(0.35 0.14 235); /* darker deep blue */
+	--button-primary-hover: oklch(0.3 0.12 235); /* darker on hover */
+	--button-primary-text: oklch(0.96 0.02 235); /* light text */
+	--nav-button-bg: oklch(1 0 0 / 0.1); /* white/10 */
+	--nav-button-bg-hover: oklch(1 0 0 / 0.2); /* white/20 */
+	--nav-button-text: var(--foreground); /* near white */
+	--nav-item-text: oklch(0.905 0.002 235); /* light gray with blue tint */
+	--nav-item-text-hover: oklch(0.65 0.18 235); /* lighter deep blue on hover */
+	--nav-item-description: oklch(
+		0.708 0.015 235
+	); /* mid-light gray with blue tint */
+	--nav-item-active-bg: oklch(0.269 0.04 235); /* dark deep blue background */
+	--nav-item-active-border: var(
+		--button-primary
+	); /* lighter deep blue border */
+	--modal-overlay: oklch(0 0 0 / 0.5); /* darker overlay */
+	--modal-header-text: var(--foreground); /* near white */
+	--level-card-bg: oklch(0.45 0.15 235); /* deep blue-600 */
+	--level-card-text: var(--foreground); /* near white */
+	--progress-bar: oklch(0.689 0.171 154.449); /* brighter green */
+
+	/* Hint card variables for dark mode */
+	--hint-card-bg: var(--muted); /* dark gray card background */
+	--hint-card-border: oklch(0.65 0.18 235); /* lighter deep blue-500 */
+	--hint-card-title: oklch(0.68 0.18 235); /* lighter deep blue-600 */
+	--hint-card-text: oklch(
+		0.808 0.015 235
+	); /* lighter gray-400 with blue tint */
+	--hint-card-code-bg: var(--background); /* darker background for code */
+	--hint-card-code-text: oklch(
+		0.853 0.015 235
+	); /* light gray-300 with blue tint */
+	--hint-tip-bg: oklch(0.269 0.08 235); /* dark deep blue-900 equivalent */
+	--hint-tip-border: oklch(0.45 0.12 235); /* darker deep blue-600 */
+	--hint-tip-text: oklch(0.72 0.15 235); /* lighter deep blue-400 */
+
+	/* Quiz component variables for dark mode */
+	--stats-card-bg: oklch(0.269 0.02 235); /* darker deep blue */
+	--stats-card-border: var(--hint-card-border); /* lighter deep blue-500 */
+	--stats-points: oklch(0.68 0.18 235); /* lighter deep blue-400 */
+	--stats-streak: oklch(0.72 0.16 154.449); /* lighter green for dark mode */
+	--stats-record: oklch(0.75 0.2 303.9); /* lighter purple for dark mode */
+	--stats-accuracy-high: var(--stats-streak); /* lighter green for dark mode */
+	--stats-accuracy-medium: oklch(
+		0.82 0.2 84.429
+	); /* lighter yellow for dark mode */
+	--stats-accuracy-low: oklch(0.75 0.26 27.325); /* lighter red for dark mode */
+	--stats-label: oklch(0.708 0.015 235); /* lighter gray with deep blue tint */
+	--question-prompt-bg: var(--button-primary); /* lighter deep blue */
+	--question-prompt-text: var(--foreground); /* near white */
+	--code-display-bg: var(
+		--stats-card-bg
+	); /* dark background with deep blue tint */
+	--code-display-text: oklch(0.905 0 0); /* light text */
+	--code-line-number: oklch(
+		0.65 0.015 235
+	); /* lighter gray-400 with deep blue tint for dark mode */
+	--checkbox-label-border: oklch(
+		0.369 0.002 235
+	); /* dark gray-700 with deep blue tint */
+	--checkbox-label-border-hover: oklch(
+		0.55 0.15 235
+	); /* deep blue-500 in dark */
+	--checkbox-label-bg-hover: var(--stats-card-bg); /* dark deep blue */
+	--checkbox-kbd-bg: oklch(0.269 0.002 235); /* dark gray with deep blue tint */
+	--action-button-bg: oklch(
+		0.519 0.131 154.449
+	); /* green-700 adjusted - darker for better contrast */
+	--action-button-bg-hover: oklch(0.452 0.111 154.449); /* green-800 adjusted */
+	--action-button-text: var(--foreground); /* near white */
+	--action-button-disabled: oklch(
+		0.408 0.015 235
+	); /* darker gray with deep blue tint */
+	--feedback-success-bg: oklch(0.269 0.031 154.449); /* dark green */
+	--feedback-success-text: oklch(0.789 0.111 154.449); /* light green text */
+	--feedback-error-bg: oklch(0.269 0.051 27.325); /* dark red */
+	--feedback-error-text: oklch(0.837 0.217 27.325); /* light red text */
+	--hint-summary-bg: var(--stats-card-bg); /* darker deep blue */
+	--hint-summary-bg-hover: oklch(
+		0.339 0.08 235
+	); /* slightly lighter deep blue */
+	--hint-summary-border: var(--hint-tip-border); /* darker deep blue */
+	--hint-summary-text: var(--hint-tip-text); /* lighter deep blue text */
+	--hint-content-bg: var(--stats-card-bg); /* dark deep blue */
 }
 
 @layer base {
@@ -139,6 +345,45 @@
 	body {
 		@apply bg-background text-foreground;
 	}
+
+	a.underline {
+		text-decoration: underline !important;
+	}
+}
+
+/* Screen reader only utility class for accessibility */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Site specific styles */
+
+/* Custom animations */
+@keyframes gentle-bounce {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-3px);
+	}
+}
+
+.animate-gentle-bounce {
+	animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+/* Custom kbd styling */
+.kbd-style {
+	@apply bg-slate-700 text-white text-xs font-semibold px-2 py-1 rounded border border-slate-600 shadow-sm min-w-[24px] text-center;
 }
 
 /* Keyboard shortcuts arrow rotation */

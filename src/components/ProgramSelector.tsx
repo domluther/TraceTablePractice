@@ -58,7 +58,7 @@ export function ProgramSelector({
 
 	return (
 		<details open>
-			<summary className="my-2 text-xl font-semibold text-gray-800">
+			<summary className="my-2 text-xl font-semibold text-nav-item-text">
 				🖥️ Pick a program
 			</summary>
 
@@ -67,7 +67,7 @@ export function ProgramSelector({
 				<div className="flex items-center gap-3">
 					<label
 						htmlFor={difficultySelectId}
-						className="font-bold text-gray-700 text-md"
+						className="font-bold text-stats-label text-md"
 					>
 						Difficulty:
 					</label>
@@ -79,7 +79,7 @@ export function ProgramSelector({
 							setSelectedDifficulty(newDifficulty);
 							onDifficultyChange?.(newDifficulty);
 						}}
-						className="px-3 py-1.5 border border-gray-400 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+						className="px-3 py-1.5 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
 					>
 						<option value="easy">Easy</option>
 						<option value="medium">Medium</option>
@@ -93,17 +93,17 @@ export function ProgramSelector({
 			</div>
 
 			{/* Program Table */}
-			<div className="overflow-scroll bg-white rounded-lg shadow-sm max-h-96">
-				<table className="w-full text-base bg-white border-collapse">
+			<div className="overflow-scroll bg-card rounded-lg shadow-sm max-h-96">
+				<table className="w-full text-base bg-card border-collapse">
 					<thead>
-						<tr className="sticky top-0 z-10 bg-gradient-to-br from-gray-800 to-gray-900">
-							<th className="px-4 py-3 font-semibold text-left text-white border-b">
+						<tr className="sticky top-0 z-10 bg-button-primary">
+							<th className="px-4 py-3 font-semibold text-left text-button-primary-text border-b border-border">
 								Program
 							</th>
-							<th className="px-4 py-3 font-semibold text-left text-white border-b">
+							<th className="px-4 py-3 font-semibold text-left text-button-primary-text border-b border-border">
 								Best Score
 							</th>
-							<th className="px-4 py-3 font-semibold text-left text-white border-b">
+							<th className="px-4 py-3 font-semibold text-left text-button-primary-text border-b border-border">
 								Action
 							</th>
 						</tr>
@@ -114,15 +114,15 @@ export function ProgramSelector({
 							return (
 								<tr
 									key={`${selectedDifficulty}-${index}-${program.description}`}
-									className="border-b transition-colors duration-150 hover:bg-gray-50"
+									className="border-b border-border transition-colors duration-150 hover:bg-checkbox-label-bg-hover"
 								>
 									<td className="px-4 py-3 align-middle">
 										<div>
-											<div className="font-medium text-gray-800">
+											<div className="font-medium text-card-foreground">
 												{program.description}
 											</div>
 											{program.inputSets && (
-												<div className="mt-1 text-xs text-gray-500">
+												<div className="mt-1 text-xs text-muted-foreground">
 													Multiple input variations available
 												</div>
 											)}
@@ -133,14 +133,14 @@ export function ProgramSelector({
 											className={`inline-block min-w-24 text-center px-2 py-1 rounded-full text-xs font-semibold ${
 												// No attempt grey, otherwise colour coded
 												scoreDisplay.accuracy === null
-													? "bg-gray-200 text-gray-600"
+													? "bg-muted text-muted-foreground"
 													: scoreDisplay.accuracy >= 80
-														? "bg-emerald-200 text-emerald-800"
+														? "bg-feedback-success-bg text-feedback-success-text"
 														: scoreDisplay.accuracy >= 60
-															? "bg-lime-200 text-lime-800"
+															? "bg-stats-accuracy-medium/20 text-stats-accuracy-medium"
 															: scoreDisplay.accuracy >= 40
-																? "bg-amber-200 text-amber-800"
-																: "bg-red-200 text-red-800"
+																? "bg-stats-accuracy-medium/30 text-stats-accuracy-medium"
+																: "bg-feedback-error-bg text-feedback-error-text"
 											}`}
 										>
 											{scoreDisplay.text}

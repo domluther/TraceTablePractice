@@ -9,7 +9,6 @@ import type { Program } from "@/lib/programs";
 import type { SITE_CONFIG } from "@/lib/siteConfig";
 import type { Difficulty } from "@/lib/types";
 import { captureElement } from "@/lib/utils";
-import { HintPanel } from "./HintPanel";
 import { ProgramCode } from "./ProgramCode";
 import { QuizButton } from "./QuizButton";
 import { Button } from "./ui/button";
@@ -345,16 +344,16 @@ export function TraceTableBody({
 
 		// Base classes that maintain consistent sizing and styling
 		const baseClass =
-			"w-full h-8 px-2 text-center text-sm rounded-sm border-none focus:outline-2 focus:outline-blue-500 focus:bg-blue-50 box-border";
+			"w-full h-8 px-2 text-center text-sm rounded-sm border-none focus:outline-2 focus:outline-ring focus:bg-checkbox-label-bg-hover box-border";
 
 		if (isMarked && isCorrect !== undefined) {
 			if (isCorrect) {
-				return `${baseClass} bg-green-100 text-green-800 border-green-400`;
+				return `${baseClass} bg-feedback-success-bg text-feedback-success-text border-stats-accuracy-high`;
 			} else {
-				return `${baseClass} bg-red-100 text-red-800 border-red-400`;
+				return `${baseClass} bg-feedback-error-bg text-feedback-error-text border-stats-accuracy-low`;
 			}
 		}
-		return `${baseClass} bg-slate-50`;
+		return `${baseClass} bg-checkbox-kbd-bg`;
 	};
 
 	const shuffleInputs = useCallback(() => {
@@ -471,11 +470,58 @@ export function TraceTableBody({
 		canGoPrevious,
 	]);
 
+	// Generate hint content from siteConfig.hints
+	const getHintContent = useCallback(() => {
+		const hints = siteConfig.hints || [];
+		return (
+			<div className="space-y-3">
+				{hints.map((hint) => (
+					<div
+						key={hint.title}
+						className="p-3 border-l-4 rounded-lg bg-hint-card-bg border-hint-card-border shadow-sm"
+					>
+						<div className="mb-1 font-bold text-hint-card-title">
+							{hint.title}
+						</div>
+						<div className="mb-2 text-hint-card-text">{hint.description}</div>
+						<div className="space-y-1">
+							{hint.examples.map((example) => (
+								<div
+									key={example}
+									className="px-2 py-1 font-mono text-sm rounded text-hint-card-code-text bg-hint-card-code-bg"
+								>
+									{example}
+								</div>
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+		);
+	}, [siteConfig.hints]);
+
+	const helpSection = (
+		<details className="group">
+			<summary className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-button-primary focus:ring-offset-2 rounded-lg px-4 py-3 bg-hint-summary-bg border border-hint-summary-border hover:bg-hint-summary-bg-hover transition-all duration-200 shadow-sm hover:shadow-md list-none [&::-webkit-details-marker]:hidden">
+				<span className="flex items-center font-semibold text-hint-summary-text">
+					<span className="mr-2 text-lg">💡</span>
+					Get help with Trace Tables
+					<span className="ml-auto transition-transform duration-200 group-open:rotate-180">
+						▼
+					</span>
+				</span>
+			</summary>
+			<div className="p-5 mt-3 border rounded-lg border-hint-summary-border shadow-sm bg-hint-content-bg">
+				<div className="text-base">{getHintContent()}</div>
+			</div>
+		</details>
+	);
+
 	if (!currentProgram) {
 		return (
 			<Card>
 				<CardContent className="p-6">
-					<p className="text-center text-gray-500">
+					<p className="text-center text-muted-foreground">
 						Select a program to start practicing!
 					</p>
 				</CardContent>
@@ -495,45 +541,51 @@ export function TraceTableBody({
 			/>
 
 			{/* Trace Table */}
-			<Card className="border-l-4 gap-2 shadow-sm border-slate-200 bg-slate-100 border-l-gray-500">
-				<CardHeader className="flex flex-row justify-between pb-0">
-					<CardTitle className="text-xl font-semibold text-slate-800">
-						Trace Table
-					</CardTitle>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() =>
-							captureElement(
-								cardRef,
-								`Trace table - ${currentProgram.description}`,
-							)
-						}
-						className="text-sm font-light text-blue-300 transition-all duration-200 bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500 hover:text-white"
-					>
-						📸 Screenshot
-					</Button>
+			<Card className="border-l-4 gap-2 shadow-xl border-border bg-code-display-bg border-l-hint-card-border py-0">
+				<CardHeader className="border-b bg-button-primary px-4 !pb-2 !pt-2 rounded-t-lg">
+					<div className="flex flex-col justify-between gap-3 md:flex-row lg:items-center">
+						<div className="flex flex-col">
+							<CardTitle className="text-lg font-semibold text-button-primary-text">
+								Trace Table
+							</CardTitle>
+						</div>
+						<div className="flex items-center flex-shrink-0 gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() =>
+									captureElement(
+										cardRef,
+										`Trace table - ${currentProgram.description}`,
+									)
+								}
+								className="text-sm font-light text-link transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-link-hover"
+							>
+								📸 Screenshot
+							</Button>
+						</div>
+					</div>
 				</CardHeader>
 				<CardContent className="pt-0">
 					<div className="overflow-auto rounded-lg max-h-96">
 						<table
 							ref={cardRef}
-							className="w-full text-sm border-collapse table-fixed bg-slate-50"
+							className="w-full text-sm border-collapse table-fixed bg-checkbox-kbd-bg"
 						>
 							<thead>
-								<tr className="sticky top-0 z-10 bg-slate-600">
-									<th className="px-2 py-3 font-semibold text-center text-white border border-gray-800">
+								<tr className="sticky top-0 z-10 bg-button-primary">
+									<th className="px-2 py-3 font-semibold text-center text-button-primary-text border border-border">
 										Line Number
 									</th>
 									{programVariables.map((varName) => (
 										<th
 											key={varName}
-											className="px-2 py-3 font-semibold text-center text-white border border-gray-800"
+											className="px-2 py-3 font-semibold text-center text-button-primary-text border border-border"
 										>
 											{varName}
 										</th>
 									))}
-									<th className="px-2 py-3 font-semibold text-center text-white border border-gray-800">
+									<th className="px-2 py-3 font-semibold text-center text-button-primary-text border border-border">
 										Output
 									</th>
 								</tr>
@@ -542,9 +594,9 @@ export function TraceTableBody({
 								{userEntries.map((entry, rowIndex) => (
 									<tr
 										key={entry.id}
-										className="transition-colors hover:bg-gray-50"
+										className="transition-colors hover:bg-checkbox-label-bg-hover"
 									>
-										<td className="p-1 text-center border border-slate-200">
+										<td className="p-1 text-center border border-checkbox-label-border">
 											<input
 												ref={rowIndex === 0 ? firstInputRef : undefined}
 												type="number"
@@ -563,7 +615,7 @@ export function TraceTableBody({
 										{programVariables.map((varName) => (
 											<td
 												key={varName}
-												className="p-1 text-center border border-slate-200"
+												className="p-1 text-center border border-checkbox-label-border"
 											>
 												<input
 													type="text"
@@ -576,7 +628,7 @@ export function TraceTableBody({
 												/>
 											</td>
 										))}
-										<td className="p-1 text-center border border-slate-200">
+										<td className="p-1 text-center border border-checkbox-label-border">
 											<input
 												type="text"
 												className={getCellClassName(rowIndex, "output")}
@@ -631,14 +683,14 @@ export function TraceTableBody({
 			{/* Feedback */}
 			{feedback && (
 				<Card
-					className={`mt-6 border-2 ${feedback.isCorrect ? "border-green-400 bg-green-50" : "border-red-400 bg-red-50"}`}
+					className={`mt-6 border-2 ${feedback.isCorrect ? "border-stats-accuracy-high bg-feedback-success-bg" : "border-stats-accuracy-low bg-feedback-error-bg"}`}
 				>
 					<CardContent className="px-6">
 						<div
 							className={`feedback ${feedback.isCorrect ? "correct" : "incorrect"}`}
 						>
 							<p
-								className={`text-base font-semibold ${feedback.isCorrect ? "text-green-700" : "text-red-700"}`}
+								className={`text-base font-semibold ${feedback.isCorrect ? "text-feedback-success-text" : "text-feedback-error-text"}`}
 							>
 								<strong>{feedback.message.split("You got")[0].trim()}</strong>{" "}
 								{feedback.message.includes("You got")
@@ -648,7 +700,7 @@ export function TraceTableBody({
 							{feedback.details && feedback.details.length > 0 && (
 								<div className="mt-4 feedback-details">
 									<p
-										className={`text-sm font-semibold mb-3 ${feedback.isCorrect ? "text-green-700" : "text-red-700"}`}
+										className={`text-sm font-semibold mb-3 ${feedback.isCorrect ? "text-feedback-success-text" : "text-feedback-error-text"}`}
 									>
 										<strong>Details:</strong>
 									</p>
@@ -656,7 +708,7 @@ export function TraceTableBody({
 										{feedback.details.map((error) => (
 											<div
 												key={error}
-												className="p-2 font-mono text-sm leading-relaxed text-red-800 bg-red-100 rounded feedback-item incorrect"
+												className="p-2 font-mono text-sm leading-relaxed text-feedback-error-text bg-feedback-error-bg rounded feedback-item incorrect"
 											>
 												{error}
 											</div>
@@ -670,12 +722,10 @@ export function TraceTableBody({
 			)}
 
 			{/* Help Section */}
-			{currentProgram ? (
-				<HintPanel title="📝 Trace Table Tips" items={siteConfig.hints || []} />
-			) : null}
+			{currentProgram ? helpSection : null}
 
 			{/* Keyboard Shortcuts Help */}
-			<div className="mx-auto my-4 border border-l-4 rounded-lg border-l-teal-500 bg-slate-100">
+			<div className="mx-auto my-4 border border-l-4 rounded-lg border-l-hint-card-border bg-hint-card-code-bg">
 				<details>
 					<summary className="relative flex items-center px-4 py-3 font-semibold list-none cursor-pointer select-none gap-2">
 						<span className="inline-block text-xs transition-transform duration-200 arrow-icon">
@@ -683,28 +733,28 @@ export function TraceTableBody({
 						</span>
 						⌨️ Keyboard Shortcuts
 					</summary>
-					<div className="p-4 pt-0 border-t border-blue-100 grid grid-cols-1 gap-2 sm:flex sm:justify-evenly">
-						<span className="flex items-center text-sm text-gray-600 gap-2">
+					<div className="p-4 pt-0 border-t border-checkbox-label-border grid grid-cols-1 gap-2 sm:flex sm:justify-evenly">
+						<span className="flex items-center text-sm text-muted-foreground gap-2">
 							<kbd className="kbd-style">Enter</kbd>
 							Mark Answer
 						</span>
 						{onNextProgram && (
-							<span className="flex items-center text-sm text-gray-600 gap-2">
+							<span className="flex items-center text-sm text-muted-foreground gap-2">
 								<kbd className="kbd-style">N</kbd>
 								Next Program
 							</span>
 						)}
 						{onPreviousProgram && (
-							<span className="flex items-center text-sm text-gray-600 gap-2">
+							<span className="flex items-center text-sm text-muted-foreground gap-2">
 								<kbd className="kbd-style">P</kbd>
 								Previous Program
 							</span>
 						)}
-						<span className="flex items-center text-sm text-gray-600 gap-2">
+						<span className="flex items-center text-sm text-muted-foreground gap-2">
 							<kbd className="kbd-style">S</kbd>
 							Shuffle Inputs
 						</span>
-						<span className="flex items-center text-sm text-gray-600 gap-2">
+						<span className="flex items-center text-sm text-muted-foreground gap-2">
 							<kbd className="kbd-style">Esc</kbd>
 							Clear Table
 						</span>

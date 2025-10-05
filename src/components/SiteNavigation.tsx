@@ -57,9 +57,9 @@ export function SiteNavigation({
 						aria-label="Open navigation menu"
 						className={cn(
 							"flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg",
-							"bg-white/10 hover:bg-white/20 backdrop-blur-sm",
-							"text-white font-medium transition-all duration-200",
-							"border border-white/20 hover:border-white/30",
+							"bg-nav-button-bg hover:bg-nav-button-bg-hover backdrop-blur-sm",
+							"text-nav-button-text font-medium transition-all duration-200",
+							"border border-muted/20 hover:border-muted/30",
 						)}
 					>
 						{/* Responsive display */}
@@ -91,7 +91,7 @@ export function SiteNavigation({
 					sideOffset={8}
 				>
 					{/* Header */}
-					<div className="p-3 text-xs font-semibold text-center text-white uppercase sm:p-4 sm:text-sm bg-header/90 ">
+					<div className="p-3 text-xs font-semibold text-center uppercase text-nav-button-text sm:p-4 sm:text-sm bg-header/90 ">
 						Computer Science Practice
 					</div>
 
@@ -102,19 +102,19 @@ export function SiteNavigation({
 								<a
 									href={item.url}
 									className={cn(
-										"block p-2 sm:p-3 border-b border-indigo-200 transition-colors",
-										"group text-gray-800 cursor-pointer",
+										"block p-2 sm:p-3 border-b border-border transition-colors",
+										"group text-nav-item-text cursor-pointer",
 										currentSiteId === item.id &&
-											"bg-indigo-100 border-l-4 border-l-indigo-500",
+											"bg-nav-item-active-bg border-l-4 border-l-nav-item-active-border",
 									)}
 									target="_blank"
 									rel="noopener noreferrer"
 								>
 									<div className="flex flex-col space-y-1">
-										<div className="text-base font-bold text-center transition-colors sm:text-lg group-hover:text-indigo-600">
+										<div className="text-base font-bold text-center transition-colors sm:text-lg group-hover:text-nav-item-text-hover">
 											{item.title}
 										</div>
-										<div className="text-xs leading-tight text-gray-600 sm:text-sm">
+										<div className="text-xs leading-tight text-nav-item-description sm:text-sm">
 											{item.description}
 										</div>
 									</div>

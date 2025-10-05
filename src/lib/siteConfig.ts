@@ -1,4 +1,4 @@
-import type { HintItem } from "@/components/HintPanel";
+import type { HintItem } from "@/lib/types";
 import type { LevelInfo } from "@/lib/scoreManager";
 
 /** Configuration interface for GCSE CS practice sites */

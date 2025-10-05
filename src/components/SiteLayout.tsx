@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Header } from "@/components/Header";
-import { Footer } from './Footer';
 
 interface QuizLayoutProps {
 	/** The main content area of the quiz */
@@ -28,19 +27,17 @@ export function SiteLayout({
 	titleIcon = "🦆",
 }: QuizLayoutProps) {
 	return (
-			<div className="flex flex-col items-center justify-center min-h-screen p-2 sm:p-5 bg-gradient-to-br from-indigo-400 to-purple-600">
-
+		<>
 			<div className="w-full max-w-7xl overflow-hidden bg-white shadow-2xl rounded-xl">
 				<Header
 					scoreButton={scoreButton}
 					title={`${titleIcon} ${title} ${titleIcon}`}
 					subtitle={subtitle}
 				/>
-				<main className="p-8">
+				<main className="p-4 bg-muted sm:p-6">
 					<div className="mx-auto">{children}</div>
 				</main>
-				<Footer/>
 			</div>
-		</div>
+		</>
 	);
 }

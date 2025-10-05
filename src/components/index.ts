@@ -5,8 +5,6 @@
 
 export { Footer } from "./Footer";
 export { Header } from "./Header";
-export type { HintItem } from "./HintPanel";
-export { HintPanel } from "./HintPanel";
 export { ProgramSelector } from "./ProgramSelector";
 export type {
 	QuizButtonProps,
