@@ -133,7 +133,7 @@ export function ProgramSelector({
 											className={`inline-block min-w-24 text-center px-2 py-1 rounded-full text-xs font-semibold ${
 												// No attempt grey, otherwise colour coded
 												scoreDisplay.accuracy === null
-													? "bg-muted text-muted-foreground"
+													? "bg-muted text-stats-label"
 													: scoreDisplay.accuracy >= 80
 														? "bg-feedback-success-bg text-feedback-success-text"
 														: scoreDisplay.accuracy >= 60

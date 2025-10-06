@@ -559,7 +559,7 @@ export function TraceTableBody({
 										`Trace table - ${currentProgram.description}`,
 									)
 								}
-								className="text-sm font-light text-link transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-link-hover"
+								className="text-sm font-light text-button-primary-text transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
 							>
 								📸 Screenshot
 							</Button>

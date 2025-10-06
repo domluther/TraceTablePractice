@@ -84,7 +84,7 @@ export function ProgramCode({
 						</CardTitle>
 						{currentProgram && (
 							<div className="flex items-center gap-3">
-								<span className="text-sm font-light text-header-subtitle rounded-md ">
+								<span className="text-sm font-light text-button-primary-text rounded-md ">
 									{getProgramDisplayName()}: {currentProgram.description}
 								</span>
 							</div>
@@ -98,7 +98,7 @@ export function ProgramCode({
 								onClick={() =>
 									window.open(generateERLURL(currentProgram.code), "_blank")
 								}
-								className="text-sm font-light text-link transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-link-hover"
+								className="text-sm font-light text-button-primary-text transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
 							>
 								💻 Open in ERL IDE
 							</Button>
@@ -106,7 +106,7 @@ export function ProgramCode({
 								variant="outline"
 								size="sm"
 								onClick={generateShareURL}
-								className="text-sm font-light text-link transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-link-hover"
+								className="text-sm font-light text-button-primary-text transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
 							>
 								🔗 Share Link
 							</Button>
@@ -115,7 +115,7 @@ export function ProgramCode({
 								variant="outline"
 								size="sm"
 								onClick={() => captureElement(cardRef, getProgramDisplayName())}
-								className="text-sm font-light text-link transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-link-hover"
+								className="text-sm font-light text-button-primary-text transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
 							>
 								📸 Screenshot
 							</Button>

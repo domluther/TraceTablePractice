@@ -93,7 +93,8 @@ const buttonVariants = {
   `,
 	destructive: `
     px-6 py-3 font-medium rounded-lg transition-all duration-200
-    bg-red-500 hover:bg-red-600
+    bg-[oklch(0.437_0.217_27.325)] hover:bg-[oklch(0.35_0.2_27.325)]
+    dark:bg-[oklch(0.35_0.2_27.325)] dark:hover:bg-[oklch(0.28_0.18_27.325)]
     text-white shadow-md hover:shadow-lg
   `,
 	menu: `
