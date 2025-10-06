@@ -610,6 +610,7 @@ export function TraceTableBody({
 													)
 												}
 												placeholder=""
+												aria-label={`Line number for row ${rowIndex + 1}`}
 											/>
 										</td>
 										{programVariables.map((varName) => (
@@ -625,6 +626,7 @@ export function TraceTableBody({
 														updateUserEntry(rowIndex, varName, e.target.value)
 													}
 													placeholder=""
+													aria-label={`${varName} value for row ${rowIndex + 1}`}
 												/>
 											</td>
 										))}
@@ -637,6 +639,7 @@ export function TraceTableBody({
 													updateUserEntry(rowIndex, "output", e.target.value)
 												}
 												placeholder=""
+												aria-label={`Output value for row ${rowIndex + 1}`}
 											/>
 										</td>
 									</tr>
