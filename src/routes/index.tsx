@@ -76,43 +76,12 @@ function Index() {
 	// Used for scrolling
 	const [programCodeId, setProgramCodeId] = useState<string>("");
 
-	// Overall statistics for score display
-	const [localStats, setLocalStats] = useState({
-		level: siteConfig.scoring.customLevels?.[0] || {
-			emoji: "🥚",
-			title: "Beginner",
-			description: "Just getting started!",
-			minPoints: 0,
-			minAccuracy: 0,
-		},
-		totalPoints: 0,
-		accuracy: 0,
-	});
+	// Score update trigger to force re-renders when score changes
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [_scoreUpdateTrigger, setScoreUpdateTrigger] = useState(0);
 
-	// Function to update overall stats
-	const updateStats = useCallback(() => {
-		const stats = scoreManager.getOverallStats();
-
-		// Calculate level based on performance
-		const currentLevel = stats.currentLevel;
-
-		setLocalStats({
-			level: currentLevel || {
-				emoji: "🥚",
-				title: "Beginner",
-				description: "Just getting started!",
-				minPoints: 0,
-				minAccuracy: 0,
-			},
-			totalPoints: stats.totalPoints,
-			accuracy: stats.accuracy,
-		});
-	}, [scoreManager]);
-
-	// Update stats on mount and when dependencies change
-	useEffect(() => {
-		updateStats();
-	}, [updateStats]);
+	// Get overall stats (computed fresh on each render)
+	const overallStats = scoreManager.getOverallStats();
 
 	// Used to set a program
 	useEffect(() => {
@@ -315,10 +284,10 @@ function Index() {
 					total,
 				);
 				// Update stats immediately after score changes
-				updateStats();
+				setScoreUpdateTrigger((prev) => prev + 1);
 			}
 		},
-		[currentDifficulty, currentProgramIndex, scoreManager, updateStats],
+		[currentDifficulty, currentProgramIndex, scoreManager],
 	);
 
 	return (
@@ -328,9 +297,9 @@ function Index() {
 			titleIcon={siteConfig.icon}
 			scoreButton={
 				<ScoreButton
-					levelEmoji={localStats.level.emoji}
-					levelTitle={localStats.level.title}
-					points={localStats.totalPoints}
+					levelEmoji={overallStats.currentLevel.emoji}
+					levelTitle={overallStats.currentLevel.title}
+					points={overallStats.totalPoints}
 					onClick={() => setShowStatsModal(true)}
 				/>
 			}
@@ -370,7 +339,7 @@ function Index() {
 				onClose={() => setShowStatsModal(false)}
 				scoreManager={scoreManager}
 				title="Trace Table Statistics"
-				onStatsUpdate={updateStats}
+				onStatsUpdate={() => setScoreUpdateTrigger((prev) => prev + 1)}
 			/>
 		</SiteLayout>
 	);
