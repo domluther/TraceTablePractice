@@ -55,7 +55,6 @@ export const captureElement = async (
 export const pickProgramInputs = (program: Program) => {
 	// Make a shallow copy first
 	const selectedProgram = { ...program };
-	console.log(selectedProgram);
 
 	if (program.inputSets && program.inputSets.length > 0) {
 		const randomInputSet =

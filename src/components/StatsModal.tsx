@@ -3,7 +3,7 @@ import { useEffect, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import type { ScoreManager } from "@/lib/scoreManager";
+import type { OverallStats, ScoreManager } from "@/lib/scoreManager";
 import { cn } from "@/lib/utils";
 
 interface StatsModalProps {
@@ -11,7 +11,7 @@ interface StatsModalProps {
 	onClose: () => void;
 	scoreManager: ScoreManager;
 	/** Title for the modal */
-	title?: string;
+	title: string;
 	/** Callback to trigger stats update in parent component */
 	onStatsUpdate?: () => void;
 }
@@ -24,7 +24,7 @@ export function StatsModal({
 	isOpen,
 	onClose,
 	scoreManager,
-	title = "Your Progress",
+	title,
 	onStatsUpdate,
 }: StatsModalProps) {
 	const titleId = useId();
@@ -48,9 +48,7 @@ export function StatsModal({
 	if (!isOpen) return null;
 
 	const overallStats = scoreManager.getOverallStats();
-	const programScores = scoreManager.getProgramScores
-		? scoreManager.getProgramScores()
-		: [];
+	const detailedStats = scoreManager.getProgramScores();
 
 	const handleResetScores = () => {
 		if (
@@ -106,70 +104,7 @@ export function StatsModal({
 					{overallStats.totalAttempts > 0 ? (
 						<div className="space-y-4">
 							{/* Level Info Card */}
-							<Card className="text-level-card-text bg-level-card-bg">
-								<CardHeader className="text-level-card-text">
-									<div className="flex items-center gap-4">
-										<div className="text-5xl animate-gentle-bounce">
-											{overallStats.currentLevel.emoji}
-										</div>
-										<div className="flex-1 text-left">
-											<CardTitle className="text-2xl">
-												{overallStats.currentLevel.title}
-											</CardTitle>
-											<p className="mt-1 opacity-90">
-												{overallStats.currentLevel.description}
-											</p>
-										</div>
-									</div>
-								</CardHeader>
-								{overallStats.nextLevel && (
-									<CardContent className="p-4 mx-4 rounded-md bg-card/20">
-										<div className="flex items-center justify-between mb-2 text-sm font-semibold">
-											<span>
-												Progress to {overallStats.nextLevel.emoji}{" "}
-												{overallStats.nextLevel.title}
-											</span>
-											<span>
-												{Math.max(
-													0,
-													overallStats.nextLevel.minPoints -
-														overallStats.totalPoints,
-												)}{" "}
-												points needed
-											</span>
-										</div>
-										<Progress
-											value={overallStats.progress}
-											className="h-2 mb-3 [&>div]:bg-progress-bar"
-										/>
-										{/* Detailed requirements */}
-										<div className="text-sm space-y-1">
-											{overallStats.accuracy <
-												overallStats.nextLevel.minAccuracy && (
-												<div>
-													🎯 {Math.round(overallStats.nextLevel.minAccuracy)}%
-													accuracy required (currently{" "}
-													{Math.round(overallStats.accuracy)}%)
-												</div>
-											)}
-										</div>
-									</CardContent>
-								)}
-								{!overallStats.nextLevel && (
-									<CardContent className="pt-4">
-										<div className="text-center">
-											<div className="p-3 text-white bg-yellow-500 rounded-lg">
-												<p className="text-lg font-semibold">
-													🎉 Maximum Level Reached!
-												</p>
-												<p className="text-sm text-yellow-100">
-													You&apos;re the ultimate master!
-												</p>
-											</div>
-										</div>
-									</CardContent>
-								)}
-							</Card>
+							<LevelInfoCard overallStats={overallStats} />
 
 							{/* Overall Statistics */}
 							<Card className="p-4 gap-4">
@@ -178,6 +113,7 @@ export function StatsModal({
 										📈 Overall Statistics
 									</CardTitle>
 								</CardHeader>
+								{/* Different sites use different stats */}
 								<CardContent className="px-2">
 									<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 										<div className="p-4 text-center border-l-4 rounded-lg bg-stats-card-bg border-stats-accuracy-high">
@@ -185,7 +121,7 @@ export function StatsModal({
 												{overallStats.totalPoints}
 											</div>
 											<div className="text-sm text-muted-foreground">
-												Total Points
+												Points
 											</div>
 										</div>
 										<div className="p-4 text-center border-l-4 rounded-lg bg-stats-card-bg border-stats-points">
@@ -219,7 +155,7 @@ export function StatsModal({
 									<div className="space-y-4">
 										{
 											// Show program scores for trace tables
-											programScores.map((program) => (
+											detailedStats.map((program) => (
 												<div
 													key={program.programName}
 													className="flex items-center justify-between p-4 rounded-lg bg-muted"
@@ -255,15 +191,7 @@ export function StatsModal({
 							</Card>
 						</div>
 					) : (
-						<div className="py-12 text-center">
-							<div className="mb-4 text-6xl">🦆</div>
-							<p className="mb-2 text-xl text-shadow-muted-foreground">
-								No scores recorded yet
-							</p>
-							<p className="text-muted-foreground">
-								Start practicing to see your progress!
-							</p>
-						</div>
+						<BlankState />
 					)}
 				</div>
 
@@ -275,6 +203,89 @@ export function StatsModal({
 					<Button onClick={onClose}>Close</Button>
 				</div>
 			</div>
+		</div>
+	);
+}
+
+function LevelInfoCard({ overallStats }: { overallStats: OverallStats }) {
+	return (
+		<Card className="text-level-card-text bg-level-card-bg">
+			<CardHeader className="text-level-card-text">
+				<div className="flex items-center gap-4">
+					<div className="text-5xl animate-gentle-bounce">
+						{overallStats.currentLevel.emoji}
+					</div>
+					<div className="flex-1 text-left">
+						<CardTitle className="text-2xl">
+							{overallStats.currentLevel.title}
+						</CardTitle>
+						<p className="mt-1 opacity-90">
+							{overallStats.currentLevel.description}
+						</p>
+					</div>
+				</div>
+			</CardHeader>
+			{overallStats.nextLevel && (
+				<CardContent className="p-4 mx-4 rounded-md bg-card/20">
+					<div className="flex items-center justify-between mb-2 text-sm font-semibold">
+						<span>
+							Progress to {overallStats.nextLevel.emoji}{" "}
+							{overallStats.nextLevel.title}
+						</span>
+						<span>
+							{Math.max(
+								0,
+								overallStats.nextLevel.minPoints -
+									overallStats.totalPoints,
+							)}{" "}
+							points needed
+						</span>
+					</div>
+					<Progress
+						value={overallStats.progress}
+						className="h-2 mb-3 [&>div]:bg-progress-bar"
+					/>
+					{/* Detailed requirements */}
+					<div className="text-sm space-y-1">
+						{overallStats.accuracy <
+							overallStats.nextLevel.minAccuracy && (
+							<div>
+								🎯 {Math.round(overallStats.nextLevel.minAccuracy)}%
+								accuracy required (currently{" "}
+								{Math.round(overallStats.accuracy)}%)
+							</div>
+						)}
+					</div>
+				</CardContent>
+			)}
+			{!overallStats.nextLevel && (
+				<CardContent className="pt-4">
+					<div className="text-center">
+						<div className="p-3 text-white bg-yellow-500 rounded-lg">
+							<p className="text-lg font-semibold">
+								🎉 Maximum Level Reached!
+							</p>
+							<p className="text-sm text-yellow-100">
+								You&apos;re the ultimate master!
+							</p>
+						</div>
+					</div>
+				</CardContent>
+			)}
+		</Card>
+	);
+}
+
+function BlankState() {
+	return (
+		<div className="py-12 text-center">
+			<div className="mb-4 text-6xl">🦆</div>
+			<p className="mb-2 text-xl text-shadow-muted-foreground">
+				No scores recorded yet
+			</p>
+			<p className="text-muted-foreground">
+				Start practicing to see your progress!
+			</p>
 		</div>
 	);
 }

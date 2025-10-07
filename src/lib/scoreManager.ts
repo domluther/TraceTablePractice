@@ -21,6 +21,16 @@ export interface ProgramScore {
 	accuracy: number;
 }
 
+export interface OverallStats {
+	accuracy: number;
+	totalPoints: number;
+	totalPossiblePoints: number;
+	totalAttempts: number;
+	currentLevel: LevelInfo;
+	progress: number;
+	nextLevel: LevelInfo | null;
+}
+
 export interface ScoreData {
 	attempts: number;
 	bestScore: number;
@@ -155,19 +165,11 @@ export class ScoreManager {
 	}
 
 	// Calculates latest stats & returns them
-	getOverallStats(): {
-		accuracy: number;
-		totalPoints: number;
-		totalPossiblePoints: number;
-		totalAttempts: number;
-		currentLevel: LevelInfo;
-		progress: number;
-		nextLevel: LevelInfo | null;
-	} {
+	getOverallStats(): OverallStats {
 		// For trace tables, we need to calculate accuracy differently since 'correct' is points, not binary
 		let totalPoints = 0;
 		let totalPossiblePoints = 0;
-		let programsAttempted = 0;
+		let totalAttempts = 0;
 
 		for (const [, scoreData] of Object.entries(this.scores)) {
 			// All data is trace table programs - correct field is best score achieved
@@ -176,7 +178,7 @@ export class ScoreManager {
 
 			// Count programs that have been attempted - this should be everything in here
 			if (scoreData.attempts > 0) {
-				programsAttempted++;
+				totalAttempts++;
 			}
 		}
 
@@ -219,7 +221,7 @@ export class ScoreManager {
 			accuracy,
 			totalPoints,
 			totalPossiblePoints,
-			totalAttempts: programsAttempted,
+			totalAttempts,
 			currentLevel,
 			progress,
 			nextLevel,
