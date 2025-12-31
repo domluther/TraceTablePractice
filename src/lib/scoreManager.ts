@@ -132,7 +132,6 @@ export class ScoreManager {
 				this.scores[itemKey] = {
 					attempts: 0,
 					bestScore: 0,
-					// Only needs setting the first time
 					outOf: total,
 					history: [],
 				};
@@ -140,7 +139,10 @@ export class ScoreManager {
 
 			const scoreData = this.scores[itemKey];
 			scoreData.attempts++;
+			// Update outOf to match the current attempt's total
+			scoreData.outOf = total;
 
+			// Dumb. Thinks that eg 9/20 is worse than 10/100 as it doesn't look at outOf
 			if (attemptScore > scoreData.bestScore) {
 				scoreData.bestScore = attemptScore;
 			}
