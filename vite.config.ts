@@ -1,7 +1,7 @@
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 // https://vite.dev/config/
@@ -26,5 +26,6 @@ export default defineConfig({
 		setupFiles: ["./src/test/setup.ts"],
 		css: true,
 		testTimeout: 2000, // 2 second timeout for individual tests
+		silent: true,
 	},
 });
