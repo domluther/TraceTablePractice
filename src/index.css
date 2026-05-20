@@ -249,8 +249,12 @@
 
 	/* Semantic color variables for dark mode */
 	--header: oklch(0.15 0.02 235); /* very dark blue for dark mode */
-	--header-text: oklch(0.96 0.02 235); /* light text - keep bright for contrast */
-	--header-subtitle: oklch(0.85 0.08 235); /* brighter subtitle for better contrast */
+	--header-text: oklch(
+		0.96 0.02 235
+	); /* light text - keep bright for contrast */
+	--header-subtitle: oklch(
+		0.85 0.08 235
+	); /* brighter subtitle for better contrast */
 	--link: oklch(0.82 0.15 235); /* brighter deep blue */
 	--link-hover: var(--foreground); /* near white */
 	--button-primary: oklch(0.35 0.14 235); /* darker deep blue */

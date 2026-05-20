@@ -235,8 +235,7 @@ function LevelInfoCard({ overallStats }: { overallStats: OverallStats }) {
 						<span>
 							{Math.max(
 								0,
-								overallStats.nextLevel.minPoints -
-									overallStats.totalPoints,
+								overallStats.nextLevel.minPoints - overallStats.totalPoints,
 							)}{" "}
 							points needed
 						</span>
@@ -247,12 +246,10 @@ function LevelInfoCard({ overallStats }: { overallStats: OverallStats }) {
 					/>
 					{/* Detailed requirements */}
 					<div className="text-sm space-y-1">
-						{overallStats.accuracy <
-							overallStats.nextLevel.minAccuracy && (
+						{overallStats.accuracy < overallStats.nextLevel.minAccuracy && (
 							<div>
-								🎯 {Math.round(overallStats.nextLevel.minAccuracy)}%
-								accuracy required (currently{" "}
-								{Math.round(overallStats.accuracy)}%)
+								🎯 {Math.round(overallStats.nextLevel.minAccuracy)}% accuracy
+								required (currently {Math.round(overallStats.accuracy)}%)
 							</div>
 						)}
 					</div>
@@ -262,9 +259,7 @@ function LevelInfoCard({ overallStats }: { overallStats: OverallStats }) {
 				<CardContent className="pt-4">
 					<div className="text-center">
 						<div className="p-3 text-white bg-yellow-500 rounded-lg">
-							<p className="text-lg font-semibold">
-								🎉 Maximum Level Reached!
-							</p>
+							<p className="text-lg font-semibold">🎉 Maximum Level Reached!</p>
 							<p className="text-sm text-yellow-100">
 								You&apos;re the ultimate master!
 							</p>

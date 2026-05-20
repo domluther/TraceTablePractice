@@ -10,7 +10,7 @@ export function Footer() {
 			>
 				Mr Luther
 			</a>{" "}
-			2025
+			2026
 		</footer>
 	);
 }

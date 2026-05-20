@@ -27,17 +27,15 @@ export function SiteLayout({
 	titleIcon = "🦆",
 }: QuizLayoutProps) {
 	return (
-		<>
-			<div className="w-full overflow-hidden bg-white shadow-2xl max-w-7xl rounded-xl">
-				<Header
-					scoreButton={scoreButton}
-					title={`${titleIcon} ${title} ${titleIcon}`}
-					subtitle={subtitle}
-				/>
-				<main className="p-4 bg-muted sm:p-6">
-					<div className="mx-auto">{children}</div>
-				</main>
-			</div>
-		</>
+		<div className="w-full overflow-hidden bg-white shadow-2xl max-w-7xl rounded-xl">
+			<Header
+				scoreButton={scoreButton}
+				title={`${titleIcon} ${title} ${titleIcon}`}
+				subtitle={subtitle}
+			/>
+			<main className="p-4 bg-muted sm:p-6">
+				<div className="mx-auto">{children}</div>
+			</main>
+		</div>
 	);
 }

@@ -520,6 +520,15 @@ print("Average: " + str(average))`,
 				["40", "50", "30"],
 			],
 		},
+		{
+			code: `for outer = 1 to 3
+    print("outer")
+    for inner = 1 to 2
+        print("inner")
+    next inner
+next outer`,
+			description: "Simple nested loop with outer and inner labels",
+		},
 	],
 	hard: [
 		{
@@ -619,6 +628,16 @@ endif`,
 				["1", "4", "2"],
 				["3", "1", "3"],
 			],
+		},
+		{
+			code: `total = 0
+for i = 1 to 3
+    for j = 1 to 2
+        total = total + i
+    next j
+	print(total)
+next i`,
+			description: "Nested loop accumulator",
 		},
 		{
 			code: `secret = random(1, 50)
