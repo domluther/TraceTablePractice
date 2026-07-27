@@ -74,7 +74,7 @@ export function ProgramCode({
 		<Card
 			ref={cardRef}
 			id={programCodeId}
-			className="py-0 border-l-4 shadow-xl gap-4 bg-code-display-bg border-border border-l-hint-card-border"
+			className="gap-4 py-0 border-l-4 shadow-xl bg-code-display-bg border-border border-l-hint-card-border"
 		>
 			<CardHeader className="border-b bg-button-primary px-4 !pb-2 !pt-2 rounded-t-lg">
 				<div className="flex flex-col justify-between gap-3 md:flex-row lg:items-center">
@@ -84,7 +84,7 @@ export function ProgramCode({
 						</CardTitle>
 						{currentProgram && (
 							<div className="flex items-center gap-3">
-								<span className="text-sm font-light text-button-primary-text rounded-md ">
+								<span className="text-sm font-light rounded-md text-button-primary-text ">
 									{getProgramDisplayName()}: {currentProgram.description}
 								</span>
 							</div>
@@ -98,7 +98,7 @@ export function ProgramCode({
 								onClick={() =>
 									window.open(generateERLURL(currentProgram.code), "_blank")
 								}
-								className="text-sm font-light text-button-primary-text transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
+								className="text-sm font-light transition-all duration-200 text-button-primary-text bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
 							>
 								💻 Open in ERL IDE
 							</Button>
@@ -106,7 +106,7 @@ export function ProgramCode({
 								variant="outline"
 								size="sm"
 								onClick={generateShareURL}
-								className="text-sm font-light text-button-primary-text transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
+								className="text-sm font-light transition-all duration-200 text-button-primary-text bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
 							>
 								🔗 Share Link
 							</Button>
@@ -115,7 +115,7 @@ export function ProgramCode({
 								variant="outline"
 								size="sm"
 								onClick={() => captureElement(cardRef, getProgramDisplayName())}
-								className="text-sm font-light text-button-primary-text transition-all duration-200 bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
+								className="text-sm font-light transition-all duration-200 text-button-primary-text bg-nav-button-bg border-border hover:bg-nav-button-bg-hover hover:border-hint-card-border hover:text-button-primary-text"
 							>
 								📸 Screenshot
 							</Button>
@@ -128,7 +128,7 @@ export function ProgramCode({
 					<pre className="py-2 pl-2 m-0 text-sm leading-relaxed">
 						{currentProgram.code.split("\n").map((line, index) => (
 							<div
-								key={`line-${index}-${line}`}
+								key={line}
 								className="flex transition-colors duration-150 hover:bg-checkbox-label-bg-hover"
 							>
 								<span className="text-code-line-number bg-code-display-bg border-r border-border px-1 py-1.5 select-none min-w-[3rem] text-right font-medium text-xs leading-none">

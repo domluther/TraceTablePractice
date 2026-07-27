@@ -63,7 +63,7 @@ export function ProgramSelector({
 			</summary>
 
 			{/* Controls */}
-			<div className="flex items-center mb-6 gap-6">
+			<div className="flex items-center gap-6 mb-6">
 				<div className="flex items-center gap-3">
 					<label
 						htmlFor={difficultySelectId}
@@ -79,7 +79,7 @@ export function ProgramSelector({
 							setSelectedDifficulty(newDifficulty);
 							onDifficultyChange?.(newDifficulty);
 						}}
-						className="px-3 py-1.5 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+						className="px-3 py-1.5 cursor-pointer border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
 					>
 						<option value="easy">Easy</option>
 						<option value="medium">Medium</option>
@@ -93,7 +93,7 @@ export function ProgramSelector({
 			</div>
 
 			{/* Program Table */}
-			<div className="overflow-scroll rounded-lg bg-card shadow-sm max-h-96">
+			<div className="overflow-scroll rounded-lg shadow-sm bg-card max-h-96">
 				<table className="w-full text-base border-collapse bg-card">
 					<thead>
 						<tr className="sticky top-0 z-10 bg-button-primary">
@@ -113,8 +113,8 @@ export function ProgramSelector({
 							const scoreDisplay = getScoreDisplay(selectedDifficulty, index);
 							return (
 								<tr
-									key={`${selectedDifficulty}-${index}-${program.description}`}
-									className="border-b border-border transition-colors duration-150 hover:bg-checkbox-label-bg-hover"
+									key={`${selectedDifficulty}-${program.description}`}
+									className="transition-colors duration-150 border-b border-border hover:bg-checkbox-label-bg-hover"
 								>
 									<td className="px-4 py-3 align-middle">
 										<div>

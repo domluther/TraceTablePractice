@@ -93,7 +93,7 @@ export function StatsModal({
 					<button
 						type="button"
 						onClick={onClose}
-						className="flex items-center justify-center w-8 h-8 text-2xl transition-colors hover:opacity-80"
+						className="flex items-center justify-center w-8 h-8 text-2xl cursor-pointer transition-colors hover:opacity-80"
 					>
 						<X className="w-6 h-6" />
 					</button>
