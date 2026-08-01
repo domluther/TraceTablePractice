@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { logEvent } from "@/lib/analytics";
 import type {
 	ASTInterpreter,
 	TraceStep,
@@ -296,7 +297,24 @@ export function TraceTableBody({
 
 		setIsMarked(true);
 		onScoreUpdate(correct, total);
-	}, [expectedTrace, userEntries, programVariables, onScoreUpdate]);
+		if (currentProgram) {
+			logEvent({
+				site: "trace-table-practice",
+				game: difficulty,
+				score: correct,
+				score_max: total,
+				question_ref: currentProgram.description,
+				correct: correct === total,
+			});
+		}
+	}, [
+		expectedTrace,
+		userEntries,
+		programVariables,
+		onScoreUpdate,
+		currentProgram,
+		difficulty,
+	]);
 
 	const clearTable = useCallback(() => {
 		// Check if there's any user input before confirming
