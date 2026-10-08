@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { Program } from "@/lib/astInterpreter";
-import type { Difficulty } from "@/lib/types";
+import { DIFFICULTY_LABELS, type Difficulty } from "@/lib/types";
 import { captureElement } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
@@ -23,8 +23,7 @@ export function ProgramCode({
 
 	// Get program display name
 	const getProgramDisplayName = (): string => {
-		const difficultyName =
-			difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+		const difficultyName = DIFFICULTY_LABELS[difficulty];
 		return `${difficultyName} #${programIndex}`;
 	};
 

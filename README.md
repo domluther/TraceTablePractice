@@ -5,7 +5,7 @@ A modern React application for mastering OCR ERL (Exam Reference Language) trace
 ## 🚀 Features
 
 - **Interactive Trace Tables**: Practice tracing OCR ERL algorithms with real-time feedback
-- **Progressive Difficulty**: Easy, medium, and hard programs to match your skill level
+- **Progressive Difficulty**: Easy, medium, hard and A-Level programs to match your skill level
 - **Instant Scoring**: Get immediate feedback on your answers with detailed explanations
 - **Comprehensive ERL Support**: Full implementation of OCR ERL language features
 - **Gamified Learning**: Leveling system with achievements to track progress
@@ -53,7 +53,7 @@ npm run dev
 
 ## 🎮 How to Use
 
-1. **Select Difficulty**: Choose from Easy, Medium, or Hard programs
+1. **Select Difficulty**: Choose from Easy, Medium, Hard or A-Level programs
 2. **Pick a Program**: Browse available OCR ERL programs with descriptions
 3. **Fill the Trace Table**: 
    - Enter line numbers where variables change
@@ -102,6 +102,8 @@ The application features a comprehensive scoring system with:
 - **Persistent Progress**: Scores saved locally in your browser
 
 ## 🧪 Testing
+
+> Contributing or using an AI agent? Read [AGENTS.md](AGENTS.md) first. The GCSE golden snapshot test (`src/test/gcse-golden.test.ts`) must always pass unchanged.
 
 Run the comprehensive test suite:
 

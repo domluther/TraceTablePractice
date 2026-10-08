@@ -1,4 +1,4 @@
-import type { Difficulty } from "./types";
+import { DIFFICULTY_LABELS, DIFFICULTY_ORDER, type Difficulty } from "./types";
 
 export interface LevelInfo {
 	emoji: string;
@@ -272,7 +272,7 @@ export class ScoreManager {
 			if (scoreData.attempts > 0) {
 				const [difficulty, indexStr] = key.split("-");
 				const programIndex = parseInt(indexStr, 10);
-				const programName = `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} #${programIndex}`;
+				const programName = `${DIFFICULTY_LABELS[difficulty as Difficulty] ?? difficulty} #${programIndex}`;
 
 				// Use stored best score and get total from most recent attempt
 				const bestScore = scoreData.bestScore;
@@ -303,7 +303,7 @@ export class ScoreManager {
 
 		// Sort by difficulty and then by program number
 		programScores.sort((a, b) => {
-			const difficultyOrder = ["Easy", "Medium", "Hard"];
+			const difficultyOrder = DIFFICULTY_ORDER.map((d) => DIFFICULTY_LABELS[d]);
 			const aDifficulty = a.programName.split(" ")[0];
 			const bDifficulty = b.programName.split(" ")[0];
 

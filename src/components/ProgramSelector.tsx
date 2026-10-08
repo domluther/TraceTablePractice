@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { type Program, programs } from "@/lib/programs";
 import type { ScoreManager } from "@/lib/scoreManager";
-import type { Difficulty } from "@/lib/types";
+import { type Difficulty, isDifficulty } from "@/lib/types";
 import { QuizButton } from "./QuizButton";
 
 interface ProgramSelectorProps {
@@ -27,10 +27,7 @@ export function ProgramSelector({
 
 	// Sync with parent difficulty
 	useEffect(() => {
-		if (
-			currentDifficulty &&
-			["easy", "medium", "hard"].includes(currentDifficulty)
-		) {
+		if (currentDifficulty && isDifficulty(currentDifficulty)) {
 			setSelectedDifficulty(currentDifficulty);
 		}
 	}, [currentDifficulty]);
@@ -84,6 +81,7 @@ export function ProgramSelector({
 						<option value="easy">Easy</option>
 						<option value="medium">Medium</option>
 						<option value="hard">Hard</option>
+						<option value="alevel">A-Level</option>
 					</select>
 				</div>
 
@@ -121,7 +119,7 @@ export function ProgramSelector({
 											<div className="font-medium text-card-foreground">
 												{program.description}
 											</div>
-											{program.inputSets && (
+											{(program.inputSets || program.setupVariants) && (
 												<div className="mt-1 text-xs text-muted-foreground">
 													Multiple input variations available
 												</div>

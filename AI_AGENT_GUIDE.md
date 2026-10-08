@@ -1,3 +1,5 @@
+> **Working on TraceTablePractice itself?** Read [AGENTS.md](AGENTS.md) first. This file is a generic template-porting guide.
+
 # AI Agent Guide: Using This Vite + React Template
 
 This documentation is specifically designed for AI agents (Claude Sonnet 4+) to understand how to port existing projects into this modern React + TypeScript + Vite template.

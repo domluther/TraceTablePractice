@@ -6,7 +6,7 @@ import type {
 	TraceStep,
 	VariableValue,
 } from "@/lib/astInterpreter";
-import type { Program } from "@/lib/programs";
+import { applySetupVariant, getSetupBlock, type Program } from "@/lib/programs";
 import type { SITE_CONFIG } from "@/lib/siteConfig";
 import type { Difficulty } from "@/lib/types";
 import { captureElement } from "@/lib/utils";
@@ -374,64 +374,78 @@ export function TraceTableBody({
 		return `${baseClass} bg-checkbox-kbd-bg`;
 	};
 
+	const canShuffle =
+		(currentProgram?.inputSets?.length ?? 0) > 1 ||
+		(currentProgram?.setupVariants?.length ?? 0) > 1;
+
 	const shuffleInputs = useCallback(() => {
-		if (currentProgram?.inputSets && currentProgram.inputSets.length > 1) {
-			// Get all input sets except the current one
-			const availableInputSets = currentProgram.inputSets.filter(
-				(inputSet) =>
-					JSON.stringify(inputSet) !== JSON.stringify(currentProgram.inputs),
+		if (!currentProgram || !canShuffle) return;
+
+		// Pick a different option from each list where one is available
+		const pickDifferent = <T,>(options: T[], current: T): T => {
+			const others = options.filter(
+				(option) => JSON.stringify(option) !== JSON.stringify(current),
 			);
+			const pool = others.length > 0 ? others : options;
+			return pool[Math.floor(Math.random() * pool.length)];
+		};
 
-			// If no different input sets available, use any random one
-			const inputSetsToChooseFrom =
-				availableInputSets.length > 0
-					? availableInputSets
-					: currentProgram.inputSets;
-
-			const randomInputSet =
-				inputSetsToChooseFrom[
-					Math.floor(Math.random() * inputSetsToChooseFrom.length)
-				];
-
-			const shuffledProgram = { ...currentProgram, inputs: randomInputSet };
-
-			// Re-execute with new inputs
-			try {
-				const result = interpreter.executeProgram(
-					shuffledProgram.code,
-					shuffledProgram,
-				);
-				setExpectedTrace(result.trace);
-				setProgramVariables(result.variables);
-
-				// Update the current program inputs to show the new values
-				// This is a bit of a hack since we're mutating the prop, but it's needed
-				// to update the displayed input values
-				currentProgram.inputs = randomInputSet;
-
-				// Clear user entries
-				const emptyEntries: UserTraceEntry[] = [];
-				for (let i = 0; i < result.trace.length + 3; i++) {
-					const entry: UserTraceEntry = {
-						id: `entry-${Date.now()}-${i}`,
-						lineNumber: "",
-						variables: {},
-						output: "",
-					};
-					result.variables.forEach((varName) => {
-						entry.variables[varName] = "";
-					});
-					emptyEntries.push(entry);
-				}
-				setUserEntries(emptyEntries);
-				setFeedback(null);
-				setCellResults({});
-				setIsMarked(false);
-			} catch (error) {
-				console.error("Error shuffling inputs:", error);
-			}
+		let shuffledProgram: Program = { ...currentProgram };
+		if (currentProgram.inputSets && currentProgram.inputSets.length > 1) {
+			shuffledProgram.inputs = pickDifferent(
+				currentProgram.inputSets,
+				currentProgram.inputs ?? [],
+			);
 		}
-	}, [currentProgram, interpreter]);
+		if (
+			currentProgram.setupVariants &&
+			currentProgram.setupVariants.length > 1
+		) {
+			shuffledProgram = applySetupVariant(
+				shuffledProgram,
+				pickDifferent(
+					currentProgram.setupVariants,
+					getSetupBlock(currentProgram),
+				),
+			);
+		}
+
+		// Re-execute with the new data
+		try {
+			const result = interpreter.executeProgram(
+				shuffledProgram.code,
+				shuffledProgram,
+			);
+			setExpectedTrace(result.trace);
+			setProgramVariables(result.variables);
+
+			// Update the current program so the displayed code and input values change.
+			// This is a bit of a hack since we're mutating the prop.
+			currentProgram.inputs = shuffledProgram.inputs;
+			currentProgram.code = shuffledProgram.code;
+
+			// Clear user entries
+			const emptyEntries: UserTraceEntry[] = [];
+			for (let i = 0; i < result.trace.length + 3; i++) {
+				const entry: UserTraceEntry = {
+					id: `entry-${Date.now()}-${i}`,
+					lineNumber: "",
+					variables: {},
+					output: "",
+				};
+				result.variables.forEach((varName) => {
+					entry.variables[varName] = "";
+				});
+				emptyEntries.push(entry);
+			}
+			setUserEntries(emptyEntries);
+			setFeedback(null);
+			setCellResults({});
+			setIsMarked(false);
+		} catch (error) {
+			console.error("Error shuffling inputs:", error);
+		}
+	}, [currentProgram, interpreter, canShuffle]);
 
 	// Keyboard shortcuts
 	useEffect(() => {
@@ -682,9 +696,11 @@ export function TraceTableBody({
 				<QuizButton onClick={markAnswer} variant="action">
 					✅ Mark My Answer
 				</QuizButton>
-				{currentProgram.inputSets && currentProgram.inputSets.length > 1 && (
+				{canShuffle && (
 					<QuizButton onClick={shuffleInputs} variant="secondary">
-						🔄 Shuffle Inputs
+						{currentProgram.inputSets && currentProgram.inputSets.length > 1
+							? "🔄 Shuffle Inputs"
+							: "🔄 Shuffle Values"}
 					</QuizButton>
 				)}
 				<QuizButton onClick={clearTable} variant="destructive">

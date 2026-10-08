@@ -158,6 +158,8 @@ export class ASTInterpreter {
 		const shouldTrace = true;
 		const changeRecord: Record<string, VariableValue> = {}; // Track which variables actually change
 
+		line = this.resolveArrayReferences(line, vars);
+
 		if (line.startsWith("array ")) {
 			// Array declaration with initialization like "array scores = [85, 92, 78, 90]"
 			const initMatch = line.match(/array\s+(\w+)\s*=\s*\[([^\]]+)\]/);
@@ -179,11 +181,16 @@ export class ASTInterpreter {
 				changeRecord[arrayName] = vars[arrayName];
 			} else {
 				// Array declaration like "array nums[3]" - don't trace empty declarations
-				const match = line.match(/array\s+(\w+)\[(\d+)\]/);
+				const match = line.match(/array\s+(\w+)\[([^\]]+)\]/);
 				if (match) {
 					const arrayName = match[1];
-					const size = parseInt(match[2], 10);
-					vars[arrayName] = new Array(size).fill(0);
+					// Size can be a literal, a variable or an expression like n + 1
+					const size = /^\d+$/.test(match[2].trim())
+						? parseInt(match[2], 10)
+						: Number(this.evaluateExpression(match[2], vars));
+					if (Number.isInteger(size) && size >= 0) {
+						vars[arrayName] = new Array(size).fill(0);
+					}
 					// Don't add to changeRecord - empty array declarations shouldn't be traced
 				}
 			}
@@ -332,7 +339,7 @@ export class ASTInterpreter {
 
 			if (varName.includes("[") && varName.includes("]")) {
 				// Array element assignment like nums[0] = 10
-				const arrayMatch = varName.match(/(\w+)\[(\w+|\d+)\]/);
+				const arrayMatch = varName.match(/(\w+)\[([^[\]]+)\]/);
 				if (arrayMatch) {
 					const arrayName = arrayMatch[1];
 					const indexStr = arrayMatch[2];
@@ -342,15 +349,7 @@ export class ASTInterpreter {
 						vars[arrayName] = [];
 					}
 
-					let index: number;
-					if (/^\d+$/.test(indexStr)) {
-						index = parseInt(indexStr, 10);
-					} else if (vars[indexStr] !== undefined) {
-						const indexValue = vars[indexStr];
-						index = parseInt(String(indexValue), 10);
-					} else {
-						index = 0;
-					}
+					const index = this.resolveArrayIndex(indexStr, vars) ?? 0;
 					const newValue = this.evaluateExpression(value, vars);
 
 					// Only record as changed if the value actually changed
@@ -410,6 +409,63 @@ export class ASTInterpreter {
 		return { output, shouldTrace, changedVariables: changeRecord };
 	}
 
+	// Rewrites array references into forms the rest of the interpreter handles:
+	// - accesses with an expression index (nums[i + 1]) become a literal index (nums[3])
+	// - nums.length on an array becomes its size
+	// Text inside string literals is left alone.
+	private resolveArrayReferences(
+		text: string,
+		vars: Record<string, VariableValue>,
+	): string {
+		if (!text.includes("[") && !text.includes(".length")) {
+			return text;
+		}
+		const indexExpression = /(\w+)\[([^[\]]*[^\w[\]\s][^[\]]*)\]/g;
+		const arrayLength = /\b(\w+)\.length\b/g;
+		return text
+			.split(/("[^"]*"|'[^']*')/)
+			.map((segment, i) => {
+				if (i % 2 === 1) return segment;
+				return segment
+					.replace(arrayLength, (match, name: string) => {
+						const value = vars[name];
+						return Array.isArray(value) ? String(value.length) : match;
+					})
+					.replace(
+						indexExpression,
+						(match, name: string, indexExpr: string) => {
+							const index = this.resolveArrayIndex(indexExpr, vars);
+							return index === undefined || index < 0
+								? match
+								: `${name}[${index}]`;
+						},
+					);
+			})
+			.join("");
+	}
+
+	// Resolves an array index that may be a literal, variable or expression like i + 1
+	private resolveArrayIndex(
+		indexStr: string,
+		vars: Record<string, VariableValue>,
+	): number | undefined {
+		const trimmed = indexStr.trim();
+		if (/^\d+$/.test(trimmed)) {
+			return parseInt(trimmed, 10);
+		}
+		const value =
+			vars[trimmed] !== undefined
+				? vars[trimmed]
+				: /^\w+$/.test(trimmed)
+					? undefined
+					: this.evaluateExpression(trimmed, vars);
+		if (value === undefined) {
+			return undefined;
+		}
+		const index = parseInt(String(value), 10);
+		return Number.isNaN(index) ? undefined : index;
+	}
+
 	// Helper function to get value from variable or array access
 	private getVariableValue(
 		operand: string,
@@ -417,25 +473,15 @@ export class ASTInterpreter {
 	): VariableValue {
 		if (operand.includes("[") && operand.includes("]")) {
 			// Array access like nums[i] or nums[0]
-			const arrayMatch = operand.match(/(\w+)\[(\w+|\d+)\]/);
+			const arrayMatch = operand.match(/(\w+)\[([^[\]]+)\]/);
 			if (arrayMatch) {
 				const arrayName = arrayMatch[1];
 				const indexStr = arrayMatch[2];
 
 				if (vars[arrayName] && Array.isArray(vars[arrayName])) {
-					let index: number;
-					// Check if index is a literal number or a variable
-					if (/^\d+$/.test(indexStr)) {
-						// Literal index like [0], [1], etc.
-						index = parseInt(indexStr, 10);
-					} else {
-						// Variable index like [i], [counter], etc.
-						if (vars[indexStr] !== undefined) {
-							const indexValue = vars[indexStr];
-							index = parseInt(String(indexValue), 10);
-						} else {
-							return undefined;
-						}
+					const index = this.resolveArrayIndex(indexStr, vars);
+					if (index === undefined) {
+						return undefined;
 					}
 					if (index >= 0 && index < vars[arrayName].length) {
 						return vars[arrayName][index];
@@ -1035,6 +1081,7 @@ export class ASTInterpreter {
 		if (
 			expression.includes("[") &&
 			expression.includes("]") &&
+			!/^["']/.test(expression) &&
 			!/[+\-*/]/.test(expression.replace(/\[.*?\]/g, ""))
 		) {
 			return this.getVariableValue(expression, vars);
@@ -1096,25 +1143,15 @@ export class ASTInterpreter {
 
 		// Handle array access
 		if (operand.includes("[") && operand.includes("]")) {
-			const arrayMatch = operand.match(/(\w+)\[(\w+|\d+)\]/);
+			const arrayMatch = operand.match(/(\w+)\[([^[\]]+)\]/);
 			if (arrayMatch) {
 				const arrayName = arrayMatch[1];
 				const indexStr = arrayMatch[2];
 
 				if (vars[arrayName] && Array.isArray(vars[arrayName])) {
-					let index: number;
-					// Check if index is a literal number or a variable
-					if (/^\d+$/.test(indexStr)) {
-						// Literal index like [0], [1], etc.
-						index = parseInt(indexStr, 10);
-					} else {
-						// Variable index like [i], [counter], etc.
-						if (vars[indexStr] !== undefined) {
-							const indexValue = vars[indexStr];
-							index = parseInt(String(indexValue), 10);
-						} else {
-							return 0;
-						}
+					const index = this.resolveArrayIndex(indexStr, vars);
+					if (index === undefined) {
+						return 0;
 					}
 
 					if (index >= 0 && index < vars[arrayName].length) {
@@ -1144,6 +1181,8 @@ export class ASTInterpreter {
 		expression: string,
 		vars: Record<string, VariableValue>,
 	): number {
+		expression = this.resolveArrayReferences(expression, vars);
+
 		// Normalize whitespace around word operators
 		expression = expression.replace(/\s*\bMOD\b\s*/g, " MOD ");
 		expression = expression.replace(/\s*\bDIV\b\s*/g, " DIV ");
@@ -1386,6 +1425,8 @@ export class ASTInterpreter {
 			);
 		}
 
+		condition = this.resolveArrayReferences(condition, vars);
+
 		// Enhanced condition evaluation that handles arithmetic expressions
 
 		// Handle AND operator
@@ -1426,19 +1467,25 @@ export class ASTInterpreter {
 				const leftNum = leftVal !== undefined ? Number(leftVal) : 0;
 				const rightNum = rightVal !== undefined ? Number(rightVal) : 0;
 
+				// Two text values (e.g. "Alaska" < "Texas") are ordered alphabetically
+				const compareAsText =
+					typeof leftVal === "string" &&
+					typeof rightVal === "string" &&
+					(Number.isNaN(leftNum) || Number.isNaN(rightNum));
+
 				switch (operator) {
 					case ">=":
-						return leftNum >= rightNum;
+						return compareAsText ? leftVal >= rightVal : leftNum >= rightNum;
 					case "<=":
-						return leftNum <= rightNum;
+						return compareAsText ? leftVal <= rightVal : leftNum <= rightNum;
 					case "==":
 						return leftVal === rightVal;
 					case "!=":
 						return leftVal !== rightVal;
 					case ">":
-						return leftNum > rightNum;
+						return compareAsText ? leftVal > rightVal : leftNum > rightNum;
 					case "<":
-						return leftNum < rightNum;
+						return compareAsText ? leftVal < rightVal : leftNum < rightNum;
 				}
 			}
 		}
@@ -1769,11 +1816,11 @@ export class ASTInterpreter {
 
 	private handleForLoop(lines: string[], i: number): number {
 		// For loop with optional step
-		const line = lines[i];
+		const line = this.resolveArrayReferences(lines[i], this.variables);
 
 		// Try to match pattern with step first: "for var = start to end step stepValue"
 		let forMatch = line.match(
-			/for\s+(\w+)\s*=\s*(-?\d+)\s+to\s+(-?\d+)\s+step\s+(-?\d+)/,
+			/^for\s+(\w+)\s*=\s*(-?\d+)\s+to\s+(-?\d+)\s+step\s+(-?\d+)\s*$/,
 		);
 		let stepValue = 1; // Default step value
 
@@ -1782,16 +1829,43 @@ export class ASTInterpreter {
 			stepValue = parseInt(forMatch[4], 10);
 		} else {
 			// Try pattern without step: "for var = start to end"
-			forMatch = line.match(/for\s+(\w+)\s*=\s*(-?\d+)\s+to\s+(-?\d+)/);
-			if (!forMatch) {
+			forMatch = line.match(/^for\s+(\w+)\s*=\s*(-?\d+)\s+to\s+(-?\d+)\s*$/);
+		}
+
+		let loopVar: string;
+		let startVal: number;
+		let endVal: number;
+
+		if (forMatch) {
+			loopVar = forMatch[1];
+			startVal = parseInt(forMatch[2], 10);
+			endVal = parseInt(forMatch[3], 10);
+		} else {
+			// Bounds that are variables or expressions: "for i = 0 to n - 1 step 2"
+			const exprMatch = line.match(
+				/^for\s+(\w+)\s*=\s*(.+?)\s+to\s+(.+?)(?:\s+step\s+(.+))?$/,
+			);
+			if (!exprMatch) {
 				// If no match, just skip this line
 				return i + 1;
 			}
+			loopVar = exprMatch[1];
+			startVal = Number(this.evaluateExpression(exprMatch[2], this.variables));
+			endVal = Number(this.evaluateExpression(exprMatch[3], this.variables));
+			if (exprMatch[4] !== undefined) {
+				stepValue = Number(
+					this.evaluateExpression(exprMatch[4], this.variables),
+				);
+			}
+			if (
+				Number.isNaN(startVal) ||
+				Number.isNaN(endVal) ||
+				Number.isNaN(stepValue) ||
+				stepValue === 0
+			) {
+				return i + 1;
+			}
 		}
-
-		const loopVar = forMatch[1];
-		const startVal = parseInt(forMatch[2], 10);
-		const endVal = parseInt(forMatch[3], 10);
 
 		// Find the matching next statement
 		let nextLineIndex = -1;

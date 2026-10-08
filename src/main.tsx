@@ -1,4 +1,8 @@
-import { createRouter, RouterProvider } from "@tanstack/react-router";
+import {
+	createRouter,
+	type ErrorComponentProps,
+	RouterProvider,
+} from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
@@ -9,7 +13,7 @@ import { routeTree } from "./routeTree.gen";
 // Create a new router instance with error handling
 const router = createRouter({
 	routeTree,
-	defaultErrorComponent: ({ error }: { error: Error }) => (
+	defaultErrorComponent: ({ error }: ErrorComponentProps) => (
 		<div className="flex items-center justify-center min-h-screen p-4">
 			<div className="max-w-md p-6 text-center rounded-lg shadow-lg bg-card">
 				<h2 className="mb-4 text-2xl font-bold text-destructive">

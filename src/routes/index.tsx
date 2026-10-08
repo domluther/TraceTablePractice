@@ -17,7 +17,7 @@ import type { Program } from "@/lib/programs";
 import { programs } from "@/lib/programs";
 import { ScoreManager } from "@/lib/scoreManager";
 import { SITE_CONFIG } from "@/lib/siteConfig";
-import type { Difficulty } from "@/lib/types";
+import { DIFFICULTY_ORDER, type Difficulty, isDifficulty } from "@/lib/types";
 import { pickProgramInputs } from "@/lib/utils";
 
 type SearchParams = {
@@ -30,13 +30,7 @@ export const Route = createFileRoute("/")({
 		return {
 			difficulty: (() => {
 				const diff = search.difficulty;
-				if (
-					typeof diff === "string" &&
-					["easy", "medium", "hard"].includes(diff)
-				) {
-					return diff as Difficulty;
-				}
-				return undefined;
+				return isDifficulty(diff) ? diff : undefined;
 			})(),
 			program: (() => {
 				const prog = search.program;
@@ -169,7 +163,7 @@ function Index() {
 
 	// Helper functions for difficulty progression
 	const getDifficultyOrder = useCallback((): Difficulty[] => {
-		return ["easy", "medium", "hard"];
+		return DIFFICULTY_ORDER;
 	}, []);
 
 	const getNextDifficultyAndIndex = useCallback(

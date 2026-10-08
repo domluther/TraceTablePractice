@@ -7,12 +7,35 @@ export interface Program {
 	randomValues?: (number | string)[];
 	inputs?: string[];
 	randomValue?: number | string;
+	// Alternative versions of the opening lines of `code` (e.g. the array to
+	// sort and the value to find). One replaces those lines when the program is
+	// picked or shuffled, so each attempt uses different data without the student
+	// tracing any input. Every variant must have the same number of lines.
+	setupVariants?: string[];
 }
+
+const countLines = (text: string): number => text.split("\n").length;
+
+// The block of opening lines that setupVariants replace
+export const getSetupBlock = (program: Program): string =>
+	program.code
+		.split("\n")
+		.slice(0, countLines(program.setupVariants?.[0] ?? ""))
+		.join("\n");
+
+export const applySetupVariant = (
+	program: Program,
+	variant: string,
+): Program => {
+	const rest = program.code.split("\n").slice(countLines(variant));
+	return { ...program, code: [variant, ...rest].join("\n") };
+};
 
 export interface ProgramSet {
 	easy: Program[];
 	medium: Program[];
 	hard: Program[];
+	alevel: Program[];
 }
 
 export const programs: ProgramSet = {
@@ -672,6 +695,144 @@ endif`,
 				["1", "2", "3"],
 			],
 			randomValues: [6, 25, 30, 40, 45, 50],
+		},
+	],
+	alevel: [
+		{
+			code: `array items = [7, 3, 9, 4, 12, 6]
+target = 4
+found = false
+index = 0
+while index < items.length AND found == false
+    if items[index] == target then
+        found = true
+    else
+        index = index + 1
+    endif
+endwhile
+if found == true then
+    print("Item found at position " + str(index))
+else
+    print("Item not found")
+endif`,
+			description: "Linear search algorithm",
+			setupVariants: [
+				`array items = [7, 3, 9, 4, 12, 6]
+target = 4`,
+				`array items = [15, 8, 21, 5, 11]
+target = 15`,
+				`array items = [9, 14, 2, 17, 6, 10, 3]
+target = 3`,
+				`array items = [12, 5, 19, 8, 23, 1]
+target = 19`,
+				`array items = [6, 13, 4, 18, 9]
+target = 20`,
+				`array items = [10, 3, 16, 7, 22, 14, 5]
+target = 1`,
+				`array items = [4, 11, 4, 8, 15, 2]
+target = 4`,
+				`array items = [18, 7, 13, 2, 9, 20]
+target = 9`,
+			],
+		},
+		{
+			code: `array items = [3, 8, 12, 19, 25, 31, 40]
+target = 19
+found = false
+left = 0
+right = items.length - 1
+while left <= right AND found == false
+    midpoint = (left + right) DIV 2
+    if items[midpoint] == target then
+        found = true
+    elseif items[midpoint] < target then
+        left = midpoint + 1
+    else
+        right = midpoint - 1
+    endif
+endwhile
+if found == true then
+    print("Item found at position " + str(midpoint))
+else
+    print("Item not found")
+endif`,
+			description: "Binary search algorithm",
+			setupVariants: [
+				`array items = [3, 8, 12, 19, 25, 31, 40]
+target = 19`,
+				`array items = [2, 5, 9, 14, 20, 27, 33]
+target = 33`,
+				`array items = [4, 7, 11, 16, 22, 30]
+target = 7`,
+				`array items = [1, 6, 10, 15, 21]
+target = 21`,
+				`array items = [5, 9, 13, 18, 24, 29]
+target = 18`,
+				`array items = [3, 8, 12, 19, 25, 31, 40]
+target = 50`,
+				`array items = [10, 20, 30, 40, 50]
+target = 5`,
+				`array items = [2, 6, 11, 17, 23, 28]
+target = 14`,
+				`array items = [6, 13, 21, 34, 42]
+target = 21`,
+			],
+		},
+		{
+			code: `array items = [5, 2, 4, 1]
+n = items.length
+swapped = true
+while n > 0 AND swapped == true
+    swapped = false
+    n = n - 1
+    for index = 0 to n - 1
+        if items[index] > items[index + 1] then
+            temp = items[index]
+            items[index] = items[index + 1]
+            items[index + 1] = temp
+            swapped = true
+        endif
+    next index
+endwhile
+for j = 0 to items.length - 1
+    print(items[j])
+next j`,
+			description: "Bubble sort algorithm",
+			setupVariants: [
+				"array items = [5, 2, 4, 1]",
+				"array items = [8, 3, 9, 1, 4]",
+				"array items = [1, 2, 3, 5, 4]",
+				"array items = [9, 7, 5, 3, 1]",
+				"array items = [6, 6, 2, 4]",
+				"array items = [4, 1, 3, 2, 6, 5]",
+				"array items = [3, 8, 2]",
+			],
+		},
+		{
+			code: `array items = [5, 2, 4, 1]
+n = items.length
+for index = 1 to n - 1
+    current = items[index]
+    index2 = index
+    while index2 > 0 AND items[index2 - 1] > current
+        items[index2] = items[index2 - 1]
+        index2 = index2 - 1
+    endwhile
+    items[index2] = current
+next index
+for j = 0 to items.length - 1
+    print(items[j])
+next j`,
+			description: "Insertion sort algorithm",
+			setupVariants: [
+				"array items = [5, 2, 4, 1]",
+				"array items = [8, 3, 9, 1, 4]",
+				"array items = [1, 2, 3, 5, 4]",
+				"array items = [9, 7, 5, 3, 1]",
+				"array items = [6, 6, 2, 4]",
+				"array items = [4, 1, 3, 2, 6, 5]",
+				"array items = [3, 8, 2]",
+			],
 		},
 	],
 };

@@ -4,7 +4,7 @@ import type { Difficulty } from '@/lib/types';
 
 // Test helper functions that simulate the navigation logic
 function getDifficultyOrder(): Difficulty[] {
-  return ["easy", "medium", "hard"];
+  return ["easy", "medium", "hard", "alevel"];
 }
 
 function getNextDifficultyAndIndex(
@@ -75,9 +75,15 @@ describe('Cross-difficulty navigation', () => {
       expect(result).toEqual({ difficulty: 'hard', index: 0 });
     });
 
-    it('should return null when at end of hard difficulty', () => {
+    it('should move from end of hard to first of alevel', () => {
       const hardProgramsCount = programs.hard.length;
       const result = getNextDifficultyAndIndex('hard', hardProgramsCount - 1);
+      expect(result).toEqual({ difficulty: 'alevel', index: 0 });
+    });
+
+    it('should return null when at end of alevel difficulty', () => {
+      const alevelProgramsCount = programs.alevel.length;
+      const result = getNextDifficultyAndIndex('alevel', alevelProgramsCount - 1);
       expect(result).toBeNull();
     });
   });
@@ -113,8 +119,8 @@ describe('Cross-difficulty navigation', () => {
     });
 
     it('should indicate no next navigation available at very end', () => {
-      const hardProgramsCount = programs.hard.length;
-      const result = getNextDifficultyAndIndex('hard', hardProgramsCount - 1);
+      const alevelProgramsCount = programs.alevel.length;
+      const result = getNextDifficultyAndIndex('alevel', alevelProgramsCount - 1);
       expect(result).toBeNull();
     });
 

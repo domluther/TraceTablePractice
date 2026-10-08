@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { toBlob, toPng } from "html-to-image";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
-import type { Program } from "./programs";
+import { applySetupVariant, type Program } from "./programs";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -54,7 +54,15 @@ export const captureElement = async (
 
 export const pickProgramInputs = (program: Program) => {
 	// Make a shallow copy first
-	const selectedProgram = { ...program };
+	let selectedProgram = { ...program };
+
+	if (program.setupVariants && program.setupVariants.length > 0) {
+		const randomLine =
+			program.setupVariants[
+				Math.floor(Math.random() * program.setupVariants.length)
+			];
+		selectedProgram = applySetupVariant(selectedProgram, randomLine);
+	}
 
 	if (program.inputSets && program.inputSets.length > 0) {
 		const randomInputSet =
