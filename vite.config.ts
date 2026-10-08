@@ -23,6 +23,7 @@ export default defineConfig({
 		globals: true,
 		watch: false,
 		environment: "jsdom",
+		pool: "vmThreads", // creates jsdom once per worker while keeping per-file isolation
 		setupFiles: ["./src/test/setup.ts"],
 		css: true,
 		testTimeout: 2000, // 2 second timeout for individual tests
