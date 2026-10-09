@@ -299,7 +299,7 @@ describe("Programs Integration Tests - A-Level Programs", () => {
 
 			expect(result.success).toBe(true);
 			expect((result.variables as Record<string, any>).items).toEqual(sorted);
-			expect(result.outputs).toEqual(sorted.map(String));
+			expect(result.outputs).toEqual([`[${sorted.join(", ")}]`]);
 		}
 	});
 
@@ -330,7 +330,7 @@ describe("Programs Integration Tests - A-Level Programs", () => {
 			applySetupVariant(bubbleSort, "array items = [4, 3, 2, 1]"),
 		);
 
-		expect(sortedRun.outputs).toEqual(["1", "2", "3", "4"]);
+		expect(sortedRun.outputs).toEqual(["[1, 2, 3, 4]"]);
 		expect(sortedRun.trace.length).toBeLessThan(reversedRun.trace.length);
 	});
 
@@ -339,7 +339,7 @@ describe("Programs Integration Tests - A-Level Programs", () => {
 			applySetupVariant(bubbleSort, "array items = [7]"),
 		);
 		expect(result.success).toBe(true);
-		expect(result.outputs).toEqual(["7"]);
+		expect(result.outputs).toEqual(["[7]"]);
 	});
 
 	it("expands the trace columns to match the array length", () => {
@@ -409,7 +409,7 @@ describe("Programs Integration Tests - A-Level insertion sort ", () => {
 			const sorted = [...parseItems(variant)].sort((a, b) => a - b);
 			expect(result.success).toBe(true);
 			expect((result.variables as Record<string, any>).items).toEqual(sorted);
-			expect(result.outputs).toEqual(sorted.map(String));
+			expect(result.outputs).toEqual([`[${sorted.join(", ")}]`]);
 		}
 	});
 
@@ -526,6 +526,12 @@ describe("Programs Integration Tests - A-Level linear search", () => {
 			"Binary search algorithm",
 			"Bubble sort algorithm",
 			"Insertion sort algorithm",
+			"Recursive factorial",
+			"Recursive Fibonacci",
+			"Towers of Hanoi",
+			"Recursive binary search",
+			"Merge sort algorithm",
+			"Quick sort algorithm",
 		]);
 	});
 
@@ -604,4 +610,223 @@ describe("applySetupVariant", () => {
 		const picked = pickProgramInputs(programs.easy[0]);
 		expect(picked.code).toBe(programs.easy[0].code);
 	});
+});
+
+
+describe("Programs Integration Tests - A-Level recursive factorial", () => {
+	const factorialProgram = findALevel("Recursive factorial");
+	const factorialOf = (n: number): number => {
+		let total = 1;
+		for (let i = 2; i <= n; i++) total *= i;
+		return total;
+	};
+	const numberOf = (variant: string) => Number(variant.replace("number = ", ""));
+
+	it("prints the factorial for every variant", () => {
+		expect(factorialProgram.setupVariants).toContain(getSetupBlock(factorialProgram));
+		for (const variant of factorialProgram.setupVariants ?? []) {
+			const result = runProgram(applySetupVariant(factorialProgram, variant));
+			expect(result.success).toBe(true);
+			expect(result.outputs).toEqual([String(factorialOf(numberOf(variant)))]);
+		}
+	});
+
+	it("traces one call per level, then the returns, then the result", () => {
+		const result = runProgram(factorialProgram);
+		const n = numberOf(getSetupBlock(factorialProgram));
+		const calls = result.trace.filter((t) => t.lineNumber === 2);
+		const returns = result.trace.filter((t) => "return" in t.changedVariables);
+		expect(calls.map((t) => t.changedVariables.n)).toEqual(
+			Array.from({ length: n }, (_, i) => n - i),
+		);
+		expect(returns.map((t) => t.changedVariables.return)).toEqual(
+			Array.from({ length: n }, (_, i) => factorialOf(i + 1)),
+		);
+		expect(result.trace[result.trace.length - 2].changedVariables).toEqual({
+			result: factorialOf(n),
+		});
+	});
+});
+
+
+const findByDescription = (list: typeof programs.hard, name: string) => {
+	const program = list.find((p) => p.description === name);
+	if (!program) throw new Error(`No program named ${name}`);
+	return program;
+};
+
+const numberAfter = (line: string, name: string) =>
+	Number(line.match(new RegExp(`${name} = (-?\\d+)`))?.[1]);
+
+const parseArray = (variant: string) =>
+	(variant.match(/array items = \[([^\]]*)\]/)?.[1] ?? "")
+		.split(",")
+		.map(Number);
+
+const ascending = (values: number[]) => [...values].sort((a, b) => a - b);
+
+describe("Programs Integration Tests - Hard procedures and functions", () => {
+	it("prints the total for the procedure call", () => {
+		const program = findByDescription(programs.hard, "Procedure with parameters");
+		for (const variant of program.setupVariants ?? []) {
+			const price = numberAfter(variant, "price");
+			const quantity = numberAfter(variant, "quantity");
+			const result = runProgram(applySetupVariant(program, variant));
+			expect(result.success).toBe(true);
+			expect(result.outputs).toEqual([`Total: ${price * quantity}`]);
+		}
+	});
+
+	it("returns the grade for every mark, including the boundaries", () => {
+		const program = findByDescription(programs.hard, "Function that returns a grade");
+		const gradeFor = (mark: number) =>
+			mark >= 70 ? "Distinction" : mark >= 50 ? "Merit" : "Pass";
+		const grades = new Set<string>();
+		for (const variant of program.setupVariants ?? []) {
+			const mark = numberAfter(variant, "mark");
+			const result = runProgram(applySetupVariant(program, variant));
+			expect(result.success).toBe(true);
+			expect(result.outputs).toEqual([gradeFor(mark)]);
+			grades.add(gradeFor(mark));
+		}
+		expect(grades.size).toBe(3);
+	});
+
+	it("sums the numbers up to the limit", () => {
+		const program = findByDescription(programs.hard, "Function with a loop");
+		for (const variant of program.setupVariants ?? []) {
+			const limit = numberAfter(variant, "limit");
+			const result = runProgram(applySetupVariant(program, variant));
+			expect(result.success).toBe(true);
+			expect(result.outputs).toEqual([`Sum: ${(limit * (limit + 1)) / 2}`]);
+		}
+	});
+});
+
+describe("Programs Integration Tests - A-Level recursion", () => {
+	it("computes Fibonacci numbers", () => {
+		const program = findALevel("Recursive Fibonacci");
+		const fib = (n: number): number => (n <= 1 ? n : fib(n - 1) + fib(n - 2));
+		for (const variant of program.setupVariants ?? []) {
+			const n = numberAfter(variant, "number");
+			const result = runProgram(applySetupVariant(program, variant));
+			expect(result.success).toBe(true);
+			expect(result.outputs).toEqual([String(fib(n))]);
+			// One traced call per recursive call: 2 * fib(n + 1) - 1 calls in total
+			const calls = result.trace.filter((t) => t.lineNumber === 2);
+			expect(calls).toHaveLength(2 * fib(n + 1) - 1);
+		}
+	});
+
+	it("prints every Towers of Hanoi move in order", () => {
+		const program = findALevel("Towers of Hanoi");
+		const moves = (n: number, from: string, to: string, via: string): string[] =>
+			n === 0
+				? []
+				: [
+						...moves(n - 1, from, via, to),
+						`Move disk ${n} from ${from} to ${to}`,
+						...moves(n - 1, via, to, from),
+					];
+		for (const variant of program.setupVariants ?? []) {
+			const n = numberAfter(variant, "number");
+			const result = runProgram(applySetupVariant(program, variant));
+			expect(result.success).toBe(true);
+			expect(result.outputs).toEqual(moves(n, "A", "C", "B"));
+			expect(result.outputs).toHaveLength(2 ** n - 1);
+		}
+	});
+
+	it("finds the position of the target or reports not found", () => {
+		const program = findALevel("Recursive binary search");
+		let found = 0;
+		let notFound = 0;
+		for (const variant of program.setupVariants ?? []) {
+			const items = parseArray(variant);
+			const target = numberAfter(variant, "target");
+			expect(items).toEqual(ascending(items));
+			const result = runProgram(applySetupVariant(program, variant));
+			expect(result.success).toBe(true);
+			const position = items.indexOf(target);
+			if (position === -1) {
+				notFound++;
+				expect(result.outputs).toEqual(["Item not found"]);
+			} else {
+				found++;
+				expect(result.outputs).toEqual([`Item found at position ${position}`]);
+			}
+		}
+		expect(found).toBeGreaterThan(0);
+		expect(notFound).toBeGreaterThan(0);
+	});
+
+	it("handles tiny arrays in the recursive binary search", () => {
+		const program = findALevel("Recursive binary search");
+		const runWith = (items: number[], target: number) =>
+			runProgram(
+				applySetupVariant(
+					program,
+					`array items = [${items.join(", ")}]\ntarget = ${target}`,
+				),
+			);
+		expect(runWith([7], 7).outputs).toEqual(["Item found at position 0"]);
+		expect(runWith([7], 3).outputs).toEqual(["Item not found"]);
+		expect(runWith([1, 2], 2).outputs).toEqual(["Item found at position 1"]);
+	});
+});
+
+describe("Programs Integration Tests - A-Level merge sort and quick sort", () => {
+	const cases: [string, string][] = [
+		["Merge sort algorithm", "merge sort"],
+		["Quick sort algorithm", "quick sort"],
+	];
+
+	for (const [description, label] of cases) {
+		const program = findALevel(description);
+		const withItems = (items: number[]) => {
+			const setup = `array items = [${items.join(", ")}]`;
+			return applySetupVariant(
+				program,
+				description.startsWith("Merge")
+					? `${setup}\narray temp[${items.length}]`
+					: setup,
+			);
+		};
+
+		it(`${label} sorts every variant and prints the sorted array`, () => {
+			expect(program.setupVariants).toContain(getSetupBlock(program));
+			for (const variant of program.setupVariants ?? []) {
+				const sorted = ascending(parseArray(variant));
+				const result = runProgram(applySetupVariant(program, variant));
+				expect(result.success).toBe(true);
+				expect((result.variables as Record<string, any>).items).toEqual(sorted);
+				expect(result.outputs).toEqual([`[${sorted.join(", ")}]`]);
+			}
+		});
+
+		it(`${label} uses data of different sizes and orders`, () => {
+			const arrays = (program.setupVariants ?? []).map(parseArray);
+			expect(new Set(arrays.map((a) => a.length)).size).toBeGreaterThan(1);
+			expect(arrays.some((a) => a.join() === ascending(a).join())).toBe(true);
+			expect(arrays.some((a) => new Set(a).size < a.length)).toBe(true);
+		});
+
+		it(`${label} handles one element, two elements, duplicates and negatives`, () => {
+			for (const items of [[7], [2, 1], [1, 2], [3, 3, 3], [2, -1, 0, -5, 2]]) {
+				const result = runProgram(withItems(items));
+				expect(result.success).toBe(true);
+				expect(result.outputs).toEqual([`[${ascending(items).join(", ")}]`]);
+			}
+		});
+
+		it(`${label} is shown as separate calls in the trace`, () => {
+			const result = runProgram(program);
+			const headerLine = program.code
+				.split("\n")
+				.findIndex((line) => line.startsWith(`procedure ${label === "merge sort" ? "mergeSort" : "quickSort"}(`));
+			const calls = result.trace.filter((t) => t.lineNumber === headerLine + 1);
+			expect(calls.length).toBeGreaterThan(1);
+			expect(Object.keys(calls[0].changedVariables)).toEqual(["low", "high"]);
+		});
+	}
 });

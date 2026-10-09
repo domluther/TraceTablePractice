@@ -127,7 +127,7 @@ export function ProgramCode({
 					<pre className="py-2 pl-2 m-0 text-sm leading-relaxed">
 						{currentProgram.code.split("\n").map((line, index) => (
 							<div
-								key={line}
+								key={`${index}-${line}`}
 								className="flex transition-colors duration-150 hover:bg-checkbox-label-bg-hover"
 							>
 								<span className="text-code-line-number bg-code-display-bg border-r border-border px-1 py-1.5 select-none min-w-[3rem] text-right font-medium text-xs leading-none">

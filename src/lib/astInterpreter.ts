@@ -26,6 +26,32 @@ function safeToString(value: VariableValue): string {
 	return value !== undefined ? String(value) : "";
 }
 
+// Arrays print as [1, 2, 4, 5]
+function formatPrintValue(value: VariableValue): string {
+	return Array.isArray(value) ? `[${value.join(", ")}]` : safeToString(value);
+}
+
+// A user-defined function or procedure. Its body is lines[start + 1 .. end - 1]
+interface UserFunction {
+	name: string;
+	params: string[];
+	isFunction: boolean;
+	lines: string[];
+	start: number;
+	end: number;
+}
+
+// Thrown by a return statement to unwind to the call that made it
+class ReturnSignal {
+	value: VariableValue;
+	constructor(value: VariableValue) {
+		this.value = value;
+	}
+}
+
+const MAX_CALL_DEPTH = 100;
+const RETURN_COLUMN = "return";
+
 export interface TraceStep {
 	lineNumber: number;
 	variables: Record<string, VariableValue>;
@@ -58,8 +84,22 @@ export class ASTInterpreter {
 	private inputs: string[] = [];
 	private inputIndex = 0;
 	private randomValue?: number | string;
+	private functions: Record<string, UserFunction> = {};
+	private callDepth = 0;
+	private pendingReturn?: { value: VariableValue };
+	private hasReturnValues = false;
+	// Parameters and locals of finished calls, so they still get trace table columns
+	private localVariables: Record<string, VariableValue> = {};
+	// The main program's variables, which every call can see
+	private globalVariables: Record<string, VariableValue> = {};
 
 	reset(): void {
+		this.functions = {};
+		this.callDepth = 0;
+		this.pendingReturn = undefined;
+		this.hasReturnValues = false;
+		this.localVariables = {};
+		this.globalVariables = {};
 		this.variables = {};
 		this.constants = {};
 		this.outputs = [];
@@ -85,6 +125,7 @@ export class ASTInterpreter {
 			.map((l) => l.trim())
 			.filter((l) => l.length > 0);
 
+		this.registerFunctions(lines);
 		this.executeBlock(lines, 0, lines.length);
 
 		return {
@@ -105,6 +146,7 @@ export class ASTInterpreter {
 			.map((line) => line.trim())
 			.filter((line) => line.length > 0);
 
+		this.registerFunctions(lines);
 		this.executeBlock(lines, 0, lines.length);
 
 		return {
@@ -117,7 +159,7 @@ export class ASTInterpreter {
 	private getExpandedVariableNames(): string[] {
 		const expandedNames: string[] = [];
 
-		for (const [name, value] of Object.entries(this.variables)) {
+		const addName = (name: string, value: VariableValue) => {
 			if (Array.isArray(value)) {
 				// Expand array variables into individual elements
 				for (let i = 0; i < value.length; i++) {
@@ -127,9 +169,26 @@ export class ASTInterpreter {
 				// Add regular variables as is
 				expandedNames.push(name);
 			}
+		};
+
+		for (const [name, value] of Object.entries(this.variables)) {
+			addName(name, value);
 		}
+		for (const [name, value] of Object.entries(this.localVariables)) {
+			if (!(name in this.variables)) addName(name, value);
+		}
+		if (this.hasReturnValues) expandedNames.push(RETURN_COLUMN);
 
 		return expandedNames;
+	}
+
+	// Copy of the variables a line can see (a call's own plus the globals it inherits)
+	private snapshotVariables(
+		vars: Record<string, VariableValue>,
+	): Record<string, VariableValue> {
+		const snapshot: Record<string, VariableValue> = {};
+		for (const name in vars) snapshot[name] = vars[name];
+		return snapshot;
 	}
 
 	private addTraceEntry(
@@ -140,7 +199,7 @@ export class ASTInterpreter {
 	): void {
 		this.trace.push({
 			lineNumber: lineNum,
-			variables: { ...vars },
+			variables: this.snapshotVariables(vars),
 			output: output,
 			changedVariables: changedVariables,
 		});
@@ -158,9 +217,26 @@ export class ASTInterpreter {
 		const shouldTrace = true;
 		const changeRecord: Record<string, VariableValue> = {}; // Track which variables actually change
 
+		line = this.resolveFunctionCalls(line, vars);
 		line = this.resolveArrayReferences(line, vars);
 
-		if (line.startsWith("array ")) {
+		if (line === "return" || line.startsWith("return ")) {
+			if (this.callDepth === 0) {
+				throw new Error("return can only be used inside a function");
+			}
+			const returned =
+				line === "return"
+					? undefined
+					: this.evaluateValue(line.substring(7), vars);
+			if (Array.isArray(returned)) {
+				throw new Error("A function can only return a single value");
+			}
+			if (returned !== undefined) {
+				this.hasReturnValues = true;
+				changeRecord[RETURN_COLUMN] = returned;
+			}
+			this.pendingReturn = { value: returned };
+		} else if (line.startsWith("array ")) {
 			// Array declaration with initialization like "array scores = [85, 92, 78, 90]"
 			const initMatch = line.match(/array\s+(\w+)\s*=\s*\[([^\]]+)\]/);
 			if (initMatch) {
@@ -231,7 +307,7 @@ export class ASTInterpreter {
 						outputParts.push(part.slice(1, -1));
 					} else if (vars[part] !== undefined) {
 						// Variable reference
-						outputParts.push(safeToString(vars[part]));
+						outputParts.push(formatPrintValue(vars[part]));
 					} else {
 						// Try to evaluate as expression
 						try {
@@ -244,6 +320,9 @@ export class ASTInterpreter {
 				}
 
 				output = outputParts.join(" ");
+			} else if (Array.isArray(vars[content.trim()])) {
+				// Whole array like print(items)
+				output = formatPrintValue(vars[content.trim()]);
 			} else if (
 				content.startsWith('"') &&
 				content.endsWith('"') &&
@@ -251,6 +330,9 @@ export class ASTInterpreter {
 			) {
 				// Simple string literal with no internal quotes
 				output = content.slice(1, -1);
+			} else if (/^-?\d+(\.\d+)?$/.test(content.trim())) {
+				// Numeric literal, e.g. what print(items.length) or print(f(3)) resolves to
+				output = content.trim();
 			} else if (this.isStringConcatenation(content, vars)) {
 				// Use the existing string concatenation method which handles complex expressions
 				output = this.evaluateStringConcatenation(content, vars);
@@ -407,6 +489,213 @@ export class ASTInterpreter {
 		}
 
 		return { output, shouldTrace, changedVariables: changeRecord };
+	}
+
+	private parseFunctionHeader(
+		line: string,
+	): { isFunction: boolean; name: string; params: string[] } | undefined {
+		const match = line.match(/^(function|procedure)\s+(\w+)\s*\(([^)]*)\)$/);
+		if (!match) return undefined;
+		return {
+			isFunction: match[1] === "function",
+			name: match[2],
+			params: match[3]
+				.split(",")
+				.map((p) => p.trim())
+				.filter((p) => p.length > 0),
+		};
+	}
+
+	private findFunctionEnd(lines: string[], start: number): number {
+		const header = this.parseFunctionHeader(lines[start]);
+		const endKeyword = header?.isFunction ? "endfunction" : "endprocedure";
+		for (let j = start + 1; j < lines.length; j++) {
+			if (lines[j] === endKeyword) return j;
+		}
+		throw new Error(`Missing ${endKeyword} for ${header?.name}`);
+	}
+
+	private registerFunctions(lines: string[]): void {
+		lines.forEach((line, start) => {
+			const header = this.parseFunctionHeader(line);
+			if (header) {
+				this.functions[header.name] = {
+					...header,
+					lines,
+					start,
+					end: this.findFunctionEnd(lines, start),
+				};
+			}
+		});
+	}
+
+	// Value of the right-hand side of an assignment or return statement
+	private evaluateValue(
+		expression: string,
+		vars: Record<string, VariableValue>,
+	): VariableValue {
+		const value = expression.trim();
+		if (Array.isArray(vars[value])) {
+			return [...(vars[value] as Array<number | string | boolean>)];
+		}
+		const resolved = this.resolveArrayReferences(
+			this.resolveFunctionCalls(value, vars),
+			vars,
+		);
+		return this.isStringConcatenation(resolved, vars)
+			? this.evaluateStringConcatenation(resolved, vars)
+			: this.evaluateExpression(resolved, vars);
+	}
+
+	// Replaces each call to a user-defined function or procedure with the value
+	// it returns (nothing for a procedure), running the call as it goes.
+	// Text inside string literals is left alone.
+	private resolveFunctionCalls(
+		text: string,
+		vars: Record<string, VariableValue>,
+	): string {
+		const names = Object.keys(this.functions);
+		if (names.length === 0 || !text.includes("(")) return text;
+		const callStart = new RegExp(`(?<![\\w.])(${names.join("|")})\\s*\\(`, "y");
+
+		let result = "";
+		let i = 0;
+		while (i < text.length) {
+			const ch = text[i];
+			if (ch === '"' || ch === "'") {
+				const close = text.indexOf(ch, i + 1);
+				const end = close === -1 ? text.length : close + 1;
+				result += text.slice(i, end);
+				i = end;
+				continue;
+			}
+			callStart.lastIndex = i;
+			const match = callStart.exec(text);
+			if (!match) {
+				result += ch;
+				i++;
+				continue;
+			}
+			const argsStart = i + match[0].length;
+			const argsEnd = this.findClosingParen(text, argsStart);
+			if (argsEnd === -1) {
+				result += ch;
+				i++;
+				continue;
+			}
+			const args = this.splitArguments(text.slice(argsStart, argsEnd)).map(
+				(arg) => this.evaluateValue(arg, vars),
+			);
+			const fn = this.functions[match[1]];
+			const value = this.callFunction(fn, args);
+			result += fn.isFunction ? this.formatLiteral(value) : "";
+			i = argsEnd + 1;
+		}
+		return result;
+	}
+
+	// Index of the ) matching the ( just before start, or -1
+	private findClosingParen(text: string, start: number): number {
+		let depth = 1;
+		for (let i = start; i < text.length; i++) {
+			const ch = text[i];
+			if (ch === '"' || ch === "'") {
+				const close = text.indexOf(ch, i + 1);
+				if (close === -1) return -1;
+				i = close;
+			} else if (ch === "(") {
+				depth++;
+			} else if (ch === ")" && --depth === 0) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private splitArguments(argText: string): string[] {
+		const args: string[] = [];
+		let depth = 0;
+		let current = "";
+		for (let i = 0; i < argText.length; i++) {
+			const ch = argText[i];
+			if (ch === '"' || ch === "'") {
+				const close = argText.indexOf(ch, i + 1);
+				const end = close === -1 ? argText.length : close + 1;
+				current += argText.slice(i, end);
+				i = end - 1;
+				continue;
+			}
+			if (ch === "(" || ch === "[") depth++;
+			if (ch === ")" || ch === "]") depth--;
+			if (ch === "," && depth === 0) {
+				args.push(current);
+				current = "";
+			} else {
+				current += ch;
+			}
+		}
+		if (current.trim().length > 0 || args.length > 0) args.push(current);
+		return args;
+	}
+
+	private formatLiteral(value: VariableValue): string {
+		if (typeof value === "string") {
+			return value.includes('"') ? `'${value}'` : `"${value}"`;
+		}
+		return value === undefined ? "0" : String(value);
+	}
+
+	// Runs a call in its own set of variables: parameters and locals, plus
+	// read access to the main program's variables
+	private callFunction(fn: UserFunction, args: VariableValue[]): VariableValue {
+		if (args.length !== fn.params.length) {
+			throw new Error(
+				`${fn.name} expects ${fn.params.length} argument(s) but got ${args.length}`,
+			);
+		}
+		if (this.callDepth >= MAX_CALL_DEPTH) {
+			throw new Error(
+				`Maximum recursion depth exceeded in ${fn.name} (is there a base case?)`,
+			);
+		}
+
+		// The frame inherits the globals (so constants and shared arrays are visible)
+		// but assigning a plain variable inside a call creates a local one
+		if (this.callDepth === 0) this.globalVariables = this.variables;
+		const frame: Record<string, VariableValue> = Object.create(
+			this.globalVariables,
+		);
+		const changed: Record<string, VariableValue> = {};
+		fn.params.forEach((param, index) => {
+			frame[param] = args[index];
+			changed[param] = args[index];
+			this.localVariables[param] = args[index];
+			if (Array.isArray(args[index])) {
+				(args[index] as Array<number | string | boolean>).forEach((v, k) => {
+					changed[`${param}[${k}]`] = v;
+				});
+			}
+		});
+
+		const caller = this.variables;
+		this.variables = frame;
+		this.callDepth++;
+		try {
+			// Binding the parameters is traced on the function's header line
+			this.addTraceEntry(fn.start + 1, frame, "", changed);
+			this.executeBlock(fn.lines, fn.start + 1, fn.end);
+			return undefined;
+		} catch (error) {
+			if (error instanceof ReturnSignal) return error.value;
+			throw error;
+		} finally {
+			this.callDepth--;
+			for (const [name, value] of Object.entries(frame)) {
+				this.localVariables[name] = value;
+			}
+			this.variables = caller;
+			this.pendingReturn = undefined;
+		}
 	}
 
 	// Rewrites array references into forms the rest of the interpreter handles:
@@ -1455,6 +1744,9 @@ export class ASTInterpreter {
 			return result;
 		}
 
+		// Calls are resolved here, after AND/OR splitting, so each is evaluated once
+		condition = this.resolveFunctionCalls(condition, vars);
+
 		// Handle all comparison operators
 		const comparisonOperators = [">=", "<=", "==", "!=", ">", "<"];
 
@@ -1599,7 +1891,13 @@ export class ASTInterpreter {
 			const bodyLineNum = bodyLine + 1;
 
 			// Check if this line is a nested control structure
-			if (bodyLineCode.startsWith("if ") && bodyLineCode.includes(" then")) {
+			if (this.parseFunctionHeader(bodyLineCode)) {
+				// Definitions only run when called, so skip over the body
+				bodyLine = this.findFunctionEnd(lines, bodyLine) + 1;
+			} else if (
+				bodyLineCode.startsWith("if ") &&
+				bodyLineCode.includes(" then")
+			) {
 				// Handle nested if statement
 				bodyLine = this.handleIfStatement(lines, bodyLine);
 			} else if (bodyLineCode.startsWith("switch ")) {
@@ -1645,6 +1943,11 @@ export class ASTInterpreter {
 						result.output,
 						result.changedVariables,
 					);
+				}
+				if (this.pendingReturn) {
+					const { value } = this.pendingReturn;
+					this.pendingReturn = undefined;
+					throw new ReturnSignal(value);
 				}
 				bodyLine++;
 			}
@@ -1816,7 +2119,10 @@ export class ASTInterpreter {
 
 	private handleForLoop(lines: string[], i: number): number {
 		// For loop with optional step
-		const line = this.resolveArrayReferences(lines[i], this.variables);
+		const line = this.resolveArrayReferences(
+			this.resolveFunctionCalls(lines[i], this.variables),
+			this.variables,
+		);
 
 		// Try to match pattern with step first: "for var = start to end step stepValue"
 		let forMatch = line.match(

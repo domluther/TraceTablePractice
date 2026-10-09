@@ -12,7 +12,7 @@ export const Route = createRootRoute({
 				<div className="fixed z-50 top-2 right-2 sm:top-4 sm:right-4">
 					<SimpleThemeToggle />
 				</div>
-				<div className="w-full max-w-6xl overflow-hidden shadow-2xl bg-background rounded-xl">
+				<div className="w-full max-w-6xl has-[[data-wide-layout]]:max-w-[90rem] overflow-hidden shadow-2xl bg-background rounded-xl">
 					<main className="p-0">
 						<Outlet />
 					</main>

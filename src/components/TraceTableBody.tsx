@@ -28,6 +28,16 @@ interface TraceTableBodyProps {
 	siteConfig: typeof SITE_CONFIG;
 }
 
+// Tables with many variables use compact columns: variable columns share the spare
+// width but never shrink below the minimum, so they scroll instead of being squashed.
+// Simpler tables keep equal-width columns.
+const LINE_COLUMN_WIDTH = "4rem";
+const VARIABLE_COLUMN_MIN_WIDTH = "4.5rem";
+const OUTPUT_COLUMN_WIDTH = "10rem";
+// Tables with more variables than this are too cramped at the default page width,
+// so they ask the root layout to expand (see data-wide-layout in __root.tsx).
+const WIDE_LAYOUT_VARIABLE_THRESHOLD = 8;
+
 interface UserTraceEntry {
 	id: string;
 	lineNumber: string;
@@ -374,6 +384,9 @@ export function TraceTableBody({
 		return `${baseClass} bg-checkbox-kbd-bg`;
 	};
 
+	const isCompactTable =
+		programVariables.length > WIDE_LAYOUT_VARIABLE_THRESHOLD;
+
 	const canShuffle =
 		(currentProgram?.inputSets?.length ?? 0) > 1 ||
 		(currentProgram?.setupVariants?.length ?? 0) > 1;
@@ -563,6 +576,7 @@ export function TraceTableBody({
 
 	return (
 		<div className="space-y-4">
+			{isCompactTable && <span data-wide-layout hidden />}
 			{/* Code Display */}
 
 			<ProgramCode
@@ -598,15 +612,33 @@ export function TraceTableBody({
 						</div>
 					</div>
 				</CardHeader>
-				<CardContent className="pt-0">
-					<div className="overflow-auto rounded-lg max-h-96">
+				<CardContent className={isCompactTable ? "px-3 pt-0 sm:px-4" : "pt-0"}>
+					<div
+						className={`overflow-auto rounded-lg ${isCompactTable ? "max-h-[70vh]" : "max-h-96"}`}
+					>
 						<table
 							ref={cardRef}
 							className="w-full text-sm border-collapse table-fixed bg-checkbox-kbd-bg"
+							style={
+								isCompactTable
+									? {
+											minWidth: `calc(${LINE_COLUMN_WIDTH} + ${OUTPUT_COLUMN_WIDTH} + ${programVariables.length} * ${VARIABLE_COLUMN_MIN_WIDTH})`,
+										}
+									: undefined
+							}
 						>
+							{isCompactTable && (
+								<colgroup>
+									<col style={{ width: LINE_COLUMN_WIDTH }} />
+									{programVariables.map((varName) => (
+										<col key={varName} />
+									))}
+									<col style={{ width: OUTPUT_COLUMN_WIDTH }} />
+								</colgroup>
+							)}
 							<thead>
 								<tr className="sticky top-0 z-10 bg-button-primary">
-									<th className="px-2 py-3 font-semibold text-center border text-button-primary-text border-border">
+									<th className="sticky left-0 px-2 py-3 font-semibold text-center border bg-button-primary text-button-primary-text border-border">
 										Line Number
 									</th>
 									{programVariables.map((varName) => (
@@ -614,7 +646,14 @@ export function TraceTableBody({
 											key={varName}
 											className="px-2 py-3 font-semibold text-center border text-button-primary-text border-border"
 										>
-											{varName}
+											<span
+												className={
+													isCompactTable ? "block truncate" : undefined
+												}
+												title={varName}
+											>
+												{varName}
+											</span>
 										</th>
 									))}
 									<th className="px-2 py-3 font-semibold text-center border text-button-primary-text border-border">
@@ -628,7 +667,7 @@ export function TraceTableBody({
 										key={entry.id}
 										className="transition-colors hover:bg-checkbox-label-bg-hover"
 									>
-										<td className="p-1 text-center border border-checkbox-label-border">
+										<td className="sticky left-0 p-1 text-center border bg-checkbox-kbd-bg border-checkbox-label-border">
 											<input
 												ref={rowIndex === 0 ? firstInputRef : undefined}
 												type="number"

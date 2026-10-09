@@ -241,3 +241,42 @@ endif`);
 		expect(outputs).toEqual(["numeric", "numbers"]);
 	});
 });
+
+describe("Printing whole arrays", () => {
+	it("prints an array as [1, 2, 4, 5]", () => {
+		const { outputs } = run(`array items = [1, 2, 4, 5]
+print(items)`);
+		expect(outputs).toEqual(["[1, 2, 4, 5]"]);
+	});
+
+	it("prints the current contents after changes", () => {
+		const { outputs } = run(`array items = [3, 1, 2]
+items[0] = 9
+print(items)`);
+		expect(outputs).toEqual(["[9, 1, 2]"]);
+	});
+
+	it("prints a one-element array and a declared array", () => {
+		const { outputs } = run(`array one = [7]
+array blank[3]
+print(one)
+print(blank)`);
+		expect(outputs).toEqual(["[7]", "[0, 0, 0]"]);
+	});
+
+	it("prints text arrays and arrays alongside text", () => {
+		const { outputs } = run(`array names = ["Ann", "Bob"]
+print(names)
+print("Names:", names)`);
+		expect(outputs).toEqual(["[Ann, Bob]", "Names: [Ann, Bob]"]);
+	});
+
+	it("still prints elements and plain variables as before", () => {
+		const { outputs } = run(`array items = [4, 5, 6]
+x = 3
+print(items[1])
+print(x)
+print("items")`);
+		expect(outputs).toEqual(["5", "3", "items"]);
+	});
+});

@@ -628,11 +628,11 @@ print("Hot days: " + str(hot_days))`,
 			],
 		},
 		{
-			code: `array products = ["apples", "bananas", "cherries"]
+			code: `array items = ["apples", "bananas", "cherries"]
 array prices = [3, 5, 2]
 total_cost = 0
 for i = 0 to 2
-    quantity = int(input("How many " + products[i] + "?"))
+    quantity = int(input("How many " + items[i] + "?"))
     cost = quantity * prices[i]
     total_cost = total_cost + cost
 next i
@@ -695,6 +695,63 @@ endif`,
 				["1", "2", "3"],
 			],
 			randomValues: [6, 25, 30, 40, 45, 50],
+		},
+		{
+			code: `price = 5
+quantity = 3
+procedure showTotal(cost, amount)
+    total = cost * amount
+    print("Total: " + str(total))
+endprocedure
+showTotal(price, quantity)`,
+			description: "Procedure with parameters",
+			setupVariants: [
+				`price = 5
+quantity = 3`,
+				`price = 4
+quantity = 6`,
+				`price = 12
+quantity = 2`,
+				`price = 3
+quantity = 7`,
+			],
+		},
+		{
+			code: `mark = 65
+function getGrade(score)
+    if score >= 70 then
+        return "Distinction"
+    elseif score >= 50 then
+        return "Merit"
+    else
+        return "Pass"
+    endif
+endfunction
+result = getGrade(mark)
+print(result)`,
+			description: "Function that returns a grade",
+			setupVariants: [
+				"mark = 65",
+				"mark = 82",
+				"mark = 40",
+				"mark = 70",
+				"mark = 50",
+				"mark = 49",
+			],
+		},
+		{
+			code: `limit = 4
+function sumTo(n)
+    total = 0
+    for i = 1 to n
+        total = total + i
+    next i
+    return total
+endfunction
+answer = sumTo(limit)
+print("Sum: " + str(answer))`,
+			description: "Function with a loop",
+			setupVariants: ["limit = 4", "limit = 3", "limit = 5", "limit = 6"],
 		},
 	],
 	alevel: [
@@ -794,9 +851,7 @@ while n > 0 AND swapped == true
         endif
     next index
 endwhile
-for j = 0 to items.length - 1
-    print(items[j])
-next j`,
+print(items)`,
 			description: "Bubble sort algorithm",
 			setupVariants: [
 				"array items = [5, 2, 4, 1]",
@@ -820,9 +875,7 @@ for index = 1 to n - 1
     endwhile
     items[index2] = current
 next index
-for j = 0 to items.length - 1
-    print(items[j])
-next j`,
+print(items)`,
 			description: "Insertion sort algorithm",
 			setupVariants: [
 				"array items = [5, 2, 4, 1]",
@@ -832,6 +885,175 @@ next j`,
 				"array items = [6, 6, 2, 4]",
 				"array items = [4, 1, 3, 2, 6, 5]",
 				"array items = [3, 8, 2]",
+			],
+		},
+		{
+			code: `number = 4
+function factorial(n)
+    if n <= 1 then
+        return 1
+    endif
+    return n * factorial(n - 1)
+endfunction
+result = factorial(number)
+print(result)`,
+			description: "Recursive factorial",
+			setupVariants: ["number = 4", "number = 3", "number = 5", "number = 2"],
+		},
+		{
+			code: `number = 4
+function fib(n)
+    if n <= 1 then
+        return n
+    endif
+    return fib(n - 1) + fib(n - 2)
+endfunction
+result = fib(number)
+print(result)`,
+			description: "Recursive Fibonacci",
+			setupVariants: ["number = 4", "number = 3", "number = 5", "number = 2"],
+		},
+		{
+			code: `number = 3
+procedure hanoi(disks, source, target, spare)
+    if disks > 0 then
+        hanoi(disks - 1, source, spare, target)
+        print("Move disk " + str(disks) + " from " + source + " to " + target)
+        hanoi(disks - 1, spare, target, source)
+    endif
+endprocedure
+hanoi(number, "A", "C", "B")`,
+			description: "Towers of Hanoi",
+			setupVariants: ["number = 3", "number = 2", "number = 1"],
+		},
+		{
+			code: `array items = [3, 8, 12, 19, 25, 31, 40]
+target = 19
+function search(low, high)
+    if low > high then
+        return -1
+    endif
+    mid = (low + high) DIV 2
+    if items[mid] == target then
+        return mid
+    elseif items[mid] < target then
+        return search(mid + 1, high)
+    else
+        return search(low, mid - 1)
+    endif
+endfunction
+position = search(0, items.length - 1)
+if position == -1 then
+    print("Item not found")
+else
+    print("Item found at position " + str(position))
+endif`,
+			description: "Recursive binary search",
+			setupVariants: [
+				`array items = [3, 8, 12, 19, 25, 31, 40]
+target = 19`,
+				`array items = [2, 5, 9, 14, 20, 27, 33]
+target = 33`,
+				`array items = [4, 7, 11, 16, 22, 30]
+target = 7`,
+				`array items = [1, 6, 10, 15, 21]
+target = 21`,
+				`array items = [3, 8, 12, 19, 25, 31, 40]
+target = 50`,
+				`array items = [10, 20, 30, 40, 50]
+target = 5`,
+				`array items = [2, 6, 11, 17, 23, 28]
+target = 14`,
+			],
+		},
+		{
+			code: `array items = [5, 2, 4, 1]
+array temp[4]
+procedure merge(low, mid, high)
+    i = low
+    j = mid + 1
+    k = low
+    while i <= mid AND j <= high
+        if items[i] <= items[j] then
+            temp[k] = items[i]
+            i = i + 1
+        else
+            temp[k] = items[j]
+            j = j + 1
+        endif
+        k = k + 1
+    endwhile
+    while i <= mid
+        temp[k] = items[i]
+        i = i + 1
+        k = k + 1
+    endwhile
+    while j <= high
+        temp[k] = items[j]
+        j = j + 1
+        k = k + 1
+    endwhile
+    for i = low to high
+        items[i] = temp[i]
+    next i
+endprocedure
+procedure mergeSort(low, high)
+    if low < high then
+        mid = (low + high) DIV 2
+        mergeSort(low, mid)
+        mergeSort(mid + 1, high)
+        merge(low, mid, high)
+    endif
+endprocedure
+mergeSort(0, items.length - 1)
+print(items)`,
+			description: "Merge sort algorithm",
+			setupVariants: [
+				`array items = [5, 2, 4, 1]
+array temp[4]`,
+				`array items = [3, 1, 2]
+array temp[3]`,
+				`array items = [4, 1, 3, 2]
+array temp[4]`,
+				`array items = [1, 2, 3, 4]
+array temp[4]`,
+				`array items = [6, 6, 2, 4]
+array temp[4]`,
+				`array items = [9, 7, 5, 3]
+array temp[4]`,
+			],
+		},
+		{
+			code: `array items = [5, 2, 4, 1]
+procedure quickSort(low, high)
+    if low < high then
+        pivot = items[high]
+        i = low - 1
+        for j = low to high - 1
+            if items[j] <= pivot then
+                i = i + 1
+                temp = items[i]
+                items[i] = items[j]
+                items[j] = temp
+            endif
+        next j
+        temp = items[i + 1]
+        items[i + 1] = items[high]
+        items[high] = temp
+        quickSort(low, i)
+        quickSort(i + 2, high)
+    endif
+endprocedure
+quickSort(0, items.length - 1)
+print(items)`,
+			description: "Quick sort algorithm",
+			setupVariants: [
+				"array items = [5, 2, 4, 1]",
+				"array items = [3, 1, 2]",
+				"array items = [4, 1, 3, 2, 5]",
+				"array items = [1, 2, 3, 4]",
+				"array items = [6, 6, 2, 4]",
+				"array items = [9, 7, 5, 3, 1]",
 			],
 		},
 	],

@@ -27,7 +27,7 @@ export function SiteLayout({
 	titleIcon = "🦆",
 }: QuizLayoutProps) {
 	return (
-		<div className="w-full overflow-hidden bg-white shadow-2xl max-w-7xl rounded-xl">
+		<div className="w-full overflow-hidden bg-white shadow-2xl rounded-xl">
 			<Header
 				scoreButton={scoreButton}
 				title={`${titleIcon} ${title} ${titleIcon}`}

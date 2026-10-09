@@ -24,6 +24,11 @@ It is a string/regex based interpreter with many interacting special cases, so s
 
 Currently supported additions beyond the original GCSE feature set: expression array indexes (`a[i + 1]`), `array a[size]` with a variable size, `arr.length` on arrays, `for` loops with variable/expression bounds and step, and alphabetical `<`/`>`/`<=`/`>=` for text.
 
+Also supported: `print(array)` (prints `[1, 2, 4, 5]`), numeric literals in `print`, and user-defined `procedure name(a, b) ... endprocedure` / `function name(a) ... return x ... endfunction`, including recursion (limit: 100 nested calls). How calls work:
+- Calls are replaced by their return value before the line is evaluated (`resolveFunctionCalls`), so the existing parsers never see them. Programs without a `function`/`procedure` take the original code path.
+- Each call has its own variables, inheriting the main program's (so a procedure can read and change a global array, but a plain variable assigned inside a call is local). Programs must not reuse a name inside and outside a subprogram. Arrays passed as arguments are copied; arrays cannot be returned.
+- Trace: binding the parameters is a row on the `function`/`procedure` header line; each `return value` is a row on the return line with a `return` column.
+
 ## Programs ([src/lib/programs.ts](src/lib/programs.ts))
 
 - Programs are grouped by `Difficulty` (`easy | medium | hard | alevel`, defined with its labels and order in [src/lib/types.ts](src/lib/types.ts)). Use `DIFFICULTY_ORDER`, `DIFFICULTY_LABELS` and `isDifficulty` instead of hard-coding the list.
@@ -32,7 +37,7 @@ Currently supported additions beyond the original GCSE feature set: expression a
   - `inputSets` / `randomValues`: values supplied to `input()` and `random()`. The student sees them beside the code.
   - `setupVariants`: alternative versions of the opening lines of `code` (for example `array items = [...]` and `target = 19`). One replaces those lines when the program is picked (`pickProgramInputs` in `src/lib/utils.ts`) or shuffled (`TraceTableBody`). Use this when students should not have to trace input. All variants of a program must have the same number of lines, and the first variant must match the opening lines of `code`.
 - Keep programs small enough to trace on screen: short arrays (about 3 to 8 values), short numeric values rather than long words.
-- The A-Level order is teaching order: linear search, binary search, bubble sort, insertion sort.
+- The A-Level order is teaching order: linear search, binary search, bubble sort, insertion sort, then recursion (factorial, Fibonacci, Towers of Hanoi, recursive binary search), then merge sort and quick sort.
 
 ## Checklist when adding a program
 

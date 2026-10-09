@@ -5654,19 +5654,19 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
   "trace": [
     {
       "changedVariables": {
-        "products": [
+        "items": [
           "apples",
           "bananas",
           "cherries",
         ],
-        "products[0]": "apples",
-        "products[1]": "bananas",
-        "products[2]": "cherries",
+        "items[0]": "apples",
+        "items[1]": "bananas",
+        "items[2]": "cherries",
       },
       "lineNumber": 1,
       "output": "",
       "variables": {
-        "products": [
+        "items": [
           "apples",
           "bananas",
           "cherries",
@@ -5687,15 +5687,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "lineNumber": 2,
       "output": "",
       "variables": {
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
       },
     },
@@ -5706,15 +5706,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "lineNumber": 3,
       "output": "",
       "variables": {
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "total_cost": 0,
       },
@@ -5727,15 +5727,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "output": "",
       "variables": {
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "total_cost": 0,
       },
@@ -5748,15 +5748,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "output": "",
       "variables": {
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 0,
@@ -5771,15 +5771,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 3,
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 0,
@@ -5794,15 +5794,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 3,
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 3,
@@ -5817,15 +5817,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 3,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 3,
@@ -5840,15 +5840,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 3,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 5,
         "total_cost": 3,
@@ -5863,15 +5863,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 25,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 5,
         "total_cost": 3,
@@ -5886,15 +5886,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 25,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 5,
         "total_cost": 28,
@@ -5909,15 +5909,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 25,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 5,
         "total_cost": 28,
@@ -5932,15 +5932,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 25,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 28,
@@ -5955,15 +5955,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 2,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 28,
@@ -5978,15 +5978,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 2,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 30,
@@ -5999,15 +5999,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 2,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 30,
@@ -6020,15 +6020,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
       "variables": {
         "cost": 2,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 30,
@@ -6044,15 +6044,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
         "cost": 2,
         "discount": 3,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 30,
@@ -6069,15 +6069,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
         "discount": 3,
         "final_cost": 27,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 30,
@@ -6092,15 +6092,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
         "discount": 3,
         "final_cost": 27,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 30,
@@ -6115,15 +6115,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
         "discount": 3,
         "final_cost": 27,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 30,
@@ -6131,9 +6131,9 @@ exports[`GCSE programs golden traces > hard#4 inputs=0 random=0 1`] = `
     },
   ],
   "variables": [
-    "products[0]",
-    "products[1]",
-    "products[2]",
+    "items[0]",
+    "items[1]",
+    "items[2]",
     "prices[0]",
     "prices[1]",
     "prices[2]",
@@ -6158,19 +6158,19 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
   "trace": [
     {
       "changedVariables": {
-        "products": [
+        "items": [
           "apples",
           "bananas",
           "cherries",
         ],
-        "products[0]": "apples",
-        "products[1]": "bananas",
-        "products[2]": "cherries",
+        "items[0]": "apples",
+        "items[1]": "bananas",
+        "items[2]": "cherries",
       },
       "lineNumber": 1,
       "output": "",
       "variables": {
-        "products": [
+        "items": [
           "apples",
           "bananas",
           "cherries",
@@ -6191,15 +6191,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "lineNumber": 2,
       "output": "",
       "variables": {
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
       },
     },
@@ -6210,15 +6210,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "lineNumber": 3,
       "output": "",
       "variables": {
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "total_cost": 0,
       },
@@ -6231,15 +6231,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "output": "",
       "variables": {
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "total_cost": 0,
       },
@@ -6252,15 +6252,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "output": "",
       "variables": {
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 5,
         "total_cost": 0,
@@ -6275,15 +6275,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 15,
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 5,
         "total_cost": 0,
@@ -6298,15 +6298,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 15,
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 5,
         "total_cost": 15,
@@ -6321,15 +6321,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 15,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 5,
         "total_cost": 15,
@@ -6344,15 +6344,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 15,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 15,
@@ -6367,15 +6367,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 10,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 15,
@@ -6390,15 +6390,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 10,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 25,
@@ -6413,15 +6413,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 10,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 25,
@@ -6436,15 +6436,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 10,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 0,
         "total_cost": 25,
@@ -6459,15 +6459,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 0,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 0,
         "total_cost": 25,
@@ -6480,15 +6480,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 0,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 0,
         "total_cost": 25,
@@ -6501,15 +6501,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
       "variables": {
         "cost": 0,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 0,
         "total_cost": 25,
@@ -6525,15 +6525,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
         "cost": 0,
         "discount": 2.5,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 0,
         "total_cost": 25,
@@ -6550,15 +6550,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
         "discount": 2.5,
         "final_cost": 22.5,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 0,
         "total_cost": 25,
@@ -6573,15 +6573,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
         "discount": 2.5,
         "final_cost": 22.5,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 0,
         "total_cost": 25,
@@ -6596,15 +6596,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
         "discount": 2.5,
         "final_cost": 22.5,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 0,
         "total_cost": 25,
@@ -6612,9 +6612,9 @@ exports[`GCSE programs golden traces > hard#4 inputs=1 random=0 1`] = `
     },
   ],
   "variables": [
-    "products[0]",
-    "products[1]",
-    "products[2]",
+    "items[0]",
+    "items[1]",
+    "items[2]",
     "prices[0]",
     "prices[1]",
     "prices[2]",
@@ -6639,19 +6639,19 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
   "trace": [
     {
       "changedVariables": {
-        "products": [
+        "items": [
           "apples",
           "bananas",
           "cherries",
         ],
-        "products[0]": "apples",
-        "products[1]": "bananas",
-        "products[2]": "cherries",
+        "items[0]": "apples",
+        "items[1]": "bananas",
+        "items[2]": "cherries",
       },
       "lineNumber": 1,
       "output": "",
       "variables": {
-        "products": [
+        "items": [
           "apples",
           "bananas",
           "cherries",
@@ -6672,15 +6672,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "lineNumber": 2,
       "output": "",
       "variables": {
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
       },
     },
@@ -6691,15 +6691,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "lineNumber": 3,
       "output": "",
       "variables": {
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "total_cost": 0,
       },
@@ -6712,15 +6712,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "output": "",
       "variables": {
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "total_cost": 0,
       },
@@ -6733,15 +6733,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "output": "",
       "variables": {
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 0,
@@ -6756,15 +6756,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 3,
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 0,
@@ -6779,15 +6779,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 3,
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 3,
@@ -6802,15 +6802,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 3,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 3,
@@ -6825,15 +6825,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 3,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 4,
         "total_cost": 3,
@@ -6848,15 +6848,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 20,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 4,
         "total_cost": 3,
@@ -6871,15 +6871,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 20,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 4,
         "total_cost": 23,
@@ -6894,15 +6894,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 20,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 4,
         "total_cost": 23,
@@ -6917,15 +6917,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 20,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 23,
@@ -6940,15 +6940,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 4,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 23,
@@ -6963,15 +6963,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 4,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 27,
@@ -6984,15 +6984,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 4,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 27,
@@ -7005,15 +7005,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
       "variables": {
         "cost": 4,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 27,
@@ -7029,15 +7029,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
         "cost": 4,
         "discount": 2.7,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 27,
@@ -7054,15 +7054,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
         "discount": 2.7,
         "final_cost": 24.3,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 27,
@@ -7077,15 +7077,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
         "discount": 2.7,
         "final_cost": 24.3,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 27,
@@ -7100,15 +7100,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
         "discount": 2.7,
         "final_cost": 24.3,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 2,
         "total_cost": 27,
@@ -7116,9 +7116,9 @@ exports[`GCSE programs golden traces > hard#4 inputs=2 random=0 1`] = `
     },
   ],
   "variables": [
-    "products[0]",
-    "products[1]",
-    "products[2]",
+    "items[0]",
+    "items[1]",
+    "items[2]",
     "prices[0]",
     "prices[1]",
     "prices[2]",
@@ -7140,19 +7140,19 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
   "trace": [
     {
       "changedVariables": {
-        "products": [
+        "items": [
           "apples",
           "bananas",
           "cherries",
         ],
-        "products[0]": "apples",
-        "products[1]": "bananas",
-        "products[2]": "cherries",
+        "items[0]": "apples",
+        "items[1]": "bananas",
+        "items[2]": "cherries",
       },
       "lineNumber": 1,
       "output": "",
       "variables": {
-        "products": [
+        "items": [
           "apples",
           "bananas",
           "cherries",
@@ -7173,15 +7173,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "lineNumber": 2,
       "output": "",
       "variables": {
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
       },
     },
@@ -7192,15 +7192,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "lineNumber": 3,
       "output": "",
       "variables": {
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "total_cost": 0,
       },
@@ -7213,15 +7213,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "output": "",
       "variables": {
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "total_cost": 0,
       },
@@ -7234,15 +7234,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "output": "",
       "variables": {
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 3,
         "total_cost": 0,
@@ -7257,15 +7257,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 9,
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 3,
         "total_cost": 0,
@@ -7280,15 +7280,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 9,
         "i": 0,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 3,
         "total_cost": 9,
@@ -7303,15 +7303,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 9,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 3,
         "total_cost": 9,
@@ -7326,15 +7326,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 9,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 9,
@@ -7349,15 +7349,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 5,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 9,
@@ -7372,15 +7372,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 5,
         "i": 1,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 14,
@@ -7395,15 +7395,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 5,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 1,
         "total_cost": 14,
@@ -7418,15 +7418,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 5,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 3,
         "total_cost": 14,
@@ -7441,15 +7441,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 6,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 3,
         "total_cost": 14,
@@ -7464,15 +7464,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 6,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 3,
         "total_cost": 20,
@@ -7485,15 +7485,15 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
       "variables": {
         "cost": 6,
         "i": 2,
+        "items": [
+          "apples",
+          "bananas",
+          "cherries",
+        ],
         "prices": [
           3,
           5,
           2,
-        ],
-        "products": [
-          "apples",
-          "bananas",
-          "cherries",
         ],
         "quantity": 3,
         "total_cost": 20,
@@ -7501,9 +7501,9 @@ exports[`GCSE programs golden traces > hard#4 inputs=3 random=0 1`] = `
     },
   ],
   "variables": [
-    "products[0]",
-    "products[1]",
-    "products[2]",
+    "items[0]",
+    "items[1]",
+    "items[2]",
     "prices[0]",
     "prices[1]",
     "prices[2]",
@@ -13748,6 +13748,340 @@ exports[`GCSE programs golden traces > hard#6 inputs=5 random=5 1`] = `
     "attempts",
     "found",
     "guess",
+  ],
+}
+`;
+
+exports[`GCSE programs golden traces > hard#7 inputs=0 random=0 1`] = `
+{
+  "outputs": [
+    "Total: 15",
+  ],
+  "trace": [
+    {
+      "changedVariables": {
+        "price": 5,
+      },
+      "lineNumber": 1,
+      "output": "",
+      "variables": {
+        "price": 5,
+      },
+    },
+    {
+      "changedVariables": {
+        "quantity": 3,
+      },
+      "lineNumber": 2,
+      "output": "",
+      "variables": {
+        "price": 5,
+        "quantity": 3,
+      },
+    },
+    {
+      "changedVariables": {
+        "amount": 3,
+        "cost": 5,
+      },
+      "lineNumber": 3,
+      "output": "",
+      "variables": {
+        "amount": 3,
+        "cost": 5,
+        "price": 5,
+        "quantity": 3,
+      },
+    },
+    {
+      "changedVariables": {
+        "total": 15,
+      },
+      "lineNumber": 4,
+      "output": "",
+      "variables": {
+        "amount": 3,
+        "cost": 5,
+        "price": 5,
+        "quantity": 3,
+        "total": 15,
+      },
+    },
+    {
+      "changedVariables": {},
+      "lineNumber": 5,
+      "output": "Total: 15",
+      "variables": {
+        "amount": 3,
+        "cost": 5,
+        "price": 5,
+        "quantity": 3,
+        "total": 15,
+      },
+    },
+  ],
+  "variables": [
+    "price",
+    "quantity",
+    "cost",
+    "amount",
+    "total",
+  ],
+}
+`;
+
+exports[`GCSE programs golden traces > hard#8 inputs=0 random=0 1`] = `
+{
+  "outputs": [
+    "Merit",
+  ],
+  "trace": [
+    {
+      "changedVariables": {
+        "mark": 65,
+      },
+      "lineNumber": 1,
+      "output": "",
+      "variables": {
+        "mark": 65,
+      },
+    },
+    {
+      "changedVariables": {
+        "score": 65,
+      },
+      "lineNumber": 2,
+      "output": "",
+      "variables": {
+        "mark": 65,
+        "score": 65,
+      },
+    },
+    {
+      "changedVariables": {
+        "return": "Merit",
+      },
+      "lineNumber": 6,
+      "output": "",
+      "variables": {
+        "mark": 65,
+        "score": 65,
+      },
+    },
+    {
+      "changedVariables": {
+        "result": "Merit",
+      },
+      "lineNumber": 11,
+      "output": "",
+      "variables": {
+        "mark": 65,
+        "result": "Merit",
+      },
+    },
+    {
+      "changedVariables": {},
+      "lineNumber": 12,
+      "output": "Merit",
+      "variables": {
+        "mark": 65,
+        "result": "Merit",
+      },
+    },
+  ],
+  "variables": [
+    "mark",
+    "result",
+    "score",
+    "return",
+  ],
+}
+`;
+
+exports[`GCSE programs golden traces > hard#9 inputs=0 random=0 1`] = `
+{
+  "outputs": [
+    "Sum: 10",
+  ],
+  "trace": [
+    {
+      "changedVariables": {
+        "limit": 4,
+      },
+      "lineNumber": 1,
+      "output": "",
+      "variables": {
+        "limit": 4,
+      },
+    },
+    {
+      "changedVariables": {
+        "n": 4,
+      },
+      "lineNumber": 2,
+      "output": "",
+      "variables": {
+        "limit": 4,
+        "n": 4,
+      },
+    },
+    {
+      "changedVariables": {
+        "total": 0,
+      },
+      "lineNumber": 3,
+      "output": "",
+      "variables": {
+        "limit": 4,
+        "n": 4,
+        "total": 0,
+      },
+    },
+    {
+      "changedVariables": {
+        "i": 1,
+      },
+      "lineNumber": 4,
+      "output": "",
+      "variables": {
+        "i": 1,
+        "limit": 4,
+        "n": 4,
+        "total": 0,
+      },
+    },
+    {
+      "changedVariables": {
+        "total": 1,
+      },
+      "lineNumber": 5,
+      "output": "",
+      "variables": {
+        "i": 1,
+        "limit": 4,
+        "n": 4,
+        "total": 1,
+      },
+    },
+    {
+      "changedVariables": {
+        "i": 2,
+      },
+      "lineNumber": 4,
+      "output": "",
+      "variables": {
+        "i": 2,
+        "limit": 4,
+        "n": 4,
+        "total": 1,
+      },
+    },
+    {
+      "changedVariables": {
+        "total": 3,
+      },
+      "lineNumber": 5,
+      "output": "",
+      "variables": {
+        "i": 2,
+        "limit": 4,
+        "n": 4,
+        "total": 3,
+      },
+    },
+    {
+      "changedVariables": {
+        "i": 3,
+      },
+      "lineNumber": 4,
+      "output": "",
+      "variables": {
+        "i": 3,
+        "limit": 4,
+        "n": 4,
+        "total": 3,
+      },
+    },
+    {
+      "changedVariables": {
+        "total": 6,
+      },
+      "lineNumber": 5,
+      "output": "",
+      "variables": {
+        "i": 3,
+        "limit": 4,
+        "n": 4,
+        "total": 6,
+      },
+    },
+    {
+      "changedVariables": {
+        "i": 4,
+      },
+      "lineNumber": 4,
+      "output": "",
+      "variables": {
+        "i": 4,
+        "limit": 4,
+        "n": 4,
+        "total": 6,
+      },
+    },
+    {
+      "changedVariables": {
+        "total": 10,
+      },
+      "lineNumber": 5,
+      "output": "",
+      "variables": {
+        "i": 4,
+        "limit": 4,
+        "n": 4,
+        "total": 10,
+      },
+    },
+    {
+      "changedVariables": {
+        "return": 10,
+      },
+      "lineNumber": 7,
+      "output": "",
+      "variables": {
+        "i": 4,
+        "limit": 4,
+        "n": 4,
+        "total": 10,
+      },
+    },
+    {
+      "changedVariables": {
+        "answer": 10,
+      },
+      "lineNumber": 9,
+      "output": "",
+      "variables": {
+        "answer": 10,
+        "limit": 4,
+      },
+    },
+    {
+      "changedVariables": {},
+      "lineNumber": 10,
+      "output": "Sum: 10",
+      "variables": {
+        "answer": 10,
+        "limit": 4,
+      },
+    },
+  ],
+  "variables": [
+    "limit",
+    "answer",
+    "n",
+    "total",
+    "i",
+    "return",
   ],
 }
 `;
