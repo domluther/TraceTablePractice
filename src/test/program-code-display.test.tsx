@@ -60,4 +60,15 @@ describe("Program code display", () => {
 			);
 		}
 	});
+
+	it("limits the code height and lets screenshots show all of it", () => {
+		const { container } = render(renderCode(mergeSort));
+		const scrollArea = container.querySelector("[data-capture-expand]");
+		expect(scrollArea).not.toBeNull();
+		expect(scrollArea?.className).toContain("max-h-[26rem]");
+		expect(scrollArea?.className).toContain("overflow-auto");
+		expect(scrollArea?.querySelectorAll("pre > div")).toHaveLength(
+			mergeSort.code.split("\n").length,
+		);
+	});
 });

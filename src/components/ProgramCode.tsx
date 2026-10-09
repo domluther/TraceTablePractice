@@ -123,7 +123,8 @@ export function ProgramCode({
 				</div>
 			</CardHeader>
 			<CardContent className="p-0 pt-0 pb-2 font-mono">
-				<div className="overflow-x-auto">
+				{/* About 15 lines are visible; longer programs scroll so the trace table stays on screen */}
+				<div className="overflow-auto max-h-[26rem]" data-capture-expand>
 					<pre className="py-2 pl-2 m-0 text-sm leading-relaxed">
 						{currentProgram.code.split("\n").map((line, index) => (
 							<div

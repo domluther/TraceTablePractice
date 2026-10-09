@@ -18,10 +18,27 @@ export const captureElement = async (
 
 	// Optional: reset scroll position for horizontally scrollable content
 	node
-		.querySelectorAll<HTMLElement>("[class*='overflow-x-auto']")
+		.querySelectorAll<HTMLElement>(
+			"[class*='overflow-x-auto'], [data-capture-expand]",
+		)
 		.forEach((el) => {
 			el.scrollLeft = 0;
 		});
+
+	// Height-limited scroll areas would be clipped in the image, so show them in full
+	const limited = Array.from(
+		node.querySelectorAll<HTMLElement>("[data-capture-expand]"),
+	).map((el) => ({
+		el,
+		maxHeight: el.style.maxHeight,
+		overflowY: el.style.overflowY,
+		scrollTop: el.scrollTop,
+	}));
+	for (const { el } of limited) {
+		el.scrollTop = 0;
+		el.style.maxHeight = "none";
+		el.style.overflowY = "visible";
+	}
 
 	try {
 		if (mode === "clipboard") {
@@ -49,6 +66,12 @@ export const captureElement = async (
 		}
 	} catch (err) {
 		console.error("Failed to capture element:", err);
+	} finally {
+		for (const { el, maxHeight, overflowY, scrollTop } of limited) {
+			el.style.maxHeight = maxHeight;
+			el.style.overflowY = overflowY;
+			el.scrollTop = scrollTop;
+		}
 	}
 };
 
