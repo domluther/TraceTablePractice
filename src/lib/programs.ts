@@ -200,6 +200,16 @@ print("Total pay: " + str(pay))`,
 			inputSets: [["35"], ["45"], ["40"], ["50"]],
 		},
 		{
+			code: `number = int(input("Enter a number"))
+total = 1
+for counter = 1 to number
+    total = total * counter
+next counter
+print(total)
+			description: "Craig n Dave example",
+			inputSets: [["3"], ["5"], ["2"], ["4"]],
+		},
+		{
 			code: `first_name = input("First name")
 last_name = input("Last name")
 full_name = first_name + " " + last_name
